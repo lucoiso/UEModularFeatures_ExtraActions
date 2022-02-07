@@ -13,6 +13,8 @@ Inspired by some features from UE5's Valley of the Ancient sample, this plugin i
 
 **This project is being built on Unreal Engine 5 Early Access**
 
+Post on Unreal Engine Forum: https://forums.unrealengine.com/t/free-modularfeatures-extraactions-plugin-modular-gas-enhanced-input-and-more/495400
+
 ## Essentials informations:
 
 To bind a ability input, implement the **IAbilityInputBinding** interface inside your pawn or controller.
