@@ -11,7 +11,7 @@ Inspired by some features from UE5's Valley of the Ancient sample, this plugin i
 5. Spawn Actors;
 
 
-**This project is being built on Unreal Engine 5 Preview 1**
+**This project is being built on Unreal Engine 5**
 
 Post on Unreal Engine Forum: https://forums.unrealengine.com/t/free-modularfeatures-extraactions-plugin-modular-gas-enhanced-input-and-more/495400
 
