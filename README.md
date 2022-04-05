@@ -1,5 +1,7 @@
 # Plugin: Modular Features Extra Actions
 
+![image](https://user-images.githubusercontent.com/77353979/161829306-28db152a-0ddf-4c8a-a23c-3c3cb8e8dcdb.png)
+
 ## The plugin:
 
 Inspired by some features from UE5's Valley of the Ancient sample, this plugin integrates GAS and Enhanced Input to the existing Game Features and Modular plugins from Unreal Engine, extending some Feature Actions to:
