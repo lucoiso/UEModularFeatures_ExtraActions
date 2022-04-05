@@ -10,7 +10,7 @@ Inspired by some features from UE5's Valley of the Ancient sample, this plugin i
 4. Add Enhanced Input Mappings;
 5. Spawn Actors;
 
-**Example Project: **
+**Example Project:**
 There's a project with already built functions using multiplayer that i created using this plugin: [Project Elementus](https://github.com/lucoiso/UEProject_Elementus)
 
 **This project is being built on Unreal Engine 5**
