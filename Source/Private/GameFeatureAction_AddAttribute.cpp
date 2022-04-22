@@ -119,7 +119,7 @@ void UGameFeatureAction_AddAttribute::AddAttribute(AActor* TargetActor)
 				const TSubclassOf<UAttributeSet> SetType = Attribute.LoadSynchronous();
 				if (IsValid(SetType))
 				{
-					UAttributeSet* NewSet = NewObject<UAttributeSet>(AbilitySystemComponent, SetType);
+					UAttributeSet* NewSet = NewObject<UAttributeSet>(AbilitySystemComponent->GetOwnerActor(), SetType);
 
 					if (!InitializationData.IsNull())
 					{
