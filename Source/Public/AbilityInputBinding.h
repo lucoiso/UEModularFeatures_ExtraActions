@@ -11,7 +11,7 @@
 /**
  *
  */
- /* Your pawn or controller need this inferface to accept ability input bindings */
+/* Your pawn or controller need this inferface to accept ability input bindings */
 UINTERFACE(MinimalAPI, BlueprintType, Category = "MF Extra Actions | Modular Interfaces")
 class UAbilityInputBinding : public UInterface
 {
@@ -22,17 +22,15 @@ class UAbilityInputBinding : public UInterface
 class MODULARFEATURES_EXTRAACTIONS_API IAbilityInputBinding
 {
 	GENERATED_IINTERFACE_BODY()
-
-public:
 	/* This function is needed for setup ability input binding inside your controller or pawn */
 	UFUNCTION(Category = "MF Extra Actions | Modular Interfaces")
-		virtual void SetupAbilityInputBinding(class UInputAction* Action, const int32 InputID)
+	virtual void SetupAbilityInputBinding(class UInputAction* Action, const int32 InputID)
 	{
-	};
+	}
 
 	/* This function is needed for removing ability input binding inside your controller or pawn */
 	UFUNCTION(Category = "MF Extra Actions | Modular Interfaces")
-		virtual void RemoveAbilityInputBinding(const UInputAction* Action) const
+	virtual void RemoveAbilityInputBinding(const UInputAction* Action) const
 	{
-	};
+	}
 };

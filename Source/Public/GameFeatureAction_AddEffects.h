@@ -22,18 +22,18 @@ struct FEffectStackedData
 {
 	GENERATED_BODY()
 
-public:
 	/* Gameplay Effect Class */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
-		TSoftClassPtr<UGameplayEffect> EffectClass;
+	TSoftClassPtr<UGameplayEffect> EffectClass;
 
 	/* Gameplay Effect level */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
-		int32 EffectLevel = 1;
+	int32 EffectLevel = 1;
 
 	/* Set By Caller parameters */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", meta = (TitleProperty = "{SetByCaller Tag} -> {SetByCaller Value}"))
-		TMap<FGameplayTag, float> SetByCallerParams;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings",
+		meta = (TitleProperty = "{SetByCaller Tag} -> {SetByCaller Value}"))
+	TMap<FGameplayTag, float> SetByCallerParams;
 };
 
 /**
@@ -46,16 +46,18 @@ class UGameFeatureAction_AddEffects final : public UGameFeatureAction_WorldActio
 
 public:
 	/* Target pawn to which gameplay effects will be given */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", meta = (AllowedClasses = "Pawn", OnlyPlaceable = "true"))
-		TSoftClassPtr<APawn> TargetPawnClass;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings",
+		meta = (AllowedClasses = "Pawn", OnlyPlaceable = "true"))
+	TSoftClassPtr<APawn> TargetPawnClass;
 
 	/* Tags required on the target to apply this action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
-		TArray<FName> RequireTags;
+	TArray<FName> RequireTags;
 
 	/* Gameplay Effects stacked informations */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", meta = (DisplayName = "Effects Mapping", ShowOnlyInnerProperties))
-		TArray<FEffectStackedData> Effects;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings",
+		meta = (DisplayName = "Effects Mapping", ShowOnlyInnerProperties))
+	TArray<FEffectStackedData> Effects;
 
 protected:
 	virtual void OnGameFeatureActivating(FGameFeatureActivatingContext& Context) override;

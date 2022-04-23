@@ -43,14 +43,12 @@ void UGameFeatureAction_AddInputs::ResetExtension()
 void UGameFeatureAction_AddInputs::AddToWorld(const FWorldContext& WorldContext)
 {
 	const UWorld* World = WorldContext.World();
-	const UGameInstance* GameInstance = WorldContext.OwningGameInstance;
 
-	if (IsValid(GameInstance) && IsValid(World) && World->IsGameWorld())
+	if (const UGameInstance* GameInstance = WorldContext.OwningGameInstance; IsValid(GameInstance) && IsValid(World) &&
+		World->IsGameWorld())
 	{
-		UGameFrameworkComponentManager* ComponentManager = UGameInstance::GetSubsystem<
-			UGameFrameworkComponentManager>(GameInstance);
-
-		if (IsValid(ComponentManager) && !TargetPawnClass.IsNull())
+		if (UGameFrameworkComponentManager* ComponentManager = UGameInstance::GetSubsystem<
+			UGameFrameworkComponentManager>(GameInstance); IsValid(ComponentManager) && !TargetPawnClass.IsNull())
 		{
 			const UGameFrameworkComponentManager::FExtensionHandlerDelegate ExtensionHandlerDelegate =
 				UGameFrameworkComponentManager::FExtensionHandlerDelegate::CreateUObject(
@@ -64,7 +62,7 @@ void UGameFeatureAction_AddInputs::AddToWorld(const FWorldContext& WorldContext)
 	}
 }
 
-void UGameFeatureAction_AddInputs::HandleActorExtension(AActor* Owner, FName EventName)
+void UGameFeatureAction_AddInputs::HandleActorExtension(AActor* Owner, const FName EventName)
 {
 	/*UE_LOG(LogGameplayFeaturesExtraActions, Warning,
 		   TEXT("Event %s sended by Actor %s for inputs management."), *EventName.ToString(),
@@ -107,16 +105,15 @@ void UGameFeatureAction_AddInputs::AddActorInputs(AActor* TargetActor)
 	if (IsValid(TargetActor))
 	{
 		UE_LOG(LogGameplayFeaturesExtraActions, Display,
-			TEXT("Adding Enhanced Input Mapping %s to Actor %s."), *InputMappingContext.GetAssetName(),
-			*TargetActor->GetName());
+		       TEXT("Adding Enhanced Input Mapping %s to Actor %s."), *InputMappingContext.GetAssetName(),
+		       *TargetActor->GetName());
 
 		APawn* TargetPawn = Cast<APawn>(TargetActor);
-		const APlayerController* PlayerController = TargetPawn->GetController<APlayerController>();
 
-		if (IsValid(PlayerController))
+		if (const APlayerController* PlayerController = TargetPawn->GetController<APlayerController>(); IsValid(
+			PlayerController))
 		{
-			const ULocalPlayer* LocalPlayer = PlayerController->GetLocalPlayer();
-			if (IsValid(LocalPlayer))
+			if (const ULocalPlayer* LocalPlayer = PlayerController->GetLocalPlayer(); IsValid(LocalPlayer))
 			{
 				UEnhancedInputLocalPlayerSubsystem*
 					Subsystem = LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
@@ -158,22 +155,22 @@ void UGameFeatureAction_AddInputs::AddActorInputs(AActor* TargetActor)
 
 				if (FunctionOwner.IsValid() && InputComponent.IsValid())
 				{
-					for (const FInputMappingStack& InputData : ActionsBindings)
+					for (const auto& [ActionInput, AbilityBindingData, FunctionBindingData] : ActionsBindings)
 					{
 						UE_LOG(LogGameplayFeaturesExtraActions, Display,
-							TEXT("Binding Action Input %s to Actor %s."), *InputData.ActionInput.GetAssetName(),
-							*TargetActor->GetName());
+						       TEXT("Binding Action Input %s to Actor %s."), *ActionInput.GetAssetName(),
+						       *TargetActor->GetName());
 
-						if (!InputData.ActionInput.IsNull())
+						if (!ActionInput.IsNull())
 						{
-							UInputAction* InputAction = InputData.ActionInput.LoadSynchronous();
+							UInputAction* InputAction = ActionInput.LoadSynchronous();
 
-							for (const FFunctionStackedData& FunctionData : InputData.FunctionBindingData)
+							for (const auto& [FunctionName, Triggers] : FunctionBindingData)
 							{
-								for (const ETriggerEvent& Trigger : FunctionData.Triggers)
+								for (const ETriggerEvent& Trigger : Triggers)
 								{
 									const FInputBindingHandle& InputBindingHandle = InputComponent->BindAction(
-										InputAction, Trigger, FunctionOwner.Get(), FunctionData.FunctionName);
+										InputAction, Trigger, FunctionOwner.Get(), FunctionName);
 
 									NewInputData.ActionBinding.Add(InputBindingHandle);
 								}
@@ -181,11 +178,13 @@ void UGameFeatureAction_AddInputs::AddActorInputs(AActor* TargetActor)
 
 							if (AbilityInterface != nullptr)
 							{
-								if (InputData.AbilityBindingData.bSetupAbilityInput)
+								if (AbilityBindingData.bSetupAbilityInput)
 								{
 									const uint32 InputID =
-										InputData.AbilityBindingData.InputIDEnumerationClass.LoadSynchronous()->GetValueByName(
-											InputData.AbilityBindingData.InputIDValueName, EGetByNameFlags::CheckAuthoredName);
+										AbilityBindingData.InputIDEnumerationClass.LoadSynchronous()->
+										                   GetValueByName(
+											                   AbilityBindingData.InputIDValueName,
+											                   EGetByNameFlags::CheckAuthoredName);
 
 									AbilityInterface->SetupAbilityInputBinding(InputAction, InputID);
 
@@ -207,16 +206,15 @@ void UGameFeatureAction_AddInputs::RemoveActorInputs(AActor* TargetActor)
 	if (IsValid(TargetActor))
 	{
 		UE_LOG(LogGameplayFeaturesExtraActions, Display,
-			TEXT("Removing Enhanced Input Mapping %s from Actor %s."), *InputMappingContext.GetAssetName(),
-			*TargetActor->GetName());
+		       TEXT("Removing Enhanced Input Mapping %s from Actor %s."), *InputMappingContext.GetAssetName(),
+		       *TargetActor->GetName());
 
 		APawn* TargetPawn = Cast<APawn>(TargetActor);
-		const APlayerController* PlayerController = TargetPawn->GetController<APlayerController>();
 
-		if (IsValid(PlayerController))
+		if (const APlayerController* PlayerController = TargetPawn->GetController<APlayerController>(); IsValid(
+			PlayerController))
 		{
-			const ULocalPlayer* LocalPlayer = PlayerController->GetLocalPlayer();
-			if (IsValid(LocalPlayer))
+			if (const ULocalPlayer* LocalPlayer = PlayerController->GetLocalPlayer(); IsValid(LocalPlayer))
 			{
 				UEnhancedInputLocalPlayerSubsystem*
 					Subsystem = LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
@@ -228,11 +226,7 @@ void UGameFeatureAction_AddInputs::RemoveActorInputs(AActor* TargetActor)
 
 				const FInputBindingData ActiveInputData = ActiveExtensions.FindRef(TargetActor);
 
-#if __cplusplus > 201402L // Check if C++ > C++14
 				if constexpr (&ActiveInputData != nullptr)
-#else
-				if (&ActiveInputData != nullptr)
-#endif
 				{
 					Subsystem->RemoveMappingContext(ActiveInputData.Mapping.Get());
 
@@ -249,23 +243,21 @@ void UGameFeatureAction_AddInputs::RemoveActorInputs(AActor* TargetActor)
 						break;
 
 					default:
-						FunctionOwner = (UObject*)nullptr;
+						FunctionOwner = static_cast<UObject*>(nullptr);
 						break;
 					}
 
-					UEnhancedInputComponent* InputComponent =
-						Cast<UEnhancedInputComponent>(TargetPawn->InputComponent);
-
-					if (IsValid(FunctionOwner) && IsValid(InputComponent))
+					if (UEnhancedInputComponent* InputComponent =
+						Cast<UEnhancedInputComponent>(TargetPawn->InputComponent); IsValid(FunctionOwner) && IsValid(
+						InputComponent))
 					{
 						for (const FInputBindingHandle& BindHandle : ActiveInputData.ActionBinding)
 						{
 							InputComponent->RemoveBindingByHandle(BindHandle.GetHandle());
 						}
 
-						IAbilityInputBinding* AbilityInterface = Cast<IAbilityInputBinding>(FunctionOwner);
-
-						if (AbilityInterface != nullptr)
+						if (const IAbilityInputBinding* AbilityInterface = Cast<IAbilityInputBinding>(FunctionOwner);
+							AbilityInterface != nullptr)
 						{
 							for (TWeakObjectPtr<UInputAction> ActiveAbilityAction : AbilityActions)
 							{

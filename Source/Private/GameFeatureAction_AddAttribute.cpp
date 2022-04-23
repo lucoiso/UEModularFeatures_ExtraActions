@@ -39,14 +39,12 @@ void UGameFeatureAction_AddAttribute::ResetExtension()
 void UGameFeatureAction_AddAttribute::AddToWorld(const FWorldContext& WorldContext)
 {
 	const UWorld* World = WorldContext.World();
-	const UGameInstance* GameInstance = WorldContext.OwningGameInstance;
 
-	if (IsValid(GameInstance) && IsValid(World) && World->IsGameWorld())
+	if (const UGameInstance* GameInstance = WorldContext.OwningGameInstance; IsValid(GameInstance) && IsValid(World) &&
+		World->IsGameWorld())
 	{
-		UGameFrameworkComponentManager* ComponentManager = UGameInstance::GetSubsystem<
-			UGameFrameworkComponentManager>(GameInstance);
-
-		if (IsValid(ComponentManager) && !TargetPawnClass.IsNull())
+		if (UGameFrameworkComponentManager* ComponentManager = UGameInstance::GetSubsystem<
+			UGameFrameworkComponentManager>(GameInstance); IsValid(ComponentManager) && !TargetPawnClass.IsNull())
 		{
 			const UGameFrameworkComponentManager::FExtensionHandlerDelegate ExtensionHandlerDelegate =
 				UGameFrameworkComponentManager::FExtensionHandlerDelegate::CreateUObject(
@@ -60,7 +58,7 @@ void UGameFeatureAction_AddAttribute::AddToWorld(const FWorldContext& WorldConte
 	}
 }
 
-void UGameFeatureAction_AddAttribute::HandleActorExtension(AActor* Owner, FName EventName)
+void UGameFeatureAction_AddAttribute::HandleActorExtension(AActor* Owner, const FName EventName)
 {
 	/*UE_LOG(LogGameplayFeaturesExtraActions, Display,
 		   TEXT("Event %s sended by Actor %s for attribute management."), *EventName.ToString(),
@@ -103,21 +101,20 @@ void UGameFeatureAction_AddAttribute::AddAttribute(AActor* TargetActor)
 	if (IsValid(TargetActor) && TargetActor->GetLocalRole() == ROLE_Authority)
 	{
 		UE_LOG(LogGameplayFeaturesExtraActions, Display,
-			TEXT("Adding attribute %s to Actor %s."), *Attribute.GetAssetName(),
-			*TargetActor->GetName());
+		       TEXT("Adding attribute %s to Actor %s."), *Attribute.GetAssetName(),
+		       *TargetActor->GetName());
 
 		const IAbilitySystemInterface* InterfaceOwner = Cast<IAbilitySystemInterface>(TargetActor);
 
-		UAbilitySystemComponent* AbilitySystemComponent = InterfaceOwner != nullptr
-			? InterfaceOwner->GetAbilitySystemComponent()
-			: TargetActor->FindComponentByClass<UAbilitySystemComponent>();
-
-		if (IsValid(AbilitySystemComponent))
+		if (UAbilitySystemComponent* AbilitySystemComponent = InterfaceOwner != nullptr
+			                                                      ? InterfaceOwner->GetAbilitySystemComponent()
+			                                                      : TargetActor->FindComponentByClass<
+				                                                      UAbilitySystemComponent>(); IsValid(
+			AbilitySystemComponent))
 		{
 			if (!Attribute.IsNull())
 			{
-				const TSubclassOf<UAttributeSet> SetType = Attribute.LoadSynchronous();
-				if (IsValid(SetType))
+				if (const TSubclassOf<UAttributeSet> SetType = Attribute.LoadSynchronous(); IsValid(SetType))
 				{
 					UAttributeSet* NewSet = NewObject<UAttributeSet>(AbilitySystemComponent->GetOwnerActor(), SetType);
 
@@ -141,16 +138,16 @@ void UGameFeatureAction_AddAttribute::RemoveAttribute(AActor* TargetActor)
 	if (IsValid(TargetActor) && TargetActor->GetLocalRole() == ROLE_Authority)
 	{
 		UE_LOG(LogGameplayFeaturesExtraActions, Display,
-			TEXT("Removing attribute %s from Actor %s."), *Attribute.GetAssetName(),
-			*TargetActor->GetName());
+		       TEXT("Removing attribute %s from Actor %s."), *Attribute.GetAssetName(),
+		       *TargetActor->GetName());
 
 		const IAbilitySystemInterface* InterfaceOwner = Cast<IAbilitySystemInterface>(TargetActor);
 
-		UAbilitySystemComponent* AbilitySystemComponent = InterfaceOwner != nullptr
-			? InterfaceOwner->GetAbilitySystemComponent()
-			: TargetActor->FindComponentByClass<UAbilitySystemComponent>();
-
-		if (IsValid(AbilitySystemComponent))
+		if (UAbilitySystemComponent* AbilitySystemComponent = InterfaceOwner != nullptr
+			                                                      ? InterfaceOwner->GetAbilitySystemComponent()
+			                                                      : TargetActor->FindComponentByClass<
+				                                                      UAbilitySystemComponent>(); IsValid(
+			AbilitySystemComponent))
 		{
 			if (!Attribute.IsNull())
 			{
@@ -160,7 +157,7 @@ void UGameFeatureAction_AddAttribute::RemoveAttribute(AActor* TargetActor)
 				AbilitySystemComponent->ForceReplication();
 
 				UE_LOG(LogGameplayFeaturesExtraActions, Display, TEXT("Attribute %s removed from Actor %s."),
-					*Attribute.GetAssetName(), *TargetActor->GetName());
+				       *Attribute.GetAssetName(), *TargetActor->GetName());
 			}
 		}
 	}

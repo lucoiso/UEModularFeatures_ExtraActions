@@ -17,14 +17,13 @@ struct FActorSpawnSettings
 {
 	GENERATED_BODY()
 
-public:
 	/* Actor class to be spawned */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", meta = (OnlyPlaceable = "true"))
-		TSoftClassPtr<AActor> ActorClass;
+	TSoftClassPtr<AActor> ActorClass;
 
 	/* Transform settings to be added to spawned actor */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
-		FTransform SpawnTransform;
+	FTransform SpawnTransform;
 };
 
 /**
@@ -38,11 +37,11 @@ class UGameFeatureAction_SpawnActors final : public UGameFeatureAction_WorldActi
 public:
 	/* Target level to which actor will be spawned */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
-		TSoftObjectPtr<UWorld> TargetLevel;
+	TSoftObjectPtr<UWorld> TargetLevel;
 
 	/* Stacked spawn settings */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
-		TArray<FActorSpawnSettings> SpawnSettings;
+	TArray<FActorSpawnSettings> SpawnSettings;
 
 protected:
 	virtual void OnGameFeatureActivating(FGameFeatureActivatingContext& Context) override;
@@ -52,7 +51,7 @@ protected:
 private:
 	void SpawnActors(UWorld* WorldReference);
 	void DestroyActors();
-	
+
 	void ResetExtension();
 
 	TArray<TWeakObjectPtr<AActor>> SpawnedActors;

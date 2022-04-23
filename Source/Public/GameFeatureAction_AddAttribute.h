@@ -22,20 +22,21 @@ class UGameFeatureAction_AddAttribute final : public UGameFeatureAction_WorldAct
 
 public:
 	/* Target pawn to which attribute will be given */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", meta = (AllowedClasses = "Pawn", OnlyPlaceable = "true"))
-		TSoftClassPtr<APawn> TargetPawnClass;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings",
+		meta = (AllowedClasses = "Pawn", OnlyPlaceable = "true"))
+	TSoftClassPtr<APawn> TargetPawnClass;
 
 	/* Tags required on the target to apply this action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
-		TArray<FName> RequireTags;
+	TArray<FName> RequireTags;
 
 	/* AttributeSet class to be added */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
-		TSoftClassPtr<UAttributeSet> Attribute;
+	TSoftClassPtr<UAttributeSet> Attribute;
 
 	/* Data Table with Attribute Meta Data to be added (can be left unset) */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
-		TSoftObjectPtr<UDataTable> InitializationData;
+	TSoftObjectPtr<UDataTable> InitializationData;
 
 protected:
 	virtual void OnGameFeatureActivating(FGameFeatureActivatingContext& Context) override;

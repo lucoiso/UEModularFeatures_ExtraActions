@@ -39,14 +39,12 @@ void UGameFeatureAction_AddEffects::ResetExtension()
 void UGameFeatureAction_AddEffects::AddToWorld(const FWorldContext& WorldContext)
 {
 	const UWorld* World = WorldContext.World();
-	const UGameInstance* GameInstance = WorldContext.OwningGameInstance;
 
-	if (IsValid(GameInstance) && IsValid(World) && World->IsGameWorld())
+	if (const UGameInstance* GameInstance = WorldContext.OwningGameInstance; IsValid(GameInstance) && IsValid(World) &&
+		World->IsGameWorld())
 	{
-		UGameFrameworkComponentManager* ComponentManager = UGameInstance::GetSubsystem<
-			UGameFrameworkComponentManager>(GameInstance);
-
-		if (IsValid(ComponentManager) && !TargetPawnClass.IsNull())
+		if (UGameFrameworkComponentManager* ComponentManager = UGameInstance::GetSubsystem<
+			UGameFrameworkComponentManager>(GameInstance); IsValid(ComponentManager) && !TargetPawnClass.IsNull())
 		{
 			const UGameFrameworkComponentManager::FExtensionHandlerDelegate ExtensionHandlerDelegate =
 				UGameFrameworkComponentManager::FExtensionHandlerDelegate::CreateUObject(
@@ -60,7 +58,7 @@ void UGameFeatureAction_AddEffects::AddToWorld(const FWorldContext& WorldContext
 	}
 }
 
-void UGameFeatureAction_AddEffects::HandleActorExtension(AActor* Owner, FName EventName)
+void UGameFeatureAction_AddEffects::HandleActorExtension(AActor* Owner, const FName EventName)
 {
 	/*UE_LOG(LogGameplayFeaturesExtraActions, Display,
 		   TEXT("Event %s sended by Actor %s for effects management."), *EventName.ToString(),
@@ -106,17 +104,17 @@ void UGameFeatureAction_AddEffects::AddEffects(AActor* TargetActor, const FEffec
 	if (IsValid(TargetActor) && TargetActor->GetLocalRole() == ROLE_Authority)
 	{
 		UE_LOG(LogGameplayFeaturesExtraActions, Display,
-			TEXT("Adding effect %s level %u to Actor %s with %u SetByCaller params."),
-			*Effect.EffectClass.GetAssetName(), Effect.EffectLevel,
-			*TargetActor->GetName(), Effect.SetByCallerParams.Num());
+		       TEXT("Adding effect %s level %u to Actor %s with %u SetByCaller params."),
+		       *Effect.EffectClass.GetAssetName(), Effect.EffectLevel,
+		       *TargetActor->GetName(), Effect.SetByCallerParams.Num());
 
 		const IAbilitySystemInterface* InterfaceOwner = Cast<IAbilitySystemInterface>(TargetActor);
 
-		UAbilitySystemComponent* AbilitySystemComponent = InterfaceOwner != nullptr
-			? InterfaceOwner->GetAbilitySystemComponent()
-			: TargetActor->FindComponentByClass<UAbilitySystemComponent>();
-
-		if (IsValid(AbilitySystemComponent))
+		if (UAbilitySystemComponent* AbilitySystemComponent = InterfaceOwner != nullptr
+			                                                      ? InterfaceOwner->GetAbilitySystemComponent()
+			                                                      : TargetActor->FindComponentByClass<
+				                                                      UAbilitySystemComponent>(); IsValid(
+			AbilitySystemComponent))
 		{
 			TArray<FActiveGameplayEffectHandle> SpecData = ActiveExtensions.FindOrAdd(TargetActor);
 
@@ -146,19 +144,18 @@ void UGameFeatureAction_AddEffects::RemoveEffects(AActor* TargetActor)
 	if (IsValid(TargetActor) && TargetActor->GetLocalRole() == ROLE_Authority)
 	{
 		UE_LOG(LogGameplayFeaturesExtraActions, Display,
-			TEXT("Removing effects from Actor %s."), *TargetActor->GetName());
+		       TEXT("Removing effects from Actor %s."), *TargetActor->GetName());
 
-		TArray<FActiveGameplayEffectHandle> ActiveEffects = ActiveExtensions.FindRef(TargetActor);
-
-		if (!ActiveEffects.IsEmpty())
+		if (TArray<FActiveGameplayEffectHandle> ActiveEffects = ActiveExtensions.FindRef(TargetActor); !ActiveEffects.
+			IsEmpty())
 		{
 			const IAbilitySystemInterface* InterfaceOwner = Cast<IAbilitySystemInterface>(TargetActor);
 
-			UAbilitySystemComponent* AbilitySystemComponent = InterfaceOwner != nullptr
-				? InterfaceOwner->GetAbilitySystemComponent()
-				: TargetActor->FindComponentByClass<UAbilitySystemComponent>();
-
-			if (IsValid(AbilitySystemComponent))
+			if (UAbilitySystemComponent* AbilitySystemComponent = InterfaceOwner != nullptr
+				                                                      ? InterfaceOwner->GetAbilitySystemComponent()
+				                                                      : TargetActor->FindComponentByClass<
+					                                                      UAbilitySystemComponent>(); IsValid(
+				AbilitySystemComponent))
 			{
 				for (const FActiveGameplayEffectHandle& EffectHandle : ActiveEffects)
 				{

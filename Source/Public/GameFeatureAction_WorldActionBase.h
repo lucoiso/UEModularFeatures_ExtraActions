@@ -36,7 +36,7 @@ public:
 protected:
 	virtual void AddToWorld(const FWorldContext& WorldContext)
 	{
-	};
+	}
 
 private:
 	void HandleGameInstanceStart(UGameInstance* GameInstance, FGameFeatureStateChangeContext ChangeContext);

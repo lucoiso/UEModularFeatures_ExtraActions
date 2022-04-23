@@ -3,7 +3,6 @@
 // Repo: https://github.com/lucoiso/UEModularFeatures_ExtraActions
 
 #include "GameFeatureAction_WorldActionBase.h"
-#include "GameFeaturesSubsystemSettings.h"
 #include "Engine/World.h"
 #include "Engine/Engine.h"
 
@@ -34,7 +33,8 @@ void UGameFeatureAction_WorldActionBase::OnGameFeatureDeactivating(FGameFeatureD
 	ContextHandles.Empty();
 }
 
-void UGameFeatureAction_WorldActionBase::HandleGameInstanceStart(UGameInstance* GameInstance, FGameFeatureStateChangeContext ChangeContext)
+void UGameFeatureAction_WorldActionBase::HandleGameInstanceStart(UGameInstance* GameInstance,
+                                                                 const FGameFeatureStateChangeContext ChangeContext)
 {
 	if (const FWorldContext* WorldContext = GameInstance->GetWorldContext())
 	{
