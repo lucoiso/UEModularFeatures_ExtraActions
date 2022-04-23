@@ -11,7 +11,7 @@
 	"DocsURL": "https://github.com/lucoiso/UEModularFeatures_ExtraActions/blob/main/README.md",
 	"MarketplaceURL": "com.epicgames.launcher://ue/marketplace/product/a718e1ae4fa741869b8f7aaea1434a8d",
 	"SupportURL": "https://forums.unrealengine.com/t/free-modularfeatures-extraactions-plugin-modular-gas-enhanced-input-and-more/495400",
-	"CanContainContent": true,
+	"CanContainContent": false,
 	"IsBetaVersion": false,
 	"IsExperimentalVersion": false,
 	"Installed": false,
@@ -47,6 +47,5 @@
 			"Name": "ModularGameplay",
 			"Enabled": true
 		}
-	],
-	"BuiltInInitialFeatureState": "Active"
+	]
 }
