@@ -4,7 +4,7 @@
   "VersionName": "1.2",
   "EngineVersion": "5.0",
   "FriendlyName": "ModularFeatures_ExtraActions",
-  "Description": "Add extra actions to the existing modular features plugin.",
+  "Description": "This plugin integrates GAS and Enhanced Input to the existing Game Features and Modular plugins from Unreal Engine, extending the plugin to add some feature actions.",
   "Category": "Game Features",
   "CreatedBy": "Lucas Vilas-Boas",
   "CreatedByURL": "https://dev.epicgames.com/community/profile/4ePp/lucoiso",
