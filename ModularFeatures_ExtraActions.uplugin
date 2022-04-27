@@ -3,8 +3,8 @@
 	"Version": 1,
 	"VersionName": "1.1.1",
 	"EngineVersion": "5.0.0",
-	"FriendlyName": "ModularFeatures_ExtraActions",
-	"Description": "Integrates GAS and Enhanced Input to the existing Game Features and Modular plugins from Unreal Engine, extending the plugin to add some feature actions.",
+	"FriendlyName": "Modular Features: Extra Actions",
+	"Description": "Integrates GAS and Enhanced Input to the existing Game Features and Modular plugins from Unreal Engine.",
 	"Category": "Game Features",
 	"CreatedBy": "Lucas Vilas-Boas",
 	"CreatedByURL": "https://dev.epicgames.com/community/profile/4ePp/lucoiso",
@@ -31,19 +31,19 @@
 	],
 	"Plugins": [
 		{
-			"Name": "GameplayAbilities",
-			"Enabled": true
-		},
-		{
-			"Name": "EnhancedInput",
-			"Enabled": true
-		},
-		{
 			"Name": "GameFeatures",
 			"Enabled": true
 		},
 		{
 			"Name": "ModularGameplay",
+			"Enabled": true
+		},
+		{
+			"Name": "GameplayAbilities",
+			"Enabled": true
+		},
+		{
+			"Name": "EnhancedInput",
 			"Enabled": true
 		}
 	]
