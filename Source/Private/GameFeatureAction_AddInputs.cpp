@@ -186,7 +186,8 @@ void UGameFeatureAction_AddInputs::AddActorInputs(AActor* TargetActor)
 											                   AbilityBindingData.InputIDValueName,
 											                   EGetByNameFlags::CheckAuthoredName);
 
-									AbilityInterface->SetupAbilityInputBinding(InputAction, InputID);
+									AbilityInterface->Execute_SetupAbilityInputBinding(
+										AbilityInterface->_getUObject(), InputAction, InputID);
 
 									AbilityActions.Add(InputAction);
 								}
@@ -261,7 +262,8 @@ void UGameFeatureAction_AddInputs::RemoveActorInputs(AActor* TargetActor)
 						{
 							for (TWeakObjectPtr<UInputAction> ActiveAbilityAction : AbilityActions)
 							{
-								AbilityInterface->RemoveAbilityInputBinding(ActiveAbilityAction.Get());
+								AbilityInterface->Execute_RemoveAbilityInputBinding(
+									AbilityInterface->_getUObject(), ActiveAbilityAction.Get());
 								ActiveAbilityAction.Reset();
 							}
 						}

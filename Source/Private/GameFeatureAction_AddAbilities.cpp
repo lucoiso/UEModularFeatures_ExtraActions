@@ -158,8 +158,9 @@ void UGameFeatureAction_AddAbilities::AddActorAbilities(AActor* TargetActor,
 						if (SetupInputInterface != nullptr)
 						{
 							UInputAction* AbilityInput = Ability.InputAction.LoadSynchronous();
-							SetupInputInterface->SetupAbilityInputBinding(AbilityInput,
-							                                              InputID);
+							SetupInputInterface->Execute_SetupAbilityInputBinding(
+								SetupInputInterface->_getUObject(), AbilityInput,
+								InputID);
 
 							NewAbilityData.InputReference.Add(AbilityInput);
 						}
@@ -224,7 +225,8 @@ void UGameFeatureAction_AddAbilities::RemoveActorAbilities(AActor* TargetActor)
 						{
 							if (IsValid(InputRef))
 							{
-								SetupInputInterface->RemoveAbilityInputBinding(InputRef);
+								SetupInputInterface->Execute_RemoveAbilityInputBinding(
+									SetupInputInterface->_getUObject(), InputRef);
 							}
 						}
 					}
