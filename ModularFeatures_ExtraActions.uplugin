@@ -20,7 +20,7 @@
 			"Name": "ModularFeatures_ExtraActions",
 			"Type": "Runtime",
 			"LoadingPhase": "Default",
-			"WhitelistPlatforms": [
+			"PlatformAllowList": [
 				"Win64",
 				"Mac",
 				"Linux",
