@@ -31,7 +31,8 @@ void UGameFeatureAction_SpawnActors::AddToWorld(const FWorldContext& WorldContex
 {
 	if (!TargetLevel.IsNull())
 	{
-		if (UWorld* World = WorldContext.World(); IsValid(World) && World->IsGameWorld() && World == TargetLevel.Get())
+		if (UWorld* World = WorldContext.World(); IsValid(World) && World->IsGameWorld()
+			&& World == TargetLevel.Get() && !World->IsNetMode(NM_Client))
 		{
 			SpawnActors(World);
 		}
@@ -40,7 +41,7 @@ void UGameFeatureAction_SpawnActors::AddToWorld(const FWorldContext& WorldContex
 
 void UGameFeatureAction_SpawnActors::SpawnActors(UWorld* WorldReference)
 {
-	for (const auto& [ActorClass, SpawnTransform] : SpawnSettings)
+	for (const auto [ActorClass, SpawnTransform] : SpawnSettings)
 	{
 		UE_LOG(LogGameplayFeaturesExtraActions, Display,
 		       TEXT("Spawning actor %s on world %s"), *ActorClass.GetAssetName(), *TargetLevel.GetAssetName());

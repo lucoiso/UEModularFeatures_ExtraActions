@@ -40,8 +40,8 @@ void UGameFeatureAction_AddEffects::AddToWorld(const FWorldContext& WorldContext
 {
 	const UWorld* World = WorldContext.World();
 
-	if (const UGameInstance* GameInstance = WorldContext.OwningGameInstance; IsValid(GameInstance) && IsValid(World) &&
-		World->IsGameWorld())
+	if (const UGameInstance* GameInstance = WorldContext.OwningGameInstance;
+		IsValid(GameInstance) && IsValid(World) && World->IsGameWorld())
 	{
 		if (UGameFrameworkComponentManager* ComponentManager = UGameInstance::GetSubsystem<
 			UGameFrameworkComponentManager>(GameInstance); IsValid(ComponentManager) && !TargetPawnClass.IsNull())

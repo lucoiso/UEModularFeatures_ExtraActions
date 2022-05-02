@@ -43,8 +43,8 @@ void UGameFeatureAction_AddAbilities::AddToWorld(const FWorldContext& WorldConte
 {
 	const UWorld* World = WorldContext.World();
 
-	if (const UGameInstance* GameInstance = WorldContext.OwningGameInstance; IsValid(GameInstance) && IsValid(World) &&
-		World->IsGameWorld())
+	if (const UGameInstance* GameInstance = WorldContext.OwningGameInstance;
+		IsValid(GameInstance) && IsValid(World) && World->IsGameWorld())
 	{
 		if (UGameFrameworkComponentManager* ComponentManager = UGameInstance::GetSubsystem<
 			UGameFrameworkComponentManager>(GameInstance); IsValid(ComponentManager) && !TargetPawnClass.IsNull())

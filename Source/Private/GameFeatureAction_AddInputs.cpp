@@ -44,8 +44,8 @@ void UGameFeatureAction_AddInputs::AddToWorld(const FWorldContext& WorldContext)
 {
 	const UWorld* World = WorldContext.World();
 
-	if (const UGameInstance* GameInstance = WorldContext.OwningGameInstance; IsValid(GameInstance) && IsValid(World) &&
-		World->IsGameWorld())
+	if (const UGameInstance* GameInstance = WorldContext.OwningGameInstance;
+		IsValid(GameInstance) && IsValid(World) && World->IsGameWorld())
 	{
 		if (UGameFrameworkComponentManager* ComponentManager = UGameInstance::GetSubsystem<
 			UGameFrameworkComponentManager>(GameInstance); IsValid(ComponentManager) && !TargetPawnClass.IsNull())
@@ -155,7 +155,7 @@ void UGameFeatureAction_AddInputs::AddActorInputs(AActor* TargetActor)
 
 				if (FunctionOwner.IsValid() && InputComponent.IsValid())
 				{
-					for (const auto& [ActionInput, AbilityBindingData, FunctionBindingData] : ActionsBindings)
+					for (const auto [ActionInput, AbilityBindingData, FunctionBindingData] : ActionsBindings)
 					{
 						UE_LOG(LogGameplayFeaturesExtraActions, Display,
 						       TEXT("Binding Action Input %s to Actor %s."), *ActionInput.GetAssetName(),
