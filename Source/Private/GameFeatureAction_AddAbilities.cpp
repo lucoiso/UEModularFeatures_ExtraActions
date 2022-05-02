@@ -98,6 +98,10 @@ void UGameFeatureAction_AddAbilities::HandleActorExtension(AActor* Owner, const 
 			{
 				AddActorAbilities(Owner, Entry);
 			}
+			else
+			{
+				UE_LOG(LogGameplayFeaturesExtraActions, Error, TEXT("%s: Ability class is null."), *FString(__func__));
+			}
 		}
 	}
 }
@@ -123,8 +127,8 @@ void UGameFeatureAction_AddAbilities::AddActorAbilities(AActor* TargetActor,
 			const TSubclassOf<UGameplayAbility> AbilityToAdd = Ability.AbilityClass.LoadSynchronous();
 
 			UE_LOG(LogGameplayFeaturesExtraActions, Display,
-			       TEXT("Adding ability %s to Actor %s."), *AbilityToAdd->GetName(),
-			       *TargetActor->GetName());
+			       TEXT("%s: Adding ability %s to Actor %s."), *FString(__func__),
+			       *AbilityToAdd->GetName(), *TargetActor->GetName());
 
 			const FGameplayAbilitySpec NewAbilitySpec =
 				FGameplayAbilitySpec(AbilityToAdd,
@@ -165,11 +169,23 @@ void UGameFeatureAction_AddAbilities::AddActorAbilities(AActor* TargetActor,
 
 							NewAbilityData.InputReference.Add(AbilityInput);
 						}
+						else
+						{
+							UE_LOG(LogGameplayFeaturesExtraActions, Error,
+							       TEXT("%s: Failed to setup input binding for ability %s on Actor %s."),
+							       *FString(__func__), *AbilityToAdd->GetName(), *TargetActor->GetName());
+						}
 					}
 				}
 
 				ActiveExtensions.Add(TargetActor, NewAbilityData);
 			}
+		}
+		else
+		{
+			UE_LOG(LogGameplayFeaturesExtraActions, Error,
+			       TEXT("%s: Failed to find AbilitySystemComponent on Actor %s."), *FString(__func__),
+			       *TargetActor->GetName());
 		}
 	}
 }
@@ -178,27 +194,27 @@ void UGameFeatureAction_AddAbilities::RemoveActorAbilities(AActor* TargetActor)
 {
 	if (IsValid(TargetActor) && TargetActor->GetLocalRole() == ROLE_Authority)
 	{
-		UE_LOG(LogGameplayFeaturesExtraActions, Display,
-		       TEXT("Removing associated abilities from Actor %s."),
-		       *TargetActor->GetName());
-
 		const FActiveAbilityData ActiveAbilities = ActiveExtensions.FindRef(TargetActor);
 
 		if constexpr (&ActiveAbilities != nullptr)
 		{
 			const IAbilitySystemInterface* InterfaceOwner = Cast<IAbilitySystemInterface>(TargetActor);
 
-			if (UAbilitySystemComponent* AbilitySystemComponent = InterfaceOwner != nullptr
-				                                                      ? InterfaceOwner->GetAbilitySystemComponent()
-				                                                      : TargetActor->FindComponentByClass<
-					                                                      UAbilitySystemComponent>(); IsValid(
-				AbilitySystemComponent))
+			if (UAbilitySystemComponent* AbilitySystemComponent =
+					InterfaceOwner != nullptr
+						? InterfaceOwner->GetAbilitySystemComponent()
+						: TargetActor->FindComponentByClass<UAbilitySystemComponent>();
+				IsValid(AbilitySystemComponent))
 			{
+				UE_LOG(LogGameplayFeaturesExtraActions, Display,
+				       TEXT("%s: Removing associated abilities from Actor %s."), *FString(__func__),
+				       *TargetActor->GetName());
+
 				for (const FGameplayAbilitySpecHandle& SpecHandle : ActiveAbilities.SpecHandle)
 				{
 					if (SpecHandle.IsValid())
 					{
-						AbilitySystemComponent->SetRemoveAbilityOnEnd(SpecHandle);
+						AbilitySystemComponent->ClearAbility(SpecHandle);
 					}
 				}
 
@@ -233,6 +249,17 @@ void UGameFeatureAction_AddAbilities::RemoveActorAbilities(AActor* TargetActor)
 					}
 				}
 			}
+			else if (TargetActor->GetNetOwningPlayer())
+			{
+				UE_LOG(LogGameplayFeaturesExtraActions, Error,
+				       TEXT("%s: Failed to find AbilitySystemComponent on Actor %s."), *FString(__func__),
+				       *TargetActor->GetName());
+			}
+		}
+		else
+		{
+			UE_LOG(LogGameplayFeaturesExtraActions, Warning,
+			       TEXT("%s: No active abilities found for Actor %s."), *FString(__func__), *TargetActor->GetName());
 		}
 	}
 

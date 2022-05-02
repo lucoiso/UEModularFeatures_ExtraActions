@@ -93,6 +93,10 @@ void UGameFeatureAction_AddAttribute::HandleActorExtension(AActor* Owner, const 
 		{
 			AddAttribute(Owner);
 		}
+		else
+		{
+			UE_LOG(LogGameplayFeaturesExtraActions, Error, TEXT("%s: Attribute is null."), *FString(__func__));
+		}
 	}
 }
 
@@ -110,10 +114,6 @@ void UGameFeatureAction_AddAttribute::AddAttribute(AActor* TargetActor)
 		{
 			if (const TSubclassOf<UAttributeSet> SetType = Attribute.LoadSynchronous(); IsValid(SetType))
 			{
-				UE_LOG(LogGameplayFeaturesExtraActions, Display,
-				       TEXT("Adding attribute %s to Actor %s."), *SetType->GetName(),
-				       *TargetActor->GetName());
-
 				UAttributeSet* NewSet = NewObject<UAttributeSet>(AbilitySystemComponent->GetOwnerActor(), SetType);
 
 				if (!InitializationData.IsNull())
@@ -124,8 +124,22 @@ void UGameFeatureAction_AddAttribute::AddAttribute(AActor* TargetActor)
 				AbilitySystemComponent->AddAttributeSetSubobject(NewSet);
 				AbilitySystemComponent->ForceReplication();
 
+				UE_LOG(LogGameplayFeaturesExtraActions, Display,
+				       TEXT("%s: Attribute %s added to Actor %s."), *FString(__func__), *SetType->GetName(),
+				       *TargetActor->GetName());
+
 				ActiveExtensions.Add(TargetActor, NewSet);
 			}
+			else
+			{
+				UE_LOG(LogGameplayFeaturesExtraActions, Error, TEXT("%s: Attribute is invalid."), *FString(__func__));
+			}
+		}
+		else
+		{
+			UE_LOG(LogGameplayFeaturesExtraActions, Error,
+			       TEXT("%s: Failed to find AbilitySystemComponent on Actor %s."), *FString(__func__),
+			       *TargetActor->GetName());
 		}
 	}
 }
@@ -134,10 +148,6 @@ void UGameFeatureAction_AddAttribute::RemoveAttribute(AActor* TargetActor)
 {
 	if (IsValid(TargetActor) && TargetActor->GetLocalRole() == ROLE_Authority)
 	{
-		UE_LOG(LogGameplayFeaturesExtraActions, Display,
-		       TEXT("Removing attribute %s from Actor %s."), *Attribute.GetAssetName(),
-		       *TargetActor->GetName());
-
 		const IAbilitySystemInterface* InterfaceOwner = Cast<IAbilitySystemInterface>(TargetActor);
 
 		if (UAbilitySystemComponent* AbilitySystemComponent = InterfaceOwner != nullptr
@@ -146,13 +156,22 @@ void UGameFeatureAction_AddAttribute::RemoveAttribute(AActor* TargetActor)
 				                                                      UAbilitySystemComponent>(); IsValid(
 			AbilitySystemComponent))
 		{
-			AbilitySystemComponent->GetSpawnedAttributes_Mutable().Remove(
-				ActiveExtensions.FindRef(TargetActor).Get());
+			if (UAttributeSet* AttributeToRemove = ActiveExtensions.FindRef(TargetActor).Get();
+				IsValid(AttributeToRemove)
+				&& AbilitySystemComponent->GetSpawnedAttributes_Mutable().Remove(AttributeToRemove) != 0)
+			{
+				UE_LOG(LogGameplayFeaturesExtraActions, Display, TEXT("%s: Attribute %s removed from Actor %s."),
+				       *FString(__func__),
+				       *AttributeToRemove->GetName(), *TargetActor->GetName());
 
-			AbilitySystemComponent->ForceReplication();
-
-			UE_LOG(LogGameplayFeaturesExtraActions, Display, TEXT("Attribute %s removed from Actor %s."),
-			       *Attribute.GetAssetName(), *TargetActor->GetName());
+				AbilitySystemComponent->ForceReplication();
+			}
+		}
+		else if (TargetActor->GetNetOwningPlayer())
+		{
+			UE_LOG(LogGameplayFeaturesExtraActions, Error,
+			       TEXT("%s: Failed to find AbilitySystemComponent on Actor %s."), *FString(__func__),
+			       *TargetActor->GetName());
 		}
 	}
 

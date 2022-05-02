@@ -48,10 +48,15 @@ void UGameFeatureAction_SpawnActors::SpawnActors(UWorld* WorldReference)
 			TSubclassOf<AActor> ClassToSpawn = ActorClass.LoadSynchronous();
 
 			UE_LOG(LogGameplayFeaturesExtraActions, Display,
-			       TEXT("Spawning actor %s on world %s"), *ClassToSpawn->GetName(), *TargetLevel.GetAssetName());
+			       TEXT("%s: Spawning actor %s on world %s"), *FString(__func__), *ClassToSpawn->GetName(),
+			       *TargetLevel.GetAssetName());
 
 			AActor* SpawnedActor = WorldReference->SpawnActor<AActor>(ClassToSpawn, SpawnTransform);
 			SpawnedActors.Add(SpawnedActor);
+		}
+		else
+		{
+			UE_LOG(LogGameplayFeaturesExtraActions, Error, TEXT("%s: Actor class is null."), *FString(__func__));
 		}
 	}
 }

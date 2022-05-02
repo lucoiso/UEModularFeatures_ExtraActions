@@ -97,6 +97,11 @@ void UGameFeatureAction_AddInputs::HandleActorExtension(AActor* Owner, const FNa
 		{
 			AddActorInputs(Owner);
 		}
+		else
+		{
+			UE_LOG(LogGameplayFeaturesExtraActions, Error, TEXT("%s: Input Mapping Context is null."),
+			       *FString(__func__));
+		}
 	}
 }
 
@@ -106,16 +111,21 @@ void UGameFeatureAction_AddInputs::AddActorInputs(AActor* TargetActor)
 	{
 		APawn* TargetPawn = Cast<APawn>(TargetActor);
 
-		if (const APlayerController* PlayerController = TargetPawn->GetController<APlayerController>(); IsValid(
-			PlayerController))
+		if (const APlayerController* PlayerController = TargetPawn->GetController<APlayerController>();
+			IsValid(PlayerController))
 		{
-			if (const ULocalPlayer* LocalPlayer = PlayerController->GetLocalPlayer(); IsValid(LocalPlayer))
+			if (const ULocalPlayer* LocalPlayer = PlayerController->GetLocalPlayer();
+				PlayerController->IsLocalController() && IsValid(LocalPlayer))
 			{
 				UEnhancedInputLocalPlayerSubsystem*
 					Subsystem = LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
 
 				if (!IsValid(Subsystem))
 				{
+					UE_LOG(LogGameplayFeaturesExtraActions, Error,
+					       TEXT("%s: LocalPlayer %s has no EnhancedInputLocalPlayerSubsystem."), *FString(__func__),
+					       *LocalPlayer->GetName());
+
 					return;
 				}
 
@@ -123,7 +133,8 @@ void UGameFeatureAction_AddInputs::AddActorInputs(AActor* TargetActor)
 				UInputMappingContext* InputMapping = InputMappingContext.LoadSynchronous();
 
 				UE_LOG(LogGameplayFeaturesExtraActions, Display,
-				       TEXT("Adding Enhanced Input Mapping %s to Actor %s."), *InputMapping->GetName(),
+				       TEXT("%s: Adding Enhanced Input Mapping %s to Actor %s."), *FString(__func__),
+				       *InputMapping->GetName(),
 				       *TargetActor->GetName());
 
 				Subsystem->AddMappingContext(InputMapping, MappingPriority);
@@ -162,7 +173,8 @@ void UGameFeatureAction_AddInputs::AddActorInputs(AActor* TargetActor)
 							UInputAction* InputAction = ActionInput.LoadSynchronous();
 
 							UE_LOG(LogGameplayFeaturesExtraActions, Display,
-							       TEXT("Binding Action Input %s to Actor %s."), *InputAction->GetName(),
+							       TEXT("%s: Binding Action Input %s to Actor %s."), *FString(__func__),
+							       *InputAction->GetName(),
 							       *TargetActor->GetName());
 
 							for (const auto& [FunctionName, Triggers] : FunctionBindingData)
@@ -176,9 +188,9 @@ void UGameFeatureAction_AddInputs::AddActorInputs(AActor* TargetActor)
 								}
 							}
 
-							if (AbilityInterface != nullptr)
+							if (AbilityBindingData.bSetupAbilityInput)
 							{
-								if (AbilityBindingData.bSetupAbilityInput)
+								if (AbilityInterface != nullptr)
 								{
 									const uint32 InputID =
 										AbilityBindingData.InputIDEnumerationClass.LoadSynchronous()->
@@ -191,13 +203,36 @@ void UGameFeatureAction_AddInputs::AddActorInputs(AActor* TargetActor)
 
 									AbilityActions.Add(InputAction);
 								}
+								else
+								{
+									UE_LOG(LogGameplayFeaturesExtraActions, Error,
+									       TEXT("%s: Actor %s has no AbilityInputBinding."), *FString(__func__),
+									       *TargetActor->GetName());
+								}
 							}
+						}
+						else
+						{
+							UE_LOG(LogGameplayFeaturesExtraActions, Error, TEXT("%s: Action Input is null."),
+							       *FString(__func__));
 						}
 					}
 
 					ActiveExtensions.Add(TargetActor, NewInputData);
 				}
+				else
+				{
+					UE_LOG(LogGameplayFeaturesExtraActions, Error,
+					       TEXT("%s: Failed to find InputComponent on Actor %s."), *FString(__func__),
+					       *TargetActor->GetName());
+				}
 			}
+		}
+		else if (TargetPawn->IsPawnControlled())
+		{
+			UE_LOG(LogGameplayFeaturesExtraActions, Error,
+			       TEXT("%s: Failed to find PlayerController on Actor %s."), *FString(__func__),
+			       *TargetActor->GetName());
 		}
 	}
 }
@@ -208,29 +243,33 @@ void UGameFeatureAction_AddInputs::RemoveActorInputs(AActor* TargetActor)
 	{
 		APawn* TargetPawn = Cast<APawn>(TargetActor);
 
-		if (const APlayerController* PlayerController = TargetPawn->GetController<APlayerController>(); IsValid(
-			PlayerController))
+		if (const APlayerController* PlayerController = TargetPawn->GetController<APlayerController>();
+			IsValid(PlayerController))
 		{
-			if (const ULocalPlayer* LocalPlayer = PlayerController->GetLocalPlayer(); IsValid(LocalPlayer))
+			if (const ULocalPlayer* LocalPlayer = PlayerController->GetLocalPlayer();
+				PlayerController->IsLocalController() && IsValid(LocalPlayer))
 			{
 				UEnhancedInputLocalPlayerSubsystem*
 					Subsystem = LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
 
 				if (!IsValid(Subsystem))
 				{
+					UE_LOG(LogGameplayFeaturesExtraActions, Error,
+					       TEXT("%s: LocalPlayer %s has no EnhancedInputLocalPlayerSubsystem."), *FString(__func__),
+					       *LocalPlayer->GetName());
+
 					return;
 				}
 
-				const FInputBindingData ActiveInputData = ActiveExtensions.FindRef(TargetActor);
-
-				if constexpr (&ActiveInputData != nullptr)
+				if (const FInputBindingData* ActiveInputData = ActiveExtensions.Find(TargetActor);
+					ActiveInputData != nullptr)
 				{
 					UE_LOG(LogGameplayFeaturesExtraActions, Display,
-					       TEXT("Removing Enhanced Input Mapping %s from Actor %s."),
-					       *ActiveInputData.Mapping->GetName(),
+					       TEXT("%s: Removing Enhanced Input Mapping %s from Actor %s."), *FString(__func__),
+					       *ActiveInputData->Mapping->GetName(),
 					       *TargetActor->GetName());
 
-					Subsystem->RemoveMappingContext(ActiveInputData.Mapping.Get());
+					Subsystem->RemoveMappingContext(ActiveInputData->Mapping.Get());
 
 					UObject* FunctionOwner;
 
@@ -250,10 +289,10 @@ void UGameFeatureAction_AddInputs::RemoveActorInputs(AActor* TargetActor)
 					}
 
 					if (UEnhancedInputComponent* InputComponent =
-						Cast<UEnhancedInputComponent>(TargetPawn->InputComponent); IsValid(FunctionOwner) && IsValid(
-						InputComponent))
+							Cast<UEnhancedInputComponent>(TargetPawn->InputComponent);
+						IsValid(FunctionOwner) && IsValid(InputComponent))
 					{
-						for (const FInputBindingHandle& BindHandle : ActiveInputData.ActionBinding)
+						for (const FInputBindingHandle& BindHandle : ActiveInputData->ActionBinding)
 						{
 							InputComponent->RemoveBindingByHandle(BindHandle.GetHandle());
 						}
@@ -269,8 +308,20 @@ void UGameFeatureAction_AddInputs::RemoveActorInputs(AActor* TargetActor)
 							}
 						}
 					}
+					else
+					{
+						UE_LOG(LogGameplayFeaturesExtraActions, Error,
+						       TEXT("%s: Failed to find InputComponent on Actor %s."), *FString(__func__),
+						       *TargetActor->GetName());
+					}
 				}
 			}
+		}
+		else if (TargetPawn->IsPawnControlled())
+		{
+			UE_LOG(LogGameplayFeaturesExtraActions, Error,
+			       TEXT("%s: Failed to find PlayerController on Actor %s."), *FString(__func__),
+			       *TargetActor->GetName());
 		}
 	}
 

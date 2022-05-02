@@ -95,6 +95,10 @@ void UGameFeatureAction_AddEffects::HandleActorExtension(AActor* Owner, const FN
 			{
 				AddEffects(Owner, Entry);
 			}
+			else
+			{
+				UE_LOG(LogGameplayFeaturesExtraActions, Error, TEXT("%s: Effect class is null."), *FString(__func__));
+			}
 		}
 	}
 }
@@ -113,29 +117,32 @@ void UGameFeatureAction_AddEffects::AddEffects(AActor* TargetActor, const FEffec
 		{
 			TArray<FActiveGameplayEffectHandle> SpecData = ActiveExtensions.FindOrAdd(TargetActor);
 
-			if (!Effect.EffectClass.IsNull())
+			const TSubclassOf<UGameplayEffect> EffectClass = Effect.EffectClass.LoadSynchronous();
+
+			UE_LOG(LogGameplayFeaturesExtraActions, Display,
+			       TEXT("%s: Adding effect %s level %u to Actor %s with %u SetByCaller params."), *FString(__func__),
+			       *EffectClass->GetName(), Effect.EffectLevel,
+			       *TargetActor->GetName(), Effect.SetByCallerParams.Num());
+
+			const FGameplayEffectSpecHandle SpecHandle = AbilitySystemComponent->MakeOutgoingSpec(
+				EffectClass, Effect.EffectLevel, AbilitySystemComponent->MakeEffectContext());
+
+			for (const TPair<FGameplayTag, float> SetByCallerParam : Effect.SetByCallerParams)
 			{
-				const TSubclassOf<UGameplayEffect> EffectClass = Effect.EffectClass.LoadSynchronous();
-
-				UE_LOG(LogGameplayFeaturesExtraActions, Display,
-				       TEXT("Adding effect %s level %u to Actor %s with %u SetByCaller params."),
-				       *EffectClass->GetName(), Effect.EffectLevel,
-				       *TargetActor->GetName(), Effect.SetByCallerParams.Num());
-
-				const FGameplayEffectSpecHandle SpecHandle = AbilitySystemComponent->MakeOutgoingSpec(
-					EffectClass, Effect.EffectLevel, AbilitySystemComponent->MakeEffectContext());
-
-				for (const TPair<FGameplayTag, float> SetByCallerParam : Effect.SetByCallerParams)
-				{
-					SpecHandle.Data.Get()->SetSetByCallerMagnitude(SetByCallerParam.Key, SetByCallerParam.Value);
-				}
-
-				const FActiveGameplayEffectHandle& NewActiveEffect = AbilitySystemComponent->
-					ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
-				SpecData.Add(NewActiveEffect);
-
-				ActiveExtensions.Add(TargetActor, SpecData);
+				SpecHandle.Data.Get()->SetSetByCallerMagnitude(SetByCallerParam.Key, SetByCallerParam.Value);
 			}
+
+			const FActiveGameplayEffectHandle& NewActiveEffect = AbilitySystemComponent->
+				ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
+			SpecData.Add(NewActiveEffect);
+
+			ActiveExtensions.Add(TargetActor, SpecData);
+		}
+		else
+		{
+			UE_LOG(LogGameplayFeaturesExtraActions, Error,
+			       TEXT("%s: Failed to find AbilitySystemComponent on Actor %s."), *FString(__func__),
+			       *TargetActor->GetName());
 		}
 	}
 }
@@ -144,9 +151,6 @@ void UGameFeatureAction_AddEffects::RemoveEffects(AActor* TargetActor)
 {
 	if (IsValid(TargetActor) && TargetActor->GetLocalRole() == ROLE_Authority)
 	{
-		UE_LOG(LogGameplayFeaturesExtraActions, Display,
-		       TEXT("Removing effects from Actor %s."), *TargetActor->GetName());
-
 		if (TArray<FActiveGameplayEffectHandle> ActiveEffects = ActiveExtensions.FindRef(TargetActor); !ActiveEffects.
 			IsEmpty())
 		{
@@ -158,6 +162,9 @@ void UGameFeatureAction_AddEffects::RemoveEffects(AActor* TargetActor)
 					                                                      UAbilitySystemComponent>(); IsValid(
 				AbilitySystemComponent))
 			{
+				UE_LOG(LogGameplayFeaturesExtraActions, Display,
+				       TEXT("%s: Removing effects from Actor %s."), *FString(__func__), *TargetActor->GetName());
+
 				for (const FActiveGameplayEffectHandle& EffectHandle : ActiveEffects)
 				{
 					if (EffectHandle.IsValid())
@@ -165,6 +172,12 @@ void UGameFeatureAction_AddEffects::RemoveEffects(AActor* TargetActor)
 						AbilitySystemComponent->RemoveActiveGameplayEffect(EffectHandle);
 					}
 				}
+			}
+			else if (TargetActor->GetNetOwningPlayer())
+			{
+				UE_LOG(LogGameplayFeaturesExtraActions, Error,
+				       TEXT("%s: Failed to find AbilitySystemComponent on Actor %s."), *FString(__func__),
+				       *TargetActor->GetName());
 			}
 		}
 	}
