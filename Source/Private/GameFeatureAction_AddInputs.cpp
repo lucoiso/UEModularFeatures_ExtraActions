@@ -104,10 +104,6 @@ void UGameFeatureAction_AddInputs::AddActorInputs(AActor* TargetActor)
 {
 	if (IsValid(TargetActor))
 	{
-		UE_LOG(LogGameplayFeaturesExtraActions, Display,
-		       TEXT("Adding Enhanced Input Mapping %s to Actor %s."), *InputMappingContext.GetAssetName(),
-		       *TargetActor->GetName());
-
 		APawn* TargetPawn = Cast<APawn>(TargetActor);
 
 		if (const APlayerController* PlayerController = TargetPawn->GetController<APlayerController>(); IsValid(
@@ -125,6 +121,10 @@ void UGameFeatureAction_AddInputs::AddActorInputs(AActor* TargetActor)
 
 				FInputBindingData& NewInputData = ActiveExtensions.FindOrAdd(TargetActor);
 				UInputMappingContext* InputMapping = InputMappingContext.LoadSynchronous();
+
+				UE_LOG(LogGameplayFeaturesExtraActions, Display,
+				       TEXT("Adding Enhanced Input Mapping %s to Actor %s."), *InputMapping->GetName(),
+				       *TargetActor->GetName());
 
 				Subsystem->AddMappingContext(InputMapping, MappingPriority);
 
@@ -155,15 +155,15 @@ void UGameFeatureAction_AddInputs::AddActorInputs(AActor* TargetActor)
 
 				if (FunctionOwner.IsValid() && InputComponent.IsValid())
 				{
-					for (const auto [ActionInput, AbilityBindingData, FunctionBindingData] : ActionsBindings)
+					for (const auto& [ActionInput, AbilityBindingData, FunctionBindingData] : ActionsBindings)
 					{
-						UE_LOG(LogGameplayFeaturesExtraActions, Display,
-						       TEXT("Binding Action Input %s to Actor %s."), *ActionInput.GetAssetName(),
-						       *TargetActor->GetName());
-
 						if (!ActionInput.IsNull())
 						{
 							UInputAction* InputAction = ActionInput.LoadSynchronous();
+
+							UE_LOG(LogGameplayFeaturesExtraActions, Display,
+							       TEXT("Binding Action Input %s to Actor %s."), *InputAction->GetName(),
+							       *TargetActor->GetName());
 
 							for (const auto& [FunctionName, Triggers] : FunctionBindingData)
 							{
@@ -206,10 +206,6 @@ void UGameFeatureAction_AddInputs::RemoveActorInputs(AActor* TargetActor)
 {
 	if (IsValid(TargetActor))
 	{
-		UE_LOG(LogGameplayFeaturesExtraActions, Display,
-		       TEXT("Removing Enhanced Input Mapping %s from Actor %s."), *InputMappingContext.GetAssetName(),
-		       *TargetActor->GetName());
-
 		APawn* TargetPawn = Cast<APawn>(TargetActor);
 
 		if (const APlayerController* PlayerController = TargetPawn->GetController<APlayerController>(); IsValid(
@@ -229,6 +225,11 @@ void UGameFeatureAction_AddInputs::RemoveActorInputs(AActor* TargetActor)
 
 				if constexpr (&ActiveInputData != nullptr)
 				{
+					UE_LOG(LogGameplayFeaturesExtraActions, Display,
+					       TEXT("Removing Enhanced Input Mapping %s from Actor %s."),
+					       *ActiveInputData.Mapping->GetName(),
+					       *TargetActor->GetName());
+
 					Subsystem->RemoveMappingContext(ActiveInputData.Mapping.Get());
 
 					UObject* FunctionOwner;

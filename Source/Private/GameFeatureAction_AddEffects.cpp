@@ -103,11 +103,6 @@ void UGameFeatureAction_AddEffects::AddEffects(AActor* TargetActor, const FEffec
 {
 	if (IsValid(TargetActor) && TargetActor->GetLocalRole() == ROLE_Authority)
 	{
-		UE_LOG(LogGameplayFeaturesExtraActions, Display,
-		       TEXT("Adding effect %s level %u to Actor %s with %u SetByCaller params."),
-		       *Effect.EffectClass.GetAssetName(), Effect.EffectLevel,
-		       *TargetActor->GetName(), Effect.SetByCallerParams.Num());
-
 		const IAbilitySystemInterface* InterfaceOwner = Cast<IAbilitySystemInterface>(TargetActor);
 
 		if (UAbilitySystemComponent* AbilitySystemComponent = InterfaceOwner != nullptr
@@ -121,6 +116,12 @@ void UGameFeatureAction_AddEffects::AddEffects(AActor* TargetActor, const FEffec
 			if (!Effect.EffectClass.IsNull())
 			{
 				const TSubclassOf<UGameplayEffect> EffectClass = Effect.EffectClass.LoadSynchronous();
+
+				UE_LOG(LogGameplayFeaturesExtraActions, Display,
+				       TEXT("Adding effect %s level %u to Actor %s with %u SetByCaller params."),
+				       *EffectClass->GetName(), Effect.EffectLevel,
+				       *TargetActor->GetName(), Effect.SetByCallerParams.Num());
+
 				const FGameplayEffectSpecHandle SpecHandle = AbilitySystemComponent->MakeOutgoingSpec(
 					EffectClass, Effect.EffectLevel, AbilitySystemComponent->MakeEffectContext());
 

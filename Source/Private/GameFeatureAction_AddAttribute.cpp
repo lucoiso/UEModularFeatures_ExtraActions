@@ -100,10 +100,6 @@ void UGameFeatureAction_AddAttribute::AddAttribute(AActor* TargetActor)
 {
 	if (IsValid(TargetActor) && TargetActor->GetLocalRole() == ROLE_Authority)
 	{
-		UE_LOG(LogGameplayFeaturesExtraActions, Display,
-		       TEXT("Adding attribute %s to Actor %s."), *Attribute.GetAssetName(),
-		       *TargetActor->GetName());
-
 		const IAbilitySystemInterface* InterfaceOwner = Cast<IAbilitySystemInterface>(TargetActor);
 
 		if (UAbilitySystemComponent* AbilitySystemComponent = InterfaceOwner != nullptr
@@ -112,22 +108,23 @@ void UGameFeatureAction_AddAttribute::AddAttribute(AActor* TargetActor)
 				                                                      UAbilitySystemComponent>(); IsValid(
 			AbilitySystemComponent))
 		{
-			if (!Attribute.IsNull())
+			if (const TSubclassOf<UAttributeSet> SetType = Attribute.LoadSynchronous(); IsValid(SetType))
 			{
-				if (const TSubclassOf<UAttributeSet> SetType = Attribute.LoadSynchronous(); IsValid(SetType))
+				UE_LOG(LogGameplayFeaturesExtraActions, Display,
+				       TEXT("Adding attribute %s to Actor %s."), *SetType->GetName(),
+				       *TargetActor->GetName());
+
+				UAttributeSet* NewSet = NewObject<UAttributeSet>(AbilitySystemComponent->GetOwnerActor(), SetType);
+
+				if (!InitializationData.IsNull())
 				{
-					UAttributeSet* NewSet = NewObject<UAttributeSet>(AbilitySystemComponent->GetOwnerActor(), SetType);
-
-					if (!InitializationData.IsNull())
-					{
-						NewSet->InitFromMetaDataTable(InitializationData.LoadSynchronous());
-					}
-
-					AbilitySystemComponent->AddAttributeSetSubobject(NewSet);
-					AbilitySystemComponent->ForceReplication();
-
-					ActiveExtensions.Add(TargetActor, NewSet);
+					NewSet->InitFromMetaDataTable(InitializationData.LoadSynchronous());
 				}
+
+				AbilitySystemComponent->AddAttributeSetSubobject(NewSet);
+				AbilitySystemComponent->ForceReplication();
+
+				ActiveExtensions.Add(TargetActor, NewSet);
 			}
 		}
 	}
@@ -149,16 +146,13 @@ void UGameFeatureAction_AddAttribute::RemoveAttribute(AActor* TargetActor)
 				                                                      UAbilitySystemComponent>(); IsValid(
 			AbilitySystemComponent))
 		{
-			if (!Attribute.IsNull())
-			{
-				AbilitySystemComponent->GetSpawnedAttributes_Mutable().Remove(
-					ActiveExtensions.FindRef(TargetActor).Get());
+			AbilitySystemComponent->GetSpawnedAttributes_Mutable().Remove(
+				ActiveExtensions.FindRef(TargetActor).Get());
 
-				AbilitySystemComponent->ForceReplication();
+			AbilitySystemComponent->ForceReplication();
 
-				UE_LOG(LogGameplayFeaturesExtraActions, Display, TEXT("Attribute %s removed from Actor %s."),
-				       *Attribute.GetAssetName(), *TargetActor->GetName());
-			}
+			UE_LOG(LogGameplayFeaturesExtraActions, Display, TEXT("Attribute %s removed from Actor %s."),
+			       *Attribute.GetAssetName(), *TargetActor->GetName());
 		}
 	}
 

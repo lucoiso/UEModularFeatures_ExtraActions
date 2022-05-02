@@ -41,14 +41,18 @@ void UGameFeatureAction_SpawnActors::AddToWorld(const FWorldContext& WorldContex
 
 void UGameFeatureAction_SpawnActors::SpawnActors(UWorld* WorldReference)
 {
-	for (const auto [ActorClass, SpawnTransform] : SpawnSettings)
+	for (const auto& [ActorClass, SpawnTransform] : SpawnSettings)
 	{
-		UE_LOG(LogGameplayFeaturesExtraActions, Display,
-		       TEXT("Spawning actor %s on world %s"), *ActorClass.GetAssetName(), *TargetLevel.GetAssetName());
+		if (!ActorClass.IsNull())
+		{
+			TSubclassOf<AActor> ClassToSpawn = ActorClass.LoadSynchronous();
 
-		AActor* SpawnedActor = WorldReference->SpawnActor<AActor>(ActorClass.LoadSynchronous(),
-		                                                          SpawnTransform);
-		SpawnedActors.Add(SpawnedActor);
+			UE_LOG(LogGameplayFeaturesExtraActions, Display,
+			       TEXT("Spawning actor %s on world %s"), *ClassToSpawn->GetName(), *TargetLevel.GetAssetName());
+
+			AActor* SpawnedActor = WorldReference->SpawnActor<AActor>(ClassToSpawn, SpawnTransform);
+			SpawnedActors.Add(SpawnedActor);
+		}
 	}
 }
 

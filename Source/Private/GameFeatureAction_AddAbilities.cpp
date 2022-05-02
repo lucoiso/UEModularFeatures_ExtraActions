@@ -107,10 +107,6 @@ void UGameFeatureAction_AddAbilities::AddActorAbilities(AActor* TargetActor,
 {
 	if (IsValid(TargetActor) && TargetActor->GetLocalRole() == ROLE_Authority)
 	{
-		UE_LOG(LogGameplayFeaturesExtraActions, Display,
-		       TEXT("Adding ability %s to Actor %s."), *Ability.AbilityClass.GetAssetName(),
-		       *TargetActor->GetName());
-
 		const IAbilitySystemInterface* InterfaceOwner = Cast<IAbilitySystemInterface>(TargetActor);
 
 		if (UAbilitySystemComponent* AbilitySystemComponent = InterfaceOwner != nullptr
@@ -124,8 +120,14 @@ void UGameFeatureAction_AddAbilities::AddActorAbilities(AActor* TargetActor,
 			const uint32 InputID = InputIDEnumerationClass.LoadSynchronous()->GetValueByName(
 				Ability.InputIDValueName, EGetByNameFlags::CheckAuthoredName);
 
+			const TSubclassOf<UGameplayAbility> AbilityToAdd = Ability.AbilityClass.LoadSynchronous();
+
+			UE_LOG(LogGameplayFeaturesExtraActions, Display,
+			       TEXT("Adding ability %s to Actor %s."), *AbilityToAdd->GetName(),
+			       *TargetActor->GetName());
+
 			const FGameplayAbilitySpec NewAbilitySpec =
-				FGameplayAbilitySpec(Ability.AbilityClass.LoadSynchronous(),
+				FGameplayAbilitySpec(AbilityToAdd,
 				                     Ability.AbilityLevel,
 				                     InputID,
 				                     TargetActor);
