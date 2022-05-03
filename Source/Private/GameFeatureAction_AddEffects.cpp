@@ -173,7 +173,7 @@ void UGameFeatureAction_AddEffects::RemoveEffects(AActor* TargetActor)
 					}
 				}
 			}
-			else if (TargetActor->GetNetOwningPlayer())
+			else if (IsValid(GetWorld()) && IsValid(GetWorld()->GetGameInstance()))
 			{
 				UE_LOG(LogGameplayFeaturesExtraActions, Error,
 				       TEXT("%s: Failed to find AbilitySystemComponent on Actor %s."), *FString(__func__),
