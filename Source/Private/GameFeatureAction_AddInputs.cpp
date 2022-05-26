@@ -181,10 +181,9 @@ void UGameFeatureAction_AddInputs::AddActorInputs(AActor* TargetActor)
 							{
 								for (const ETriggerEvent& Trigger : Triggers)
 								{
-									const FInputBindingHandle& InputBindingHandle = InputComponent->BindAction(
-										InputAction, Trigger, FunctionOwner.Get(), FunctionName);
-
-									NewInputData.ActionBinding.Add(InputBindingHandle);
+									NewInputData.ActionBinding.Add(
+										InputComponent->BindAction(
+											InputAction, Trigger, FunctionOwner.Get(), FunctionName));
 								}
 							}
 
@@ -269,32 +268,33 @@ void UGameFeatureAction_AddInputs::RemoveActorInputs(AActor* TargetActor)
 					       *ActiveInputData->Mapping->GetName(),
 					       *TargetActor->GetName());
 
-					Subsystem->RemoveMappingContext(ActiveInputData->Mapping.Get());
-
-					UObject* FunctionOwner;
+					TWeakObjectPtr<UObject> FunctionOwner;
+					TWeakObjectPtr<UEnhancedInputComponent> InputComponent;
 
 					switch (InputBindingOwner)
 					{
 					case EControllerOwner::Pawn:
 						FunctionOwner = TargetPawn;
+						InputComponent = Cast<UEnhancedInputComponent>(TargetPawn->InputComponent.Get());
 						break;
 
 					case EControllerOwner::Controller:
 						FunctionOwner = TargetPawn->GetController();
+						InputComponent = Cast<UEnhancedInputComponent>(
+							TargetPawn->GetController()->InputComponent.Get());
 						break;
 
 					default:
-						FunctionOwner = static_cast<UObject*>(nullptr);
+						FunctionOwner.Reset();
+						InputComponent.Reset();
 						break;
 					}
 
-					if (UEnhancedInputComponent* InputComponent =
-							Cast<UEnhancedInputComponent>(TargetPawn->InputComponent);
-						IsValid(FunctionOwner) && IsValid(InputComponent))
+					if (FunctionOwner.IsValid() && InputComponent.IsValid())
 					{
-						for (const FInputBindingHandle& BindHandle : ActiveInputData->ActionBinding)
+						for (const FInputBindingHandle& InputActionBinding : ActiveInputData->ActionBinding)
 						{
-							InputComponent->RemoveBindingByHandle(BindHandle.GetHandle());
+							InputComponent->RemoveBinding(InputActionBinding);
 						}
 
 						if (const IAbilityInputBinding* AbilityInterface = Cast<IAbilityInputBinding>(FunctionOwner);
@@ -314,6 +314,8 @@ void UGameFeatureAction_AddInputs::RemoveActorInputs(AActor* TargetActor)
 						       TEXT("%s: Failed to find InputComponent on Actor %s."), *FString(__func__),
 						       *TargetActor->GetName());
 					}
+
+					Subsystem->RemoveMappingContext(ActiveInputData->Mapping.Get());
 				}
 			}
 		}
