@@ -38,22 +38,22 @@ void UGameFeatureAction_AddAttribute::ResetExtension()
 
 void UGameFeatureAction_AddAttribute::AddToWorld(const FWorldContext& WorldContext)
 {
-	const UWorld* World = WorldContext.World();
-
-	if (const UGameInstance* GameInstance = WorldContext.OwningGameInstance;
-		IsValid(GameInstance) && IsValid(World) && World->IsGameWorld())
+	if (const UWorld* World = WorldContext.World(); World->IsGameWorld())
 	{
-		if (UGameFrameworkComponentManager* ComponentManager = UGameInstance::GetSubsystem<
-			UGameFrameworkComponentManager>(GameInstance); IsValid(ComponentManager) && !TargetPawnClass.IsNull())
+		if (const UGameInstance* GameInstance = WorldContext.OwningGameInstance)
 		{
-			const UGameFrameworkComponentManager::FExtensionHandlerDelegate ExtensionHandlerDelegate =
-				UGameFrameworkComponentManager::FExtensionHandlerDelegate::CreateUObject(
-					this, &UGameFeatureAction_AddAttribute::HandleActorExtension);
+			if (UGameFrameworkComponentManager* ComponentManager = UGameInstance::GetSubsystem<
+				UGameFrameworkComponentManager>(GameInstance); !TargetPawnClass.IsNull())
+			{
+				const UGameFrameworkComponentManager::FExtensionHandlerDelegate ExtensionHandlerDelegate =
+					UGameFrameworkComponentManager::FExtensionHandlerDelegate::CreateUObject(
+						this, &UGameFeatureAction_AddAttribute::HandleActorExtension);
 
-			const TSharedPtr<FComponentRequestHandle> RequestHandle =
-				ComponentManager->AddExtensionHandler(TargetPawnClass, ExtensionHandlerDelegate);
+				const TSharedPtr<FComponentRequestHandle> RequestHandle =
+					ComponentManager->AddExtensionHandler(TargetPawnClass, ExtensionHandlerDelegate);
 
-			ActiveRequests.Add(RequestHandle);
+				ActiveRequests.Add(RequestHandle);
+			}
 		}
 	}
 }
@@ -109,10 +109,9 @@ void UGameFeatureAction_AddAttribute::AddAttribute(AActor* TargetActor)
 		if (UAbilitySystemComponent* AbilitySystemComponent = InterfaceOwner != nullptr
 			                                                      ? InterfaceOwner->GetAbilitySystemComponent()
 			                                                      : TargetActor->FindComponentByClass<
-				                                                      UAbilitySystemComponent>(); IsValid(
-			AbilitySystemComponent))
+				                                                      UAbilitySystemComponent>())
 		{
-			if (const TSubclassOf<UAttributeSet> SetType = Attribute.LoadSynchronous(); IsValid(SetType))
+			if (const TSubclassOf<UAttributeSet> SetType = Attribute.LoadSynchronous())
 			{
 				UAttributeSet* NewSet = NewObject<UAttributeSet>(AbilitySystemComponent->GetOwnerActor(), SetType);
 
@@ -153,12 +152,10 @@ void UGameFeatureAction_AddAttribute::RemoveAttribute(AActor* TargetActor)
 		if (UAbilitySystemComponent* AbilitySystemComponent = InterfaceOwner != nullptr
 			                                                      ? InterfaceOwner->GetAbilitySystemComponent()
 			                                                      : TargetActor->FindComponentByClass<
-				                                                      UAbilitySystemComponent>(); IsValid(
-			AbilitySystemComponent))
+				                                                      UAbilitySystemComponent>())
 		{
 			if (UAttributeSet* AttributeToRemove = ActiveExtensions.FindRef(TargetActor).Get();
-				IsValid(AttributeToRemove)
-				&& AbilitySystemComponent->GetSpawnedAttributes_Mutable().Remove(AttributeToRemove) != 0)
+				AbilitySystemComponent->GetSpawnedAttributes_Mutable().Remove(AttributeToRemove) != 0)
 			{
 				UE_LOG(LogGameplayFeaturesExtraActions, Display, TEXT("%s: Attribute %s removed from Actor %s."),
 				       *FString(__func__),

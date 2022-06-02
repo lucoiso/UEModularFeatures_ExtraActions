@@ -31,10 +31,7 @@ void UGameFeatureAction_SpawnActors::AddToWorld(const FWorldContext& WorldContex
 {
 	if (!TargetLevel.IsNull())
 	{
-		if (UWorld* World = WorldContext.World();
-			IsValid(World)
-			&& World->IsGameWorld()
-			&& World->GetNetMode() != NM_Client
+		if (UWorld* World = WorldContext.World(); World->IsGameWorld() && World->GetNetMode() != NM_Client
 			&& World->GetName() == TargetLevel.LoadSynchronous()->GetName())
 		{
 			SpawnActors(World);

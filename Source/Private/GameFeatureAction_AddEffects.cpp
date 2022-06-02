@@ -38,22 +38,22 @@ void UGameFeatureAction_AddEffects::ResetExtension()
 
 void UGameFeatureAction_AddEffects::AddToWorld(const FWorldContext& WorldContext)
 {
-	const UWorld* World = WorldContext.World();
-
-	if (const UGameInstance* GameInstance = WorldContext.OwningGameInstance;
-		IsValid(GameInstance) && IsValid(World) && World->IsGameWorld())
+	if (const UWorld* World = WorldContext.World(); World->IsGameWorld())
 	{
-		if (UGameFrameworkComponentManager* ComponentManager = UGameInstance::GetSubsystem<
-			UGameFrameworkComponentManager>(GameInstance); IsValid(ComponentManager) && !TargetPawnClass.IsNull())
+		if (const UGameInstance* GameInstance = WorldContext.OwningGameInstance)
 		{
-			const UGameFrameworkComponentManager::FExtensionHandlerDelegate ExtensionHandlerDelegate =
-				UGameFrameworkComponentManager::FExtensionHandlerDelegate::CreateUObject(
-					this, &UGameFeatureAction_AddEffects::HandleActorExtension);
+			if (UGameFrameworkComponentManager* ComponentManager = UGameInstance::GetSubsystem<
+				UGameFrameworkComponentManager>(GameInstance); !TargetPawnClass.IsNull())
+			{
+				const UGameFrameworkComponentManager::FExtensionHandlerDelegate ExtensionHandlerDelegate =
+					UGameFrameworkComponentManager::FExtensionHandlerDelegate::CreateUObject(
+						this, &UGameFeatureAction_AddEffects::HandleActorExtension);
 
-			const TSharedPtr<FComponentRequestHandle> RequestHandle =
-				ComponentManager->AddExtensionHandler(TargetPawnClass, ExtensionHandlerDelegate);
+				const TSharedPtr<FComponentRequestHandle> RequestHandle =
+					ComponentManager->AddExtensionHandler(TargetPawnClass, ExtensionHandlerDelegate);
 
-			ActiveRequests.Add(RequestHandle);
+				ActiveRequests.Add(RequestHandle);
+			}
 		}
 	}
 }
@@ -112,8 +112,7 @@ void UGameFeatureAction_AddEffects::AddEffects(AActor* TargetActor, const FEffec
 		if (UAbilitySystemComponent* AbilitySystemComponent = InterfaceOwner != nullptr
 			                                                      ? InterfaceOwner->GetAbilitySystemComponent()
 			                                                      : TargetActor->FindComponentByClass<
-				                                                      UAbilitySystemComponent>(); IsValid(
-			AbilitySystemComponent))
+				                                                      UAbilitySystemComponent>())
 		{
 			TArray<FActiveGameplayEffectHandle> SpecData = ActiveExtensions.FindOrAdd(TargetActor);
 
@@ -159,8 +158,7 @@ void UGameFeatureAction_AddEffects::RemoveEffects(AActor* TargetActor)
 			if (UAbilitySystemComponent* AbilitySystemComponent = InterfaceOwner != nullptr
 				                                                      ? InterfaceOwner->GetAbilitySystemComponent()
 				                                                      : TargetActor->FindComponentByClass<
-					                                                      UAbilitySystemComponent>(); IsValid(
-				AbilitySystemComponent))
+					                                                      UAbilitySystemComponent>())
 			{
 				UE_LOG(LogGameplayFeaturesExtraActions, Display,
 				       TEXT("%s: Removing effects from Actor %s."), *FString(__func__), *TargetActor->GetName());

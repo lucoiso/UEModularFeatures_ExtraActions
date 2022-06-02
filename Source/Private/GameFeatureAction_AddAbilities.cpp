@@ -41,22 +41,22 @@ void UGameFeatureAction_AddAbilities::ResetExtension()
 
 void UGameFeatureAction_AddAbilities::AddToWorld(const FWorldContext& WorldContext)
 {
-	const UWorld* World = WorldContext.World();
-
-	if (const UGameInstance* GameInstance = WorldContext.OwningGameInstance;
-		IsValid(GameInstance) && IsValid(World) && World->IsGameWorld())
+	if (const UWorld* World = WorldContext.World(); World->IsGameWorld())
 	{
-		if (UGameFrameworkComponentManager* ComponentManager = UGameInstance::GetSubsystem<
-			UGameFrameworkComponentManager>(GameInstance); IsValid(ComponentManager) && !TargetPawnClass.IsNull())
+		if (const UGameInstance* GameInstance = WorldContext.OwningGameInstance)
 		{
-			const UGameFrameworkComponentManager::FExtensionHandlerDelegate ExtensionHandlerDelegate =
-				UGameFrameworkComponentManager::FExtensionHandlerDelegate::CreateUObject(
-					this, &UGameFeatureAction_AddAbilities::HandleActorExtension);
+			if (UGameFrameworkComponentManager* ComponentManager = UGameInstance::GetSubsystem<
+				UGameFrameworkComponentManager>(GameInstance); !TargetPawnClass.IsNull())
+			{
+				const UGameFrameworkComponentManager::FExtensionHandlerDelegate ExtensionHandlerDelegate =
+					UGameFrameworkComponentManager::FExtensionHandlerDelegate::CreateUObject(
+						this, &UGameFeatureAction_AddAbilities::HandleActorExtension);
 
-			const TSharedPtr<FComponentRequestHandle> RequestHandle =
-				ComponentManager->AddExtensionHandler(TargetPawnClass, ExtensionHandlerDelegate);
+				const TSharedPtr<FComponentRequestHandle> RequestHandle =
+					ComponentManager->AddExtensionHandler(TargetPawnClass, ExtensionHandlerDelegate);
 
-			ActiveRequests.Add(RequestHandle);
+				ActiveRequests.Add(RequestHandle);
+			}
 		}
 	}
 }
@@ -116,8 +116,7 @@ void UGameFeatureAction_AddAbilities::AddActorAbilities(AActor* TargetActor,
 		if (UAbilitySystemComponent* AbilitySystemComponent = InterfaceOwner != nullptr
 			                                                      ? InterfaceOwner->GetAbilitySystemComponent()
 			                                                      : TargetActor->FindComponentByClass<
-				                                                      UAbilitySystemComponent>(); IsValid(
-			AbilitySystemComponent))
+				                                                      UAbilitySystemComponent>())
 		{
 			FActiveAbilityData NewAbilityData = ActiveExtensions.FindOrAdd(TargetActor);
 
@@ -143,7 +142,7 @@ void UGameFeatureAction_AddAbilities::AddActorAbilities(AActor* TargetActor,
 
 				if (!Ability.InputAction.IsNull())
 				{
-					if (APawn* TargetPawn = Cast<APawn>(TargetActor); IsValid(TargetPawn))
+					if (APawn* TargetPawn = Cast<APawn>(TargetActor))
 					{
 						IAbilityInputBinding* SetupInputInterface;
 						switch (InputBindingOwner)
@@ -201,10 +200,9 @@ void UGameFeatureAction_AddAbilities::RemoveActorAbilities(AActor* TargetActor)
 			const IAbilitySystemInterface* InterfaceOwner = Cast<IAbilitySystemInterface>(TargetActor);
 
 			if (UAbilitySystemComponent* AbilitySystemComponent =
-					InterfaceOwner != nullptr
-						? InterfaceOwner->GetAbilitySystemComponent()
-						: TargetActor->FindComponentByClass<UAbilitySystemComponent>();
-				IsValid(AbilitySystemComponent))
+				InterfaceOwner != nullptr
+					? InterfaceOwner->GetAbilitySystemComponent()
+					: TargetActor->FindComponentByClass<UAbilitySystemComponent>())
 			{
 				UE_LOG(LogGameplayFeaturesExtraActions, Display,
 				       TEXT("%s: Removing associated abilities from Actor %s."), *FString(__func__),
@@ -218,7 +216,7 @@ void UGameFeatureAction_AddAbilities::RemoveActorAbilities(AActor* TargetActor)
 					}
 				}
 
-				if (APawn* TargetPawn = Cast<APawn>(TargetActor); IsValid(TargetPawn))
+				if (APawn* TargetPawn = Cast<APawn>(TargetActor))
 				{
 					IAbilityInputBinding* SetupInputInterface;
 					switch (InputBindingOwner)
