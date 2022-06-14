@@ -31,7 +31,9 @@ void UGameFeatureAction_SpawnActors::AddToWorld(const FWorldContext& WorldContex
 {
 	if (!TargetLevel.IsNull())
 	{
-		if (UWorld* World = WorldContext.World(); World->IsGameWorld() && World->GetNetMode() != NM_Client
+		if (UWorld* World = WorldContext.World();
+			World->IsGameWorld()
+			&& World->GetNetMode() != NM_Client
 			&& World->GetName() == TargetLevel.LoadSynchronous()->GetName())
 		{
 			SpawnActors(World);
@@ -48,8 +50,8 @@ void UGameFeatureAction_SpawnActors::SpawnActors(UWorld* WorldReference)
 			TSubclassOf<AActor> ClassToSpawn = ActorClass.LoadSynchronous();
 
 			UE_LOG(LogGameplayFeaturesExtraActions, Display,
-			       TEXT("%s: Spawning actor %s on world %s"), *FString(__func__), *ClassToSpawn->GetName(),
-			       *TargetLevel.GetAssetName());
+			       TEXT("%s: Spawning actor %s on world %s"), *FString(__func__),
+			       *ClassToSpawn->GetName(), *TargetLevel.GetAssetName());
 
 			AActor* SpawnedActor = WorldReference->SpawnActor<AActor>(ClassToSpawn, SpawnTransform);
 			SpawnedActors.Add(SpawnedActor);

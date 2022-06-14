@@ -7,12 +7,15 @@
 #include "CoreMinimal.h"
 #include "GameFeatureAction.h"
 #include "GameFeaturesSubsystem.h"
+#include "Components/GameFrameworkComponentManager.h"
 #include "GameFeatureAction_WorldActionBase.generated.h"
 
 class UGameInstance;
 struct FWorldContext;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogGameplayFeaturesExtraActions, Display, All);
+
+using FComponentRequestHandlePtr = TSharedPtr<FComponentRequestHandle>;
 
 UENUM(BlueprintType, Category = "MF Extra Actions | Enums")
 enum class EControllerOwner :uint8
@@ -38,8 +41,12 @@ protected:
 	{
 	}
 
+	static bool ActorHasAllRequiredTags(const AActor* Actor, const TArray<FName>& RequiredTags);
+
+	UGameFrameworkComponentManager* GetGameFrameworkComponentManager(const FWorldContext& WorldContext) const;
+	TArray<FComponentRequestHandlePtr> ActiveRequests;
+
 private:
 	void HandleGameInstanceStart(UGameInstance* GameInstance, FGameFeatureStateChangeContext ChangeContext);
 	FDelegateHandle GameInstanceStartHandle;
-	TArray<FGameFeatureStateChangeContext> ContextHandles;
 };

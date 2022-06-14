@@ -89,5 +89,4 @@ private:
 	};
 
 	TMap<TWeakObjectPtr<AActor>, FActiveAbilityData> ActiveExtensions;
-	TArray<TSharedPtr<FComponentRequestHandle>> ActiveRequests;
 };

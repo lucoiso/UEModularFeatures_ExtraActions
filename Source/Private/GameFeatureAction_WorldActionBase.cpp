@@ -10,10 +10,9 @@ DEFINE_LOG_CATEGORY(LogGameplayFeaturesExtraActions);
 
 void UGameFeatureAction_WorldActionBase::OnGameFeatureActivating(FGameFeatureActivatingContext& Context)
 {
-	ContextHandles.AddUnique(Context);
-
-	GameInstanceStartHandle = FWorldDelegates::OnStartGameInstance.AddUObject(
-		this, &UGameFeatureAction_WorldActionBase::HandleGameInstanceStart, FGameFeatureStateChangeContext(Context));
+	GameInstanceStartHandle = FWorldDelegates::OnStartGameInstance.AddUObject(this,
+	                                                                          &UGameFeatureAction_WorldActionBase::HandleGameInstanceStart,
+	                                                                          FGameFeatureStateChangeContext(Context));
 
 	for (const FWorldContext& WorldContext : GEngine->GetWorldContexts())
 	{
@@ -26,11 +25,37 @@ void UGameFeatureAction_WorldActionBase::OnGameFeatureActivating(FGameFeatureAct
 
 void UGameFeatureAction_WorldActionBase::OnGameFeatureDeactivating(FGameFeatureDeactivatingContext& Context)
 {
-	ContextHandles.AddUnique(Context);
-
 	FWorldDelegates::OnStartGameInstance.Remove(GameInstanceStartHandle);
+}
 
-	ContextHandles.Empty();
+bool UGameFeatureAction_WorldActionBase::ActorHasAllRequiredTags(const AActor* Actor, const TArray<FName>& RequiredTags)
+{
+	if (!RequiredTags.IsEmpty())
+	{
+		for (const FName& Tag : RequiredTags)
+		{
+			if (!Actor->ActorHasTag(Tag))
+			{
+				return false;
+			}
+		}
+	}
+
+	return true;
+}
+
+UGameFrameworkComponentManager* UGameFeatureAction_WorldActionBase::GetGameFrameworkComponentManager(
+	const FWorldContext& WorldContext) const
+{
+	if (const UWorld* World = WorldContext.World(); World->IsGameWorld())
+	{
+		if (const UGameInstance* GameInstance = WorldContext.OwningGameInstance)
+		{
+			return UGameInstance::GetSubsystem<UGameFrameworkComponentManager>(GameInstance);
+		}
+	}
+
+	return nullptr;
 }
 
 void UGameFeatureAction_WorldActionBase::HandleGameInstanceStart(UGameInstance* GameInstance,

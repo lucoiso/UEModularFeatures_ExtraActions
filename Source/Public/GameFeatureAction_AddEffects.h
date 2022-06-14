@@ -72,5 +72,4 @@ private:
 	void RemoveEffects(AActor* TargetActor);
 
 	TMap<TWeakObjectPtr<AActor>, TArray<FActiveGameplayEffectHandle>> ActiveExtensions;
-	TArray<TSharedPtr<FComponentRequestHandle>> ActiveRequests;
 };

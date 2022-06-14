@@ -122,6 +122,5 @@ private:
 	};
 
 	TMap<TWeakObjectPtr<AActor>, FInputBindingData> ActiveExtensions;
-	TArray<TSharedPtr<FComponentRequestHandle>> ActiveRequests;
 	TArray<TWeakObjectPtr<UInputAction>> AbilityActions;
 };

@@ -51,5 +51,4 @@ private:
 	void RemoveAttribute(AActor* TargetActor);
 
 	TMap<TWeakObjectPtr<AActor>, TWeakObjectPtr<UAttributeSet>> ActiveExtensions;
-	TArray<TSharedPtr<FComponentRequestHandle>> ActiveRequests;
 };
