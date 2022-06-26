@@ -39,7 +39,7 @@ void UGameFeatureAction_AddAttribute::ResetExtension()
 void UGameFeatureAction_AddAttribute::AddToWorld(const FWorldContext& WorldContext)
 {
 	if (UGameFrameworkComponentManager* ComponentManager = GetGameFrameworkComponentManager(WorldContext);
-		!TargetPawnClass.IsNull())
+		IsValid(ComponentManager) && !TargetPawnClass.IsNull())
 	{
 		const UGameFrameworkComponentManager::FExtensionHandlerDelegate& ExtensionHandlerDelegate =
 			UGameFrameworkComponentManager::FExtensionHandlerDelegate::CreateUObject(this,
