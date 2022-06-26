@@ -51,7 +51,7 @@ void UGameFeatureAction_SpawnActors::SpawnActors(UWorld* WorldReference)
 
 			UE_LOG(LogGameplayFeaturesExtraActions, Display,
 			       TEXT("%s: Spawning actor %s on world %s"), *FString(__func__),
-			       *ClassToSpawn->GetName(), *TargetLevel.GetAssetName());
+			       *ClassToSpawn->GetName(), *WorldReference->GetName());
 
 			AActor* SpawnedActor = WorldReference->SpawnActor<AActor>(ClassToSpawn, SpawnTransform);
 			SpawnedActors.Add(SpawnedActor);
