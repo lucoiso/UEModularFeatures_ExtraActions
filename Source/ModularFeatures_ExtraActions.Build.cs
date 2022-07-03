@@ -13,9 +13,13 @@ public class ModularFeatures_ExtraActions : ModuleRules
 
 		PublicDependencyModuleNames.AddRange(new[]
 		{
-			"Core",
-			"CoreUObject",
+			"Core"
+		});
+
+		PrivateDependencyModuleNames.AddRange(new[]
+		{
 			"Engine",
+			"CoreUObject",
 			"InputCore",
 			"EnhancedInput",
 			"GameplayAbilities",
