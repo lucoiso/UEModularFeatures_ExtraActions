@@ -16,7 +16,9 @@ This plugin integrates GAS and Enhanced Input to the existing Game Features and 
 
 **Marketplace:** [Modular Game Features - Extra Actions in Code Plugins - UE Marketplace](https://unrealengine.com/marketplace/en-US/product/modular-game-features-extra-actions)  
 **Forum:** [[FREE] ModularFeatures_ExtraActions plugin - Modular GAS, Enhanced Input and more](https://forums.unrealengine.com/t/free-modularfeatures-extraactions-plugin-modular-gas-enhanced-input-and-more/495400)  
-**Example Project:** [Project Elementus](https://github.com/lucoiso/UEProject_Elementus) - _Work in Progress but already using this plugin_  
+**Example Project:** [MFA_ExampleProject](https://github.com/lucoiso/MFA_ExampleProject/releases/tag/v1.0)  
+
+**Extra example:** [Project Elementus](https://github.com/lucoiso/UEProject_Elementus) - _Complete template with multiplayer support. Work in Progress but already using this plugin._  
 
 # Installation
 Just clone this repository or download the .zip file in the latest version and drop the files inside the 'Plugins/' folder of your project folder.
