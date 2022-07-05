@@ -38,7 +38,7 @@ struct FAbilityInputBindingData
 
 	/* Should this action setup call SetupAbilityInput/RemoveAbilityInputBinding using the IAbilityInputBinding interface? */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
-	bool bSetupAbilityInput;
+	bool bSetupAbilityInput = false;
 
 	/* Enumeration class that will be used by the Ability System Component to manage abilities inputs */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings",
