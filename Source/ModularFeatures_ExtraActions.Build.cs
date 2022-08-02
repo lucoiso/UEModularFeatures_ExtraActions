@@ -24,7 +24,6 @@ public class ModularFeatures_ExtraActions : ModuleRules
 			"EnhancedInput",
 			"GameplayAbilities",
 			"GameplayTags",
-			"GameplayTasks",
 			"GameFeatures",
 			"ModularGameplay"
 		});
