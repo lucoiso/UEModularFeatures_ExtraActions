@@ -12,13 +12,14 @@ void UGameFeatureAction_SpawnActors::OnGameFeatureActivating(FGameFeatureActivat
 		ResetExtension();
 	}
 
-	Super::OnGameFeatureActivating(Context);
+	WorldInitializedHandle =
+		FWorldDelegates::OnPostWorldInitialization.
+		AddUObject(this, &UGameFeatureAction_SpawnActors::OnWorldInitialized);
 }
 
 void UGameFeatureAction_SpawnActors::OnGameFeatureDeactivating(FGameFeatureDeactivatingContext& Context)
 {
-	Super::OnGameFeatureDeactivating(Context);
-
+	FWorldDelegates::OnStartGameInstance.Remove(WorldInitializedHandle);
 	ResetExtension();
 }
 
@@ -27,12 +28,12 @@ void UGameFeatureAction_SpawnActors::ResetExtension()
 	DestroyActors();
 }
 
-void UGameFeatureAction_SpawnActors::AddToWorld(const FWorldContext& WorldContext)
+void UGameFeatureAction_SpawnActors::OnWorldInitialized(UWorld* World,
+                                                        [[maybe_unused]] const UWorld::InitializationValues)
 {
 	if (!TargetLevel.IsNull())
 	{
-		if (UWorld* World = WorldContext.World();
-			World->IsGameWorld()
+		if (World->IsGameWorld()
 			&& World->GetNetMode() != NM_Client
 			&& World->GetName() == TargetLevel.LoadSynchronous()->GetName())
 		{

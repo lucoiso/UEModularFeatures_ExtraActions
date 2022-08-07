@@ -30,7 +30,7 @@ struct FActorSpawnSettings
  *
  */
 UCLASS(MinimalAPI, meta = (DisplayName = "MF Extra Actions: Spawn Actors"))
-class UGameFeatureAction_SpawnActors final : public UGameFeatureAction_WorldActionBase
+class UGameFeatureAction_SpawnActors final : public UGameFeatureAction
 {
 	GENERATED_BODY()
 
@@ -46,7 +46,8 @@ public:
 protected:
 	virtual void OnGameFeatureActivating(FGameFeatureActivatingContext& Context) override;
 	virtual void OnGameFeatureDeactivating(FGameFeatureDeactivatingContext& Context) override;
-	virtual void AddToWorld(const FWorldContext& WorldContext) override;
+
+	void OnWorldInitialized(UWorld* World, const UWorld::InitializationValues InitializationValues);
 
 private:
 	void SpawnActors(UWorld* WorldReference);
@@ -55,4 +56,5 @@ private:
 	void ResetExtension();
 
 	TArray<TWeakObjectPtr<AActor>> SpawnedActors;
+	FDelegateHandle WorldInitializedHandle;
 };
