@@ -6,7 +6,7 @@ using UnrealBuildTool;
 
 public class ModularFeatures_ExtraActions : ModuleRules
 {
-	public ModularFeatures_ExtraActions(ReadOnlyTargetRules target) : base(target)
+	public ModularFeatures_ExtraActions(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 		CppStandard = CppStandardVersion.Cpp17;
