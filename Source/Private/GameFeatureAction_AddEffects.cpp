@@ -9,8 +9,7 @@
 
 void UGameFeatureAction_AddEffects::OnGameFeatureActivating(FGameFeatureActivatingContext& Context)
 {
-	if (!ensureAlways(ActiveExtensions.IsEmpty())
-		|| !ensureAlways(ActiveRequests.IsEmpty()))
+	if (!ensureAlways(ActiveExtensions.IsEmpty()) || !ensureAlways(ActiveRequests.IsEmpty()))
 	{
 		ResetExtension();
 	}
@@ -41,9 +40,10 @@ void UGameFeatureAction_AddEffects::AddToWorld(const FWorldContext& WorldContext
 	if (UGameFrameworkComponentManager* ComponentManager = GetGameFrameworkComponentManager(WorldContext);
 		IsValid(ComponentManager) && !TargetPawnClass.IsNull())
 	{
-		const UGameFrameworkComponentManager::FExtensionHandlerDelegate& ExtensionHandlerDelegate =
-			UGameFrameworkComponentManager::FExtensionHandlerDelegate::CreateUObject(this,
-				&UGameFeatureAction_AddEffects::HandleActorExtension);
+		using FHandlerDelegate = UGameFrameworkComponentManager::FExtensionHandlerDelegate;
+			
+		const FHandlerDelegate& ExtensionHandlerDelegate =
+			FHandlerDelegate::CreateUObject(this, &UGameFeatureAction_AddEffects::HandleActorExtension);
 
 		ActiveRequests.Add(ComponentManager->AddExtensionHandler(TargetPawnClass, ExtensionHandlerDelegate));
 	}
@@ -89,10 +89,9 @@ void UGameFeatureAction_AddEffects::AddEffects(AActor* TargetActor, const FEffec
 	{
 		const IAbilitySystemInterface* InterfaceOwner = Cast<IAbilitySystemInterface>(TargetActor);
 
-		if (UAbilitySystemComponent* AbilitySystemComponent =
-			InterfaceOwner != nullptr
-				? InterfaceOwner->GetAbilitySystemComponent()
-				: TargetActor->FindComponentByClass<UAbilitySystemComponent>())
+		if (UAbilitySystemComponent* AbilitySystemComponent = InterfaceOwner != nullptr
+																? InterfaceOwner->GetAbilitySystemComponent()
+																: TargetActor->FindComponentByClass<UAbilitySystemComponent>())
 		{
 			TArray<FActiveGameplayEffectHandle> SpecData = ActiveExtensions.FindOrAdd(TargetActor);
 
@@ -139,10 +138,9 @@ void UGameFeatureAction_AddEffects::RemoveEffects(AActor* TargetActor)
 		{
 			const IAbilitySystemInterface* InterfaceOwner = Cast<IAbilitySystemInterface>(TargetActor);
 
-			if (UAbilitySystemComponent* AbilitySystemComponent =
-				InterfaceOwner != nullptr
-					? InterfaceOwner->GetAbilitySystemComponent()
-					: TargetActor->FindComponentByClass<UAbilitySystemComponent>())
+			if (UAbilitySystemComponent* AbilitySystemComponent = InterfaceOwner != nullptr
+																	? InterfaceOwner->GetAbilitySystemComponent()
+																	: TargetActor->FindComponentByClass<UAbilitySystemComponent>())
 			{
 				UE_LOG(LogGameplayFeaturesExtraActions, Display,
 				       TEXT("%s: Removing effects from Actor %s."), *FString(__func__), *TargetActor->GetName());

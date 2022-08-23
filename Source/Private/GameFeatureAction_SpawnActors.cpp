@@ -13,8 +13,7 @@ void UGameFeatureAction_SpawnActors::OnGameFeatureActivating(FGameFeatureActivat
 	}
 
 	WorldInitializedHandle =
-		FWorldDelegates::OnPostWorldInitialization.
-		AddUObject(this, &UGameFeatureAction_SpawnActors::OnWorldInitialized);
+		FWorldDelegates::OnPostWorldInitialization.AddUObject(this, &UGameFeatureAction_SpawnActors::OnWorldInitialized);
 }
 
 void UGameFeatureAction_SpawnActors::OnGameFeatureDeactivating(FGameFeatureDeactivatingContext& Context)

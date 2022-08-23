@@ -32,11 +32,10 @@ class UGameFeatureAction_WorldActionBase : public UGameFeatureAction
 {
 	GENERATED_BODY()
 
-public:
+protected:
 	virtual void OnGameFeatureActivating(FGameFeatureActivatingContext& Context) override;
 	virtual void OnGameFeatureDeactivating(FGameFeatureDeactivatingContext& Context) override;
 
-protected:
 	virtual void AddToWorld(const FWorldContext& WorldContext)
 	{
 	}

@@ -13,8 +13,7 @@
 
 void UGameFeatureAction_AddInputs::OnGameFeatureActivating(FGameFeatureActivatingContext& Context)
 {
-	if (!ensureAlways(ActiveExtensions.IsEmpty())
-		|| !ensureAlways(ActiveRequests.IsEmpty()))
+	if (!ensureAlways(ActiveExtensions.IsEmpty()) || !ensureAlways(ActiveRequests.IsEmpty()))
 	{
 		ResetExtension();
 	}
@@ -45,9 +44,10 @@ void UGameFeatureAction_AddInputs::AddToWorld(const FWorldContext& WorldContext)
 	if (UGameFrameworkComponentManager* ComponentManager = GetGameFrameworkComponentManager(WorldContext);
 		IsValid(ComponentManager) && !TargetPawnClass.IsNull())
 	{
-		const UGameFrameworkComponentManager::FExtensionHandlerDelegate& ExtensionHandlerDelegate =
-			UGameFrameworkComponentManager::FExtensionHandlerDelegate::CreateUObject(this,
-				&UGameFeatureAction_AddInputs::HandleActorExtension);
+		using FHandlerDelegate = UGameFrameworkComponentManager::FExtensionHandlerDelegate;
+			
+		const FHandlerDelegate& ExtensionHandlerDelegate =
+			FHandlerDelegate::CreateUObject(this, &UGameFeatureAction_AddInputs::HandleActorExtension);
 
 		ActiveRequests.Add(ComponentManager->AddExtensionHandler(TargetPawnClass, ExtensionHandlerDelegate));
 	}
@@ -96,8 +96,7 @@ void UGameFeatureAction_AddInputs::AddActorInputs(AActor* TargetActor)
 			if (const ULocalPlayer* LocalPlayer = PlayerController->GetLocalPlayer();
 				PlayerController->IsLocalController() && IsValid(LocalPlayer))
 			{
-				UEnhancedInputLocalPlayerSubsystem*
-					Subsystem = LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
+				UEnhancedInputLocalPlayerSubsystem* Subsystem = LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
 
 				if (!IsValid(Subsystem))
 				{
@@ -162,9 +161,10 @@ void UGameFeatureAction_AddInputs::AddActorInputs(AActor* TargetActor)
 							{
 								for (const ETriggerEvent& Trigger : Triggers)
 								{
-									NewInputData.ActionBinding.Add(
-										InputComponent->BindAction(
-											InputAction, Trigger, FunctionOwner.Get(), FunctionName));
+									NewInputData.ActionBinding.Add(InputComponent->BindAction(InputAction,
+																								  Trigger,
+																								  FunctionOwner.Get(),
+																								  FunctionName));
 								}
 							}
 
@@ -174,12 +174,12 @@ void UGameFeatureAction_AddInputs::AddActorInputs(AActor* TargetActor)
 								{
 									const uint32 InputID =
 										AbilityBindingData.InputIDEnumerationClass.LoadSynchronous()->
-										                   GetValueByName(
-											                   AbilityBindingData.InputIDValueName,
-											                   EGetByNameFlags::CheckAuthoredName);
+										                   GetValueByName(AbilityBindingData.InputIDValueName,
+																		  EGetByNameFlags::CheckAuthoredName);
 
-									IAbilityInputBinding::Execute_SetupAbilityInputBinding(
-										AbilityInterface->_getUObject(), InputAction, InputID);
+									IAbilityInputBinding::Execute_SetupAbilityInputBinding(AbilityInterface->_getUObject(),
+																						   InputAction,
+																						   InputID);
 
 									AbilityActions.Add(InputAction);
 								}
@@ -228,8 +228,7 @@ void UGameFeatureAction_AddInputs::RemoveActorInputs(AActor* TargetActor)
 			if (const ULocalPlayer* LocalPlayer = PlayerController->GetLocalPlayer();
 				PlayerController->IsLocalController() && IsValid(LocalPlayer))
 			{
-				UEnhancedInputLocalPlayerSubsystem*
-					Subsystem = LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
+				UEnhancedInputLocalPlayerSubsystem* Subsystem = LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
 
 				if (!IsValid(Subsystem))
 				{
@@ -283,8 +282,8 @@ void UGameFeatureAction_AddInputs::RemoveActorInputs(AActor* TargetActor)
 						{
 							for (TWeakObjectPtr<UInputAction> ActiveAbilityAction : AbilityActions)
 							{
-								IAbilityInputBinding::Execute_RemoveAbilityInputBinding(
-									AbilityInterface->_getUObject(), ActiveAbilityAction.Get());
+								IAbilityInputBinding::Execute_RemoveAbilityInputBinding(AbilityInterface->_getUObject(),
+																						ActiveAbilityAction.Get());
 								ActiveAbilityAction.Reset();
 							}
 						}

@@ -12,8 +12,7 @@
 
 void UGameFeatureAction_AddAbilities::OnGameFeatureActivating(FGameFeatureActivatingContext& Context)
 {
-	if (!ensureAlways(ActiveExtensions.IsEmpty())
-		|| !ensureAlways(ActiveRequests.IsEmpty()))
+	if (!ensureAlways(ActiveExtensions.IsEmpty()) || !ensureAlways(ActiveRequests.IsEmpty()))
 	{
 		ResetExtension();
 	}
@@ -44,9 +43,10 @@ void UGameFeatureAction_AddAbilities::AddToWorld(const FWorldContext& WorldConte
 	if (UGameFrameworkComponentManager* ComponentManager = GetGameFrameworkComponentManager(WorldContext);
 		IsValid(ComponentManager) && !TargetPawnClass.IsNull())
 	{
-		const UGameFrameworkComponentManager::FExtensionHandlerDelegate& ExtensionHandlerDelegate =
-			UGameFrameworkComponentManager::FExtensionHandlerDelegate::CreateUObject(this,
-				&UGameFeatureAction_AddAbilities::HandleActorExtension);
+		using FHandlerDelegate = UGameFrameworkComponentManager::FExtensionHandlerDelegate;
+			
+		const FHandlerDelegate& ExtensionHandlerDelegate =
+			FHandlerDelegate::CreateUObject(this, &UGameFeatureAction_AddAbilities::HandleActorExtension);
 
 		ActiveRequests.Add(ComponentManager->AddExtensionHandler(TargetPawnClass, ExtensionHandlerDelegate));
 	}
@@ -93,15 +93,15 @@ void UGameFeatureAction_AddAbilities::AddActorAbilities(AActor* TargetActor,
 	{
 		const IAbilitySystemInterface* InterfaceOwner = Cast<IAbilitySystemInterface>(TargetActor);
 
-		if (UAbilitySystemComponent* AbilitySystemComponent =
-			InterfaceOwner != nullptr
-				? InterfaceOwner->GetAbilitySystemComponent()
-				: TargetActor->FindComponentByClass<UAbilitySystemComponent>())
+		if (UAbilitySystemComponent* AbilitySystemComponent = InterfaceOwner != nullptr
+																? InterfaceOwner->GetAbilitySystemComponent()
+																: TargetActor->FindComponentByClass<UAbilitySystemComponent>())
 		{
 			FActiveAbilityData NewAbilityData = ActiveExtensions.FindOrAdd(TargetActor);
 
-			const uint32 InputID = InputIDEnumerationClass.LoadSynchronous()->GetValueByName(
-				Ability.InputIDValueName, EGetByNameFlags::CheckAuthoredName);
+			const uint32 InputID =
+				InputIDEnumerationClass.LoadSynchronous()->GetValueByName(Ability.InputIDValueName,
+																		  EGetByNameFlags::CheckAuthoredName);
 
 			const TSubclassOf<UGameplayAbility> AbilityToAdd = Ability.AbilityClass.LoadSynchronous();
 
@@ -109,11 +109,10 @@ void UGameFeatureAction_AddAbilities::AddActorAbilities(AActor* TargetActor,
 			       TEXT("%s: Adding ability %s to Actor %s."), *FString(__func__),
 			       *AbilityToAdd->GetName(), *TargetActor->GetName());
 
-			const FGameplayAbilitySpec NewAbilitySpec =
-				FGameplayAbilitySpec(AbilityToAdd,
-				                     Ability.AbilityLevel,
-				                     InputID,
-				                     TargetActor);
+			const FGameplayAbilitySpec NewAbilitySpec = FGameplayAbilitySpec(AbilityToAdd,
+														                     Ability.AbilityLevel,
+														                     InputID,
+														                     TargetActor);
 
 			if (const FGameplayAbilitySpecHandle NewSpecHandle = AbilitySystemComponent->GiveAbility(NewAbilitySpec);
 				NewSpecHandle.IsValid())
@@ -144,7 +143,8 @@ void UGameFeatureAction_AddAbilities::AddActorAbilities(AActor* TargetActor,
 						{
 							UInputAction* AbilityInput = Ability.InputAction.LoadSynchronous();
 							IAbilityInputBinding::Execute_SetupAbilityInputBinding(SetupInputInterface->_getUObject(),
-								AbilityInput, InputID);
+																				   AbilityInput,
+																				   InputID);
 
 							NewAbilityData.InputReference.Add(AbilityInput);
 						}
@@ -179,10 +179,9 @@ void UGameFeatureAction_AddAbilities::RemoveActorAbilities(AActor* TargetActor)
 		{
 			const IAbilitySystemInterface* InterfaceOwner = Cast<IAbilitySystemInterface>(TargetActor);
 
-			if (UAbilitySystemComponent* AbilitySystemComponent =
-				InterfaceOwner != nullptr
-					? InterfaceOwner->GetAbilitySystemComponent()
-					: TargetActor->FindComponentByClass<UAbilitySystemComponent>())
+			if (UAbilitySystemComponent* AbilitySystemComponent = InterfaceOwner != nullptr
+																	? InterfaceOwner->GetAbilitySystemComponent()
+																	: TargetActor->FindComponentByClass<UAbilitySystemComponent>())
 			{
 				UE_LOG(LogGameplayFeaturesExtraActions, Display,
 				       TEXT("%s: Removing associated abilities from Actor %s."),
@@ -220,8 +219,7 @@ void UGameFeatureAction_AddAbilities::RemoveActorAbilities(AActor* TargetActor)
 						{
 							if (IsValid(InputRef))
 							{
-								IAbilityInputBinding::Execute_RemoveAbilityInputBinding(
-									SetupInputInterface->_getUObject(), InputRef);
+								IAbilityInputBinding::Execute_RemoveAbilityInputBinding(SetupInputInterface->_getUObject(), InputRef);
 							}
 						}
 					}

@@ -22,6 +22,7 @@ class UAbilityInputBinding : public UInterface
 class MODULARFEATURES_EXTRAACTIONS_API IAbilityInputBinding
 {
 	GENERATED_IINTERFACE_BODY()
+	
 	/* This function is needed for setup ability input binding inside your controller or pawn */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "MF Extra Actions | Modular Interfaces")
 	void SetupAbilityInputBinding(class UInputAction* Action, const int32 InputID);

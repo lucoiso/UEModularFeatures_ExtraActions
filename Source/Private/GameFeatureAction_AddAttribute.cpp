@@ -9,8 +9,7 @@
 
 void UGameFeatureAction_AddAttribute::OnGameFeatureActivating(FGameFeatureActivatingContext& Context)
 {
-	if (!ensureAlways(ActiveExtensions.IsEmpty())
-		|| !ensureAlways(ActiveRequests.IsEmpty()))
+	if (!ensureAlways(ActiveExtensions.IsEmpty()) || !ensureAlways(ActiveRequests.IsEmpty()))
 	{
 		ResetExtension();
 	}
@@ -41,9 +40,10 @@ void UGameFeatureAction_AddAttribute::AddToWorld(const FWorldContext& WorldConte
 	if (UGameFrameworkComponentManager* ComponentManager = GetGameFrameworkComponentManager(WorldContext);
 		IsValid(ComponentManager) && !TargetPawnClass.IsNull())
 	{
-		const UGameFrameworkComponentManager::FExtensionHandlerDelegate& ExtensionHandlerDelegate =
-			UGameFrameworkComponentManager::FExtensionHandlerDelegate::CreateUObject(this,
-				&UGameFeatureAction_AddAttribute::HandleActorExtension);
+		using FHandlerDelegate = UGameFrameworkComponentManager::FExtensionHandlerDelegate;
+			
+		const FHandlerDelegate& ExtensionHandlerDelegate =
+			FHandlerDelegate::CreateUObject(this, &UGameFeatureAction_AddAttribute::HandleActorExtension);
 
 		ActiveRequests.Add(ComponentManager->AddExtensionHandler(TargetPawnClass, ExtensionHandlerDelegate));
 	}
@@ -86,10 +86,9 @@ void UGameFeatureAction_AddAttribute::AddAttribute(AActor* TargetActor)
 	{
 		const IAbilitySystemInterface* InterfaceOwner = Cast<IAbilitySystemInterface>(TargetActor);
 
-		if (UAbilitySystemComponent* AbilitySystemComponent =
-			InterfaceOwner != nullptr
-				? InterfaceOwner->GetAbilitySystemComponent()
-				: TargetActor->FindComponentByClass<UAbilitySystemComponent>())
+		if (UAbilitySystemComponent* AbilitySystemComponent = InterfaceOwner != nullptr
+																? InterfaceOwner->GetAbilitySystemComponent()
+																: TargetActor->FindComponentByClass<UAbilitySystemComponent>())
 		{
 			if (const TSubclassOf<UAttributeSet> SetType = Attribute.LoadSynchronous())
 			{
@@ -129,10 +128,9 @@ void UGameFeatureAction_AddAttribute::RemoveAttribute(AActor* TargetActor)
 	{
 		const IAbilitySystemInterface* InterfaceOwner = Cast<IAbilitySystemInterface>(TargetActor);
 
-		if (UAbilitySystemComponent* AbilitySystemComponent =
-			InterfaceOwner != nullptr
-				? InterfaceOwner->GetAbilitySystemComponent()
-				: TargetActor->FindComponentByClass<UAbilitySystemComponent>())
+		if (UAbilitySystemComponent* AbilitySystemComponent = InterfaceOwner != nullptr
+																? InterfaceOwner->GetAbilitySystemComponent()
+																: TargetActor->FindComponentByClass<UAbilitySystemComponent>())
 		{
 			if (UAttributeSet* AttributeToRemove = ActiveExtensions.FindRef(TargetActor).Get();
 				AbilitySystemComponent->GetSpawnedAttributes_Mutable().Remove(AttributeToRemove) != 0)
