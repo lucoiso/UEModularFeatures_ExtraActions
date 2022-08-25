@@ -19,3 +19,4 @@ This plugin integrates GAS and Enhanced Input to the existing Game Features and 
 * [Unreal Engine Forum](https://forums.unrealengine.com/t/free-modularfeatures-extraactions-plugin-modular-gas-enhanced-input-and-more/495400)
 * [Simple Example Project](https://github.com/lucoiso/MFA_ExampleProject/releases/tag/v1.0)
 * [Extra Example: Project Elementus](https://github.com/lucoiso/UEProject_Elementus) _(Template with multiplayer support)_
+* [Email](mailto:contatolukevboas@gmail.com)  
