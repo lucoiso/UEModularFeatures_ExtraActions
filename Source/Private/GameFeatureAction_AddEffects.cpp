@@ -96,7 +96,7 @@ void UGameFeatureAction_AddEffects::AddEffects(AActor* TargetActor, const FEffec
 																	? InterfaceOwner->GetAbilitySystemComponent()
 																	: TargetActor->FindComponentByClass<UAbilitySystemComponent>())
 	{
-		TArray<FActiveGameplayEffectHandle> SpecData = ActiveExtensions.FindOrAdd(TargetActor);
+		TArray<FActiveGameplayEffectHandle>& SpecData = ActiveExtensions.FindOrAdd(TargetActor);
 
 		const TSubclassOf<UGameplayEffect> EffectClass = Effect.EffectClass.LoadSynchronous();
 

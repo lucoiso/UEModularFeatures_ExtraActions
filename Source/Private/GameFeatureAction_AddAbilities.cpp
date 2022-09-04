@@ -98,7 +98,7 @@ void UGameFeatureAction_AddAbilities::AddActorAbilities(AActor* TargetActor, con
 																	? InterfaceOwner->GetAbilitySystemComponent()
 																	: TargetActor->FindComponentByClass<UAbilitySystemComponent>())
 	{
-		FActiveAbilityData NewAbilityData = ActiveExtensions.FindOrAdd(TargetActor);
+		FActiveAbilityData& NewAbilityData = ActiveExtensions.FindOrAdd(TargetActor);
 
 		const uint32 InputID =
 			InputIDEnumerationClass.LoadSynchronous()->GetValueByName(Ability.InputIDValueName,
