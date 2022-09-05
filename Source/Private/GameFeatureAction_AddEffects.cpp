@@ -135,6 +135,7 @@ void UGameFeatureAction_AddEffects::RemoveEffects(AActor* TargetActor)
 {
 	if (!IsValid(TargetActor) || TargetActor->GetLocalRole() != ROLE_Authority)
 	{
+		ActiveExtensions.Remove(TargetActor);
 		return;
 	}
 

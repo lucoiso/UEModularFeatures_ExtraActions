@@ -12,6 +12,15 @@ void UGameFeatureAction_SpawnActors::OnGameFeatureActivating(FGameFeatureActivat
 		ResetExtension();
 	}
 
+	for (const FWorldContext& WorldContext : GEngine->GetWorldContexts())
+	{
+		if (Context.ShouldApplyToWorldContext(WorldContext)
+			&& AddToWorld(WorldContext.World()))
+		{
+			return;
+		}
+	}
+
 	WorldInitializedHandle =
 		FWorldDelegates::OnPostWorldInitialization.AddUObject(this, &UGameFeatureAction_SpawnActors::OnWorldInitialized);
 }
@@ -27,18 +36,28 @@ void UGameFeatureAction_SpawnActors::ResetExtension()
 	DestroyActors();
 }
 
-void UGameFeatureAction_SpawnActors::OnWorldInitialized(UWorld* World,
-	[[maybe_unused]] const UWorld::InitializationValues)
+void UGameFeatureAction_SpawnActors::OnWorldInitialized(UWorld* World, [[maybe_unused]] const UWorld::InitializationValues)
 {
-	if (!TargetLevel.IsNull())
+	AddToWorld(World);
+}
+
+bool UGameFeatureAction_SpawnActors::AddToWorld(UWorld* World)
+{
+	if (TargetLevel.IsNull())
 	{
-		if (World->IsGameWorld()
-			&& World->GetNetMode() != NM_Client
-			&& World->GetName() == TargetLevel.LoadSynchronous()->GetName())
-		{
-			SpawnActors(World);
-		}
+		return false;
 	}
+
+	else if (World->IsGameWorld()
+		&& World->GetNetMode() != NM_Client
+		&& World->GetName() == TargetLevel.LoadSynchronous()->GetName())
+	{
+		SpawnActors(World);
+
+		return true;
+	}
+
+	return false;
 }
 
 void UGameFeatureAction_SpawnActors::SpawnActors(UWorld* WorldReference)
@@ -50,7 +69,7 @@ void UGameFeatureAction_SpawnActors::SpawnActors(UWorld* WorldReference)
 			UE_LOG(LogGameplayFeaturesExtraActions, Error, TEXT("%s: Actor class is null."), *FString(__func__));
 			continue;
 		}
-		
+
 		TSubclassOf<AActor> ClassToSpawn = ActorClass.LoadSynchronous();
 
 		UE_LOG(LogGameplayFeaturesExtraActions, Display,
