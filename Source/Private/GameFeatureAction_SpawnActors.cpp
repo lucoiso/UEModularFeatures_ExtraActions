@@ -12,6 +12,14 @@ void UGameFeatureAction_SpawnActors::OnGameFeatureActivating(FGameFeatureActivat
 		ResetExtension();
 	}
 
+	for (const FWorldContext& WorldContext : GEngine->GetWorldContexts())
+	{
+		if (Context.ShouldApplyToWorldContext(WorldContext))
+		{
+			AddToWorld(WorldContext.World());
+		}
+	}
+
 	WorldInitializedHandle =
 		FWorldDelegates::OnPostWorldInitialization.AddUObject(this, &UGameFeatureAction_SpawnActors::OnWorldInitialized);
 }
@@ -27,17 +35,23 @@ void UGameFeatureAction_SpawnActors::ResetExtension()
 	DestroyActors();
 }
 
-void UGameFeatureAction_SpawnActors::OnWorldInitialized(UWorld* World,
-                                                        [[maybe_unused]] const UWorld::InitializationValues)
+void UGameFeatureAction_SpawnActors::OnWorldInitialized(UWorld* World, [[maybe_unused]] const UWorld::InitializationValues)
 {
-	if (!TargetLevel.IsNull())
+	AddToWorld(World);
+}
+
+void UGameFeatureAction_SpawnActors::AddToWorld(UWorld* World)
+{
+	if (TargetLevel.IsNull())
 	{
-		if (World->IsGameWorld()
-			&& World->GetNetMode() != NM_Client
-			&& World->GetName() == TargetLevel.LoadSynchronous()->GetName())
-		{
-			SpawnActors(World);
-		}
+		return;
+	}
+
+	else if (World->IsGameWorld()
+		&& World->GetNetMode() != NM_Client
+		&& World->GetName() == TargetLevel.LoadSynchronous()->GetName())
+	{
+		SpawnActors(World);
 	}
 }
 
@@ -45,21 +59,20 @@ void UGameFeatureAction_SpawnActors::SpawnActors(UWorld* WorldReference)
 {
 	for (const auto& [ActorClass, SpawnTransform] : SpawnSettings)
 	{
-		if (!ActorClass.IsNull())
-		{
-			TSubclassOf<AActor> ClassToSpawn = ActorClass.LoadSynchronous();
-
-			UE_LOG(LogGameplayFeaturesExtraActions, Display,
-			       TEXT("%s: Spawning actor %s on world %s"), *FString(__func__),
-			       *ClassToSpawn->GetName(), *WorldReference->GetName());
-
-			AActor* SpawnedActor = WorldReference->SpawnActor<AActor>(ClassToSpawn, SpawnTransform);
-			SpawnedActors.Add(SpawnedActor);
-		}
-		else
+		if (ActorClass.IsNull())
 		{
 			UE_LOG(LogGameplayFeaturesExtraActions, Error, TEXT("%s: Actor class is null."), *FString(__func__));
+			continue;
 		}
+
+		TSubclassOf<AActor> ClassToSpawn = ActorClass.LoadSynchronous();
+
+		UE_LOG(LogGameplayFeaturesExtraActions, Display,
+			TEXT("%s: Spawning actor %s on world %s"), *FString(__func__),
+			*ClassToSpawn->GetName(), *WorldReference->GetName());
+
+		AActor* SpawnedActor = WorldReference->SpawnActor<AActor>(ClassToSpawn, SpawnTransform);
+		SpawnedActors.Add(SpawnedActor);
 	}
 }
 

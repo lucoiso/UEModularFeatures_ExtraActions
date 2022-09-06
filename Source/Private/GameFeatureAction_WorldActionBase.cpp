@@ -11,8 +11,8 @@ DEFINE_LOG_CATEGORY(LogGameplayFeaturesExtraActions);
 void UGameFeatureAction_WorldActionBase::OnGameFeatureActivating(FGameFeatureActivatingContext& Context)
 {
 	GameInstanceStartHandle = FWorldDelegates::OnStartGameInstance.AddUObject(this,
-	                                                                          &UGameFeatureAction_WorldActionBase::HandleGameInstanceStart,
-	                                                                          FGameFeatureStateChangeContext(Context));
+																			  &UGameFeatureAction_WorldActionBase::HandleGameInstanceStart,
+																			  FGameFeatureStateChangeContext(Context));
 
 	for (const FWorldContext& WorldContext : GEngine->GetWorldContexts())
 	{
@@ -30,42 +30,32 @@ void UGameFeatureAction_WorldActionBase::OnGameFeatureDeactivating(FGameFeatureD
 
 bool UGameFeatureAction_WorldActionBase::ActorHasAllRequiredTags(const AActor* Actor, const TArray<FName>& RequiredTags)
 {
-	if (!RequiredTags.IsEmpty())
+	for (const FName& Tag : RequiredTags)
 	{
-		for (const FName& Tag : RequiredTags)
+		if (!Actor->ActorHasTag(Tag))
 		{
-			if (!Actor->ActorHasTag(Tag))
-			{
-				return false;
-			}
+			return false;
 		}
 	}
 
 	return true;
 }
 
-UGameFrameworkComponentManager* UGameFeatureAction_WorldActionBase::GetGameFrameworkComponentManager(
-	const FWorldContext& WorldContext) const
+UGameFrameworkComponentManager* UGameFeatureAction_WorldActionBase::GetGameFrameworkComponentManager(const FWorldContext& WorldContext) const
 {
-	if (const UWorld* World = WorldContext.World(); World->IsGameWorld())
+	if (!IsValid(WorldContext.World()) || !WorldContext.World()->IsGameWorld())
 	{
-		if (const UGameInstance* GameInstance = WorldContext.OwningGameInstance)
-		{
-			return UGameInstance::GetSubsystem<UGameFrameworkComponentManager>(GameInstance);
-		}
+		return nullptr;
 	}
 
-	return nullptr;
+	return UGameInstance::GetSubsystem<UGameFrameworkComponentManager>(WorldContext.OwningGameInstance);
 }
 
 void UGameFeatureAction_WorldActionBase::HandleGameInstanceStart(UGameInstance* GameInstance,
-                                                                 const FGameFeatureStateChangeContext ChangeContext)
+																 const FGameFeatureStateChangeContext ChangeContext)
 {
-	if (const FWorldContext* WorldContext = GameInstance->GetWorldContext())
+	if (ChangeContext.ShouldApplyToWorldContext(*GameInstance->GetWorldContext()))
 	{
-		if (ChangeContext.ShouldApplyToWorldContext(*WorldContext))
-		{
-			AddToWorld(*WorldContext);
-		}
+		AddToWorld(*GameInstance->GetWorldContext());
 	}
 }
