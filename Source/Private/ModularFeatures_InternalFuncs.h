@@ -10,6 +10,7 @@
 #include "AbilityInputBinding.h"
 #include "GameFeatureAction_WorldActionBase.h"
 #include "EnhancedInputComponent.h"
+#include "GameFramework/Controller.h"
 
 namespace ModularFeaturesHelper
 {
@@ -77,10 +78,10 @@ namespace ModularFeaturesHelper
 		switch (InOwner)
 		{
 			case EControllerOwner::Pawn:
-				return InPawn;
+				return Cast<AActor>(InPawn);
 
 			case EControllerOwner::Controller:
-				return InPawn->GetController();
+				return Cast<AActor>(InPawn->GetController());
 
 			default:
 				break;
