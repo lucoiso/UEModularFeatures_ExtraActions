@@ -6,6 +6,7 @@
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemInterface.h"
 #include "Components/GameFrameworkComponentManager.h"
+#include "ModularFeatures_InternalFuncs.h"
 
 void UGameFeatureAction_AddAttribute::OnGameFeatureActivating(FGameFeatureActivatingContext& Context)
 {
@@ -69,13 +70,13 @@ void UGameFeatureAction_AddAttribute::HandleActorExtension(AActor* Owner, const 
 			return;
 		}
 
-		if (!Attribute.IsNull())
+		if (Attribute.IsNull())
 		{
-			AddAttribute(Owner);
+			UE_LOG(LogGameplayFeaturesExtraActions, Error, TEXT("%s: Attribute is null."), *FString(__func__));
 		}
 		else
 		{
-			UE_LOG(LogGameplayFeaturesExtraActions, Error, TEXT("%s: Attribute is null."), *FString(__func__));
+			AddAttribute(Owner);
 		}
 	}
 }
@@ -86,12 +87,8 @@ void UGameFeatureAction_AddAttribute::AddAttribute(AActor* TargetActor)
 	{
 		return;
 	}
-
-	const IAbilitySystemInterface* InterfaceOwner = Cast<IAbilitySystemInterface>(TargetActor);
-
-	if (UAbilitySystemComponent* const AbilitySystemComponent = InterfaceOwner != nullptr
-																	? InterfaceOwner->GetAbilitySystemComponent()
-																	: TargetActor->FindComponentByClass<UAbilitySystemComponent>())
+	
+	if (UAbilitySystemComponent* const AbilitySystemComponent = ModularFeaturesHelper::GetAbilitySystemComponentByActor(TargetActor))
 	{
 		if (const TSubclassOf<UAttributeSet> SetType = Attribute.LoadSynchronous())
 		{
@@ -126,17 +123,18 @@ void UGameFeatureAction_AddAttribute::AddAttribute(AActor* TargetActor)
 
 void UGameFeatureAction_AddAttribute::RemoveAttribute(AActor* TargetActor)
 {
-	if (!IsValid(TargetActor) || TargetActor->GetLocalRole() != ROLE_Authority)
+	if (TargetActor->GetLocalRole() != ROLE_Authority)
+	{
+		return;
+	}
+
+	if (!IsValid(TargetActor))
 	{
 		ActiveExtensions.Remove(TargetActor);
 		return;
 	}
 	
-	const IAbilitySystemInterface* InterfaceOwner = Cast<IAbilitySystemInterface>(TargetActor);
-
-	if (UAbilitySystemComponent* const AbilitySystemComponent = InterfaceOwner != nullptr
-																	? InterfaceOwner->GetAbilitySystemComponent()
-																	: TargetActor->FindComponentByClass<UAbilitySystemComponent>())
+	if (UAbilitySystemComponent* const AbilitySystemComponent = ModularFeaturesHelper::GetAbilitySystemComponentByActor(TargetActor))
 	{
 		if (UAttributeSet* const AttributeToRemove = ActiveExtensions.FindRef(TargetActor).Get();
 			AbilitySystemComponent->GetSpawnedAttributes_Mutable().Remove(AttributeToRemove) != 0)

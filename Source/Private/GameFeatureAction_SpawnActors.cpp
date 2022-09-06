@@ -14,10 +14,9 @@ void UGameFeatureAction_SpawnActors::OnGameFeatureActivating(FGameFeatureActivat
 
 	for (const FWorldContext& WorldContext : GEngine->GetWorldContexts())
 	{
-		if (Context.ShouldApplyToWorldContext(WorldContext)
-			&& AddToWorld(WorldContext.World()))
+		if (Context.ShouldApplyToWorldContext(WorldContext))
 		{
-			return;
+			AddToWorld(WorldContext.World());
 		}
 	}
 
@@ -41,11 +40,11 @@ void UGameFeatureAction_SpawnActors::OnWorldInitialized(UWorld* World, [[maybe_u
 	AddToWorld(World);
 }
 
-bool UGameFeatureAction_SpawnActors::AddToWorld(UWorld* World)
+void UGameFeatureAction_SpawnActors::AddToWorld(UWorld* World)
 {
 	if (TargetLevel.IsNull())
 	{
-		return false;
+		return;
 	}
 
 	else if (World->IsGameWorld()
@@ -53,11 +52,7 @@ bool UGameFeatureAction_SpawnActors::AddToWorld(UWorld* World)
 		&& World->GetName() == TargetLevel.LoadSynchronous()->GetName())
 	{
 		SpawnActors(World);
-
-		return true;
 	}
-
-	return false;
 }
 
 void UGameFeatureAction_SpawnActors::SpawnActors(UWorld* WorldReference)

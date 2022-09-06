@@ -6,6 +6,7 @@
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemInterface.h"
 #include "Components/GameFrameworkComponentManager.h"
+#include "ModularFeatures_InternalFuncs.h"
 
 void UGameFeatureAction_AddEffects::OnGameFeatureActivating(FGameFeatureActivatingContext& Context)
 {
@@ -71,13 +72,13 @@ void UGameFeatureAction_AddEffects::HandleActorExtension(AActor* Owner, const FN
 
 		for (const FEffectStackedData& Entry : Effects)
 		{
-			if (!Entry.EffectClass.IsNull())
+			if (Entry.EffectClass.IsNull())
 			{
-				AddEffects(Owner, Entry);
+				UE_LOG(LogGameplayFeaturesExtraActions, Error, TEXT("%s: Effect class is null."), *FString(__func__));
 			}
 			else
 			{
-				UE_LOG(LogGameplayFeaturesExtraActions, Error, TEXT("%s: Effect class is null."), *FString(__func__));
+				AddEffects(Owner, Entry);
 			}
 		}
 	}
@@ -89,12 +90,8 @@ void UGameFeatureAction_AddEffects::AddEffects(AActor* TargetActor, const FEffec
 	{
 		return;
 	}
-
-	const IAbilitySystemInterface* InterfaceOwner = Cast<IAbilitySystemInterface>(TargetActor);
-
-	if (UAbilitySystemComponent* const AbilitySystemComponent = InterfaceOwner != nullptr
-																	? InterfaceOwner->GetAbilitySystemComponent()
-																	: TargetActor->FindComponentByClass<UAbilitySystemComponent>())
+	
+	if (UAbilitySystemComponent* const AbilitySystemComponent = ModularFeaturesHelper::GetAbilitySystemComponentByActor(TargetActor))
 	{
 		TArray<FActiveGameplayEffectHandle>& SpecData = ActiveExtensions.FindOrAdd(TargetActor);
 
@@ -102,8 +99,7 @@ void UGameFeatureAction_AddEffects::AddEffects(AActor* TargetActor, const FEffec
 
 		UE_LOG(LogGameplayFeaturesExtraActions, Display,
 			TEXT("%s: Adding effect %s level %u to Actor %s with %u SetByCaller params."),
-			*FString(__func__),
-			*EffectClass->GetName(), Effect.EffectLevel,
+			*FString(__func__), *EffectClass->GetName(), Effect.EffectLevel,
 			*TargetActor->GetName(), Effect.SetByCallerParams.Num());
 
 		const FGameplayEffectSpecHandle SpecHandle =
@@ -133,7 +129,12 @@ void UGameFeatureAction_AddEffects::AddEffects(AActor* TargetActor, const FEffec
 
 void UGameFeatureAction_AddEffects::RemoveEffects(AActor* TargetActor)
 {
-	if (!IsValid(TargetActor) || TargetActor->GetLocalRole() != ROLE_Authority)
+	if (TargetActor->GetLocalRole() != ROLE_Authority)
+	{
+		return;
+	}
+
+	if (!IsValid(TargetActor))
 	{
 		ActiveExtensions.Remove(TargetActor);
 		return;
@@ -142,11 +143,7 @@ void UGameFeatureAction_AddEffects::RemoveEffects(AActor* TargetActor)
 	if (TArray<FActiveGameplayEffectHandle> ActiveEffects = ActiveExtensions.FindRef(TargetActor);
 		!ActiveEffects.IsEmpty())
 	{
-		const IAbilitySystemInterface* InterfaceOwner = Cast<IAbilitySystemInterface>(TargetActor);
-
-		if (UAbilitySystemComponent* const AbilitySystemComponent = InterfaceOwner != nullptr
-																		? InterfaceOwner->GetAbilitySystemComponent()
-																		: TargetActor->FindComponentByClass<UAbilitySystemComponent>())
+		if (UAbilitySystemComponent* const AbilitySystemComponent = ModularFeaturesHelper::GetAbilitySystemComponentByActor(TargetActor))
 		{
 			UE_LOG(LogGameplayFeaturesExtraActions, Display,
 				TEXT("%s: Removing effects from Actor %s."), *FString(__func__), *TargetActor->GetName());

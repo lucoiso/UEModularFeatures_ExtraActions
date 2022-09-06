@@ -10,6 +10,7 @@
 #include "Components/GameFrameworkComponentManager.h"
 #include "GameFramework/PlayerController.h"
 #include "Engine/LocalPlayer.h"
+#include "ModularFeatures_InternalFuncs.h"
 
 void UGameFeatureAction_AddInputs::OnGameFeatureActivating(FGameFeatureActivatingContext& Context)
 {
@@ -73,14 +74,13 @@ void UGameFeatureAction_AddInputs::HandleActorExtension(AActor* Owner, const FNa
 			return;
 		}
 
-		if (!InputMappingContext.IsNull())
+		if (InputMappingContext.IsNull())
 		{
-			AddActorInputs(Owner);
+			UE_LOG(LogGameplayFeaturesExtraActions, Error, TEXT("%s: Input Mapping Context is null."), *FString(__func__));
 		}
 		else
 		{
-			UE_LOG(LogGameplayFeaturesExtraActions, Error,
-				TEXT("%s: Input Mapping Context is null."), *FString(__func__));
+			AddActorInputs(Owner);
 		}
 	}
 }
@@ -93,6 +93,11 @@ void UGameFeatureAction_AddInputs::AddActorInputs(AActor* TargetActor)
 	}
 
 	APawn* TargetPawn = Cast<APawn>(TargetActor);
+
+	if (!IsValid(TargetPawn))
+	{
+		return;
+	}
 
 	if (const APlayerController* const PlayerController = TargetPawn->GetController<APlayerController>())
 	{
@@ -115,39 +120,24 @@ void UGameFeatureAction_AddInputs::AddActorInputs(AActor* TargetActor)
 
 			UE_LOG(LogGameplayFeaturesExtraActions, Display,
 				TEXT("%s: Adding Enhanced Input Mapping %s to Actor %s."),
-				*FString(__func__),
-				*InputMapping->GetName(),
-				*TargetActor->GetName());
+				*FString(__func__), *InputMapping->GetName(), *TargetActor->GetName());
 
 			Subsystem->AddMappingContext(InputMapping, MappingPriority);
 
 			NewInputData.Mapping = InputMapping;
+			
+			const TWeakObjectPtr<UObject> FunctionOwner = ModularFeaturesHelper::GetPawnInputOwner(TargetPawn, InputBindingOwner);
+			const TWeakObjectPtr<UEnhancedInputComponent> InputComponent = ModularFeaturesHelper::GetEnhancedInputComponentInPawn(TargetPawn, InputBindingOwner);
 
-			TWeakObjectPtr<UObject> FunctionOwner;
-			TWeakObjectPtr<UEnhancedInputComponent> InputComponent;
-
-			switch (InputBindingOwner)
+			if (!FunctionOwner.IsValid() || !InputComponent.IsValid())
 			{
-				case EControllerOwner::Pawn:
-					FunctionOwner = TargetPawn;
-					InputComponent = Cast<UEnhancedInputComponent>(TargetPawn->InputComponent.Get());
-					break;
-
-				case EControllerOwner::Controller:
-					FunctionOwner = TargetPawn->GetController();
-					InputComponent = Cast<UEnhancedInputComponent>(TargetPawn->GetController()->InputComponent.Get());
-					break;
-
-				default:
-					FunctionOwner.Reset();
-					InputComponent.Reset();
-					break;
+				UE_LOG(LogGameplayFeaturesExtraActions, Error, 
+					TEXT("%s: Failed to find InputComponent on Actor %s."), 
+					*FString(__func__), *TargetActor->GetName());
 			}
-
-			const IAbilityInputBinding* AbilityInterface = Cast<IAbilityInputBinding>(FunctionOwner);
-
-			if (FunctionOwner.IsValid() && InputComponent.IsValid())
+			else
 			{
+				const IAbilityInputBinding* const SetupInputInterface = ModularFeaturesHelper::GetAbilityInputBindingInterface(TargetActor, InputBindingOwner);
 				for (const auto& [ActionInput, AbilityBindingData, FunctionBindingData] : ActionsBindings)
 				{
 					if (ActionInput.IsNull())
@@ -160,51 +150,45 @@ void UGameFeatureAction_AddInputs::AddActorInputs(AActor* TargetActor)
 
 					UE_LOG(LogGameplayFeaturesExtraActions, Display,
 						TEXT("%s: Binding Action Input %s to Actor %s."),
-						*FString(__func__),
-						*InputAction->GetName(),
-						*TargetActor->GetName());
+						*FString(__func__), *InputAction->GetName(), *TargetActor->GetName());
 
 					for (const auto& [FunctionName, Triggers] : FunctionBindingData)
 					{
 						for (const ETriggerEvent& Trigger : Triggers)
 						{
 							NewInputData.ActionBinding.Add(InputComponent->BindAction(InputAction,
-								Trigger,
-								FunctionOwner.Get(),
-								FunctionName));
+																					  Trigger,
+																					  FunctionOwner.Get(),
+																					  FunctionName));
 						}
 					}
 
-					if (AbilityBindingData.bSetupAbilityInput)
+					if (!AbilityBindingData.bSetupAbilityInput)
 					{
-						if (AbilityInterface == nullptr)
-						{
-							UE_LOG(LogGameplayFeaturesExtraActions, Error,
-								TEXT("%s: Actor %s has no AbilityInputBinding."),
-								*FString(__func__), *TargetActor->GetName());
-						}
-						else
-						{
-							const uint32 InputID =
-								AbilityBindingData.InputIDEnumerationClass.LoadSynchronous()->GetValueByName(AbilityBindingData.InputIDValueName,
-									EGetByNameFlags::CheckAuthoredName);
+						continue;
+					}
 
-							IAbilityInputBinding::Execute_SetupAbilityInputBinding(AbilityInterface->_getUObject(),
-								InputAction,
-								InputID);
+					if (SetupInputInterface == nullptr)
+					{
+						UE_LOG(LogGameplayFeaturesExtraActions, Error,
+							TEXT("%s: Actor %s has no AbilityInputBinding."),
+							*FString(__func__), *TargetActor->GetName());
+					}
+					else
+					{
+						const uint32 InputID =
+							AbilityBindingData.InputIDEnumerationClass.LoadSynchronous()->GetValueByName(AbilityBindingData.InputIDValueName,
+																										 EGetByNameFlags::CheckAuthoredName);
 
-							AbilityActions.Add(InputAction);
-						}
+						IAbilityInputBinding::Execute_SetupAbilityInputBinding(SetupInputInterface->_getUObject(),
+																			   InputAction,
+																			   InputID);
+
+						AbilityActions.Add(InputAction);
 					}
 				}
 
 				ActiveExtensions.Add(TargetActor, NewInputData);
-			}
-			else
-			{
-				UE_LOG(LogGameplayFeaturesExtraActions, Error,
-					TEXT("%s: Failed to find InputComponent on Actor %s."),
-					*FString(__func__), *TargetActor->GetName());
 			}
 		}
 	}
@@ -223,7 +207,14 @@ void UGameFeatureAction_AddInputs::RemoveActorInputs(AActor* TargetActor)
 		ActiveExtensions.Remove(TargetActor);
 		return;
 	}
+
 	APawn* TargetPawn = Cast<APawn>(TargetActor);
+
+	if (!IsValid(TargetPawn))
+	{
+		ActiveExtensions.Remove(TargetActor);
+		return;
+	}
 
 	if (const APlayerController* const PlayerController = TargetPawn->GetController<APlayerController>())
 	{
@@ -246,32 +237,10 @@ void UGameFeatureAction_AddInputs::RemoveActorInputs(AActor* TargetActor)
 			{
 				UE_LOG(LogGameplayFeaturesExtraActions, Display,
 					TEXT("%s: Removing Enhanced Input Mapping %s from Actor %s."),
-					*FString(__func__),
-					*ActiveInputData->Mapping->GetName(),
-					*TargetActor->GetName());
-
-				TWeakObjectPtr<UObject> FunctionOwner;
-				TWeakObjectPtr<UEnhancedInputComponent> InputComponent;
-
-				switch (InputBindingOwner)
-				{
-					case EControllerOwner::Pawn:
-						FunctionOwner = TargetPawn;
-						InputComponent = Cast<UEnhancedInputComponent>(TargetPawn->InputComponent.Get());
-						break;
-
-					case EControllerOwner::Controller:
-						FunctionOwner = TargetPawn->GetController();
-						InputComponent = Cast<UEnhancedInputComponent>(TargetPawn->GetController()->InputComponent.Get());
-						break;
-
-					default:
-						FunctionOwner.Reset();
-						InputComponent.Reset();
-						break;
-				}
-
-				if (!FunctionOwner.IsValid() || !InputComponent.IsValid())
+					*FString(__func__), *ActiveInputData->Mapping->GetName(), *TargetActor->GetName());
+								
+				if (const TWeakObjectPtr<UEnhancedInputComponent> InputComponent = ModularFeaturesHelper::GetEnhancedInputComponentInPawn(TargetPawn, InputBindingOwner);
+					!InputComponent.IsValid())
 				{
 					UE_LOG(LogGameplayFeaturesExtraActions, Error,
 						TEXT("%s: Failed to find InputComponent on Actor %s."),
@@ -284,12 +253,11 @@ void UGameFeatureAction_AddInputs::RemoveActorInputs(AActor* TargetActor)
 						InputComponent->RemoveBinding(InputActionBinding);
 					}
 
-					if (const IAbilityInputBinding* const AbilityInterface = Cast<IAbilityInputBinding>(FunctionOwner);
-						AbilityInterface != nullptr)
+					if (const IAbilityInputBinding* const SetupInputInterface = ModularFeaturesHelper::GetAbilityInputBindingInterface(TargetActor, InputBindingOwner))
 					{
 						for (TWeakObjectPtr<UInputAction>& ActiveAbilityAction : AbilityActions)
 						{
-							IAbilityInputBinding::Execute_RemoveAbilityInputBinding(AbilityInterface->_getUObject(),
+							IAbilityInputBinding::Execute_RemoveAbilityInputBinding(SetupInputInterface->_getUObject(),
 																					ActiveAbilityAction.Get());
 							ActiveAbilityAction.Reset();
 						}

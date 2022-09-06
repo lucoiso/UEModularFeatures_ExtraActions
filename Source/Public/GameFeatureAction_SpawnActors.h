@@ -50,7 +50,7 @@ protected:
 	void OnWorldInitialized(UWorld* World, const UWorld::InitializationValues InitializationValues);
 
 private:
-	bool AddToWorld(UWorld* World);
+	void AddToWorld(UWorld* World);
 	void SpawnActors(UWorld* WorldReference);
 	void DestroyActors();
 
