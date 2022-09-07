@@ -121,7 +121,7 @@ void UGameFeatureAction_AddAbilities::AddActorAbilities(AActor* TargetActor, con
 			{
 				if (IAbilityInputBinding* const SetupInputInterface = ModularFeaturesHelper::GetAbilityInputBindingInterface(TargetActor, InputBindingOwner))
 				{
-					UInputAction* AbilityInput = Ability.InputAction.LoadSynchronous();
+					UInputAction* const AbilityInput = Ability.InputAction.LoadSynchronous();
 					IAbilityInputBinding::Execute_SetupAbilityInputBinding(SetupInputInterface->_getUObject(),
 																		   AbilityInput,
 																		   InputID);

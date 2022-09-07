@@ -71,7 +71,7 @@ void UGameFeatureAction_SpawnActors::SpawnActors(UWorld* WorldReference)
 			TEXT("%s: Spawning actor %s on world %s"), *FString(__func__),
 			*ClassToSpawn->GetName(), *WorldReference->GetName());
 
-		AActor* SpawnedActor = WorldReference->SpawnActor<AActor>(ClassToSpawn, SpawnTransform);
+		AActor* const SpawnedActor = WorldReference->SpawnActor<AActor>(ClassToSpawn, SpawnTransform);
 		SpawnedActors.Add(SpawnedActor);
 	}
 }

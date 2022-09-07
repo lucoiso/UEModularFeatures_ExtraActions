@@ -16,7 +16,7 @@ namespace ModularFeaturesHelper
 {
 	static UAbilitySystemComponent* GetAbilitySystemComponentByActor(AActor* InActor)
 	{
-		const IAbilitySystemInterface* InterfaceOwner = Cast<IAbilitySystemInterface>(InActor);
+		const IAbilitySystemInterface* const InterfaceOwner = Cast<IAbilitySystemInterface>(InActor);
 		return InterfaceOwner != nullptr ? InterfaceOwner->GetAbilitySystemComponent() : InActor->FindComponentByClass<UAbilitySystemComponent>();
 	}
 
@@ -29,7 +29,6 @@ namespace ModularFeaturesHelper
 
 		if (APawn* const TargetPawn = Cast<APawn>(InActor))
 		{
-			IAbilityInputBinding* SetupInputInterface = nullptr;
 			switch (InOwner)
 			{
 				case EControllerOwner::Pawn:

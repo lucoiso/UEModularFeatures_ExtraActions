@@ -92,7 +92,7 @@ void UGameFeatureAction_AddInputs::AddActorInputs(AActor* TargetActor)
 		return;
 	}
 
-	APawn* TargetPawn = Cast<APawn>(TargetActor);
+	APawn* const TargetPawn = Cast<APawn>(TargetActor);
 
 	if (!IsValid(TargetPawn))
 	{
@@ -104,7 +104,7 @@ void UGameFeatureAction_AddInputs::AddActorInputs(AActor* TargetActor)
 		if (const ULocalPlayer* const LocalPlayer = PlayerController->GetLocalPlayer();
 			PlayerController->IsLocalController() && IsValid(LocalPlayer))
 		{
-			UEnhancedInputLocalPlayerSubsystem* Subsystem = LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
+			UEnhancedInputLocalPlayerSubsystem* const Subsystem = LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
 
 			if (!IsValid(Subsystem))
 			{
@@ -116,7 +116,7 @@ void UGameFeatureAction_AddInputs::AddActorInputs(AActor* TargetActor)
 			}
 
 			FInputBindingData& NewInputData = ActiveExtensions.FindOrAdd(TargetActor);
-			UInputMappingContext* InputMapping = InputMappingContext.LoadSynchronous();
+			UInputMappingContext* const InputMapping = InputMappingContext.LoadSynchronous();
 
 			UE_LOG(LogGameplayFeaturesExtraActions, Display,
 				TEXT("%s: Adding Enhanced Input Mapping %s to Actor %s."),
@@ -146,7 +146,7 @@ void UGameFeatureAction_AddInputs::AddActorInputs(AActor* TargetActor)
 						continue;
 					}
 
-					UInputAction* InputAction = ActionInput.LoadSynchronous();
+					UInputAction* const InputAction = ActionInput.LoadSynchronous();
 
 					UE_LOG(LogGameplayFeaturesExtraActions, Display,
 						TEXT("%s: Binding Action Input %s to Actor %s."),
@@ -208,7 +208,7 @@ void UGameFeatureAction_AddInputs::RemoveActorInputs(AActor* TargetActor)
 		return;
 	}
 
-	APawn* TargetPawn = Cast<APawn>(TargetActor);
+	APawn* const TargetPawn = Cast<APawn>(TargetActor);
 
 	if (!IsValid(TargetPawn))
 	{
@@ -221,7 +221,7 @@ void UGameFeatureAction_AddInputs::RemoveActorInputs(AActor* TargetActor)
 		if (const ULocalPlayer* const LocalPlayer = PlayerController->GetLocalPlayer();
 			PlayerController->IsLocalController() && IsValid(LocalPlayer))
 		{
-			UEnhancedInputLocalPlayerSubsystem* Subsystem = LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
+			UEnhancedInputLocalPlayerSubsystem* const Subsystem = LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
 
 			if (!IsValid(Subsystem))
 			{
