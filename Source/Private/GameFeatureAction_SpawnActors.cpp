@@ -20,13 +20,12 @@ void UGameFeatureAction_SpawnActors::OnGameFeatureActivating(FGameFeatureActivat
 		}
 	}
 
-	WorldInitializedHandle =
-		FWorldDelegates::OnPostWorldInitialization.AddUObject(this, &UGameFeatureAction_SpawnActors::OnWorldInitialized);
+	WorldInitializedHandle = FWorldDelegates::OnPostWorldInitialization.AddUObject(this, &UGameFeatureAction_SpawnActors::OnWorldInitialized);
 }
 
 void UGameFeatureAction_SpawnActors::OnGameFeatureDeactivating(FGameFeatureDeactivatingContext& Context)
 {
-	FWorldDelegates::OnStartGameInstance.Remove(WorldInitializedHandle);
+	FWorldDelegates::OnPostWorldInitialization.Remove(WorldInitializedHandle);
 	ResetExtension();
 }
 
@@ -46,10 +45,7 @@ void UGameFeatureAction_SpawnActors::AddToWorld(UWorld* World)
 	{
 		return;
 	}
-
-	else if (World->IsGameWorld()
-		&& World->GetNetMode() != NM_Client
-		&& World->GetName() == TargetLevel.LoadSynchronous()->GetName())
+	if (World->IsGameWorld() && World->GetNetMode() != NM_Client && World->GetName() == TargetLevel.LoadSynchronous()->GetName())
 	{
 		SpawnActors(World);
 	}
@@ -57,6 +53,11 @@ void UGameFeatureAction_SpawnActors::AddToWorld(UWorld* World)
 
 void UGameFeatureAction_SpawnActors::SpawnActors(UWorld* WorldReference)
 {
+	if (!IsValid(WorldReference))
+	{
+		return;
+	}
+
 	for (const auto& [ActorClass, SpawnTransform] : SpawnSettings)
 	{
 		if (ActorClass.IsNull())
@@ -67,11 +68,9 @@ void UGameFeatureAction_SpawnActors::SpawnActors(UWorld* WorldReference)
 
 		TSubclassOf<AActor> ClassToSpawn = ActorClass.LoadSynchronous();
 
-		UE_LOG(LogGameplayFeaturesExtraActions, Display,
-			TEXT("%s: Spawning actor %s on world %s"), *FString(__func__),
-			*ClassToSpawn->GetName(), *WorldReference->GetName());
+		UE_LOG(LogGameplayFeaturesExtraActions, Display, TEXT("%s: Spawning actor %s on world %s"), *FString(__func__), *ClassToSpawn->GetName(), *WorldReference->GetName());
 
-		AActor* SpawnedActor = WorldReference->SpawnActor<AActor>(ClassToSpawn, SpawnTransform);
+		AActor* const SpawnedActor = WorldReference->SpawnActor<AActor>(ClassToSpawn, SpawnTransform);
 		SpawnedActors.Add(SpawnedActor);
 	}
 }

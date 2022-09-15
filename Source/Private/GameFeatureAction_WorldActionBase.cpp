@@ -10,9 +10,7 @@ DEFINE_LOG_CATEGORY(LogGameplayFeaturesExtraActions);
 
 void UGameFeatureAction_WorldActionBase::OnGameFeatureActivating(FGameFeatureActivatingContext& Context)
 {
-	GameInstanceStartHandle = FWorldDelegates::OnStartGameInstance.AddUObject(this,
-																			  &UGameFeatureAction_WorldActionBase::HandleGameInstanceStart,
-																			  FGameFeatureStateChangeContext(Context));
+	GameInstanceStartHandle = FWorldDelegates::OnStartGameInstance.AddUObject(this, &UGameFeatureAction_WorldActionBase::HandleGameInstanceStart, FGameFeatureStateChangeContext(Context));
 
 	for (const FWorldContext& WorldContext : GEngine->GetWorldContexts())
 	{
@@ -51,8 +49,7 @@ UGameFrameworkComponentManager* UGameFeatureAction_WorldActionBase::GetGameFrame
 	return UGameInstance::GetSubsystem<UGameFrameworkComponentManager>(WorldContext.OwningGameInstance);
 }
 
-void UGameFeatureAction_WorldActionBase::HandleGameInstanceStart(UGameInstance* GameInstance,
-																 const FGameFeatureStateChangeContext ChangeContext)
+void UGameFeatureAction_WorldActionBase::HandleGameInstanceStart(UGameInstance* GameInstance, const FGameFeatureStateChangeContext ChangeContext)
 {
 	if (ChangeContext.ShouldApplyToWorldContext(*GameInstance->GetWorldContext()))
 	{

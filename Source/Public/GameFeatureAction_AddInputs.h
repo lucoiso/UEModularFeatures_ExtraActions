@@ -41,8 +41,7 @@ struct FAbilityInputBindingData
 	bool bSetupAbilityInput = false;
 
 	/* Enumeration class that will be used by the Ability System Component to manage abilities inputs */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings",
-		meta = (DisplayName = "InputID Enumeration Class"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", meta = (DisplayName = "InputID Enumeration Class"))
 	TSoftObjectPtr<UEnum> InputIDEnumerationClass;
 
 	/* Should this action setup call SetupAbilityInput/RemoveAbilityInputBinding using the IAbilityInputBinding interface? */
@@ -78,8 +77,7 @@ class UGameFeatureAction_AddInputs final : public UGameFeatureAction_WorldAction
 
 public:
 	/* Target pawn to which Input Mapping will be given */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings",
-		meta = (AllowedClasses = "Pawn", OnlyPlaceable = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", meta = (AllowedClasses = "Pawn", OnlyPlaceable = "true"))
 	TSoftClassPtr<APawn> TargetPawnClass;
 
 	/* Tags required on the target to apply this action */
@@ -99,8 +97,7 @@ public:
 	int32 MappingPriority = 1;
 
 	/* Enhanced Input Actions binding stacked data */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings",
-		meta = (DisplayName = "Actions Bindings", ShowOnlyInnerProperties))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", meta = (DisplayName = "Actions Bindings", ShowOnlyInnerProperties))
 	TArray<FInputMappingStack> ActionsBindings;
 
 protected:
