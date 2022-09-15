@@ -108,7 +108,7 @@ void UGameFeatureAction_AddAbilities::AddActorAbilities(AActor* TargetActor, con
 
 			if (!Ability.InputAction.IsNull())
 			{
-				if (IAbilityInputBinding* const SetupInputInterface = ModularFeaturesHelper::GetAbilityInputBindingInterface(TargetActor, InputBindingOwner))
+				if (const IAbilityInputBinding* const SetupInputInterface = ModularFeaturesHelper::GetAbilityInputBindingInterface(TargetActor, InputBindingOwner))
 				{
 					UInputAction* const AbilityInput = Ability.InputAction.LoadSynchronous();
 					IAbilityInputBinding::Execute_SetupAbilityInputBinding(SetupInputInterface->_getUObject(), AbilityInput, InputID);
@@ -164,7 +164,7 @@ void UGameFeatureAction_AddAbilities::RemoveActorAbilities(AActor* TargetActor)
 				}
 			}
 
-			if (IAbilityInputBinding* const SetupInputInterface = ModularFeaturesHelper::GetAbilityInputBindingInterface(TargetActor, InputBindingOwner))
+			if (const IAbilityInputBinding* const SetupInputInterface = ModularFeaturesHelper::GetAbilityInputBindingInterface(TargetActor, InputBindingOwner))
 			{
 				for (const UInputAction* const& InputRef : ActiveAbilities.InputReference)
 				{
