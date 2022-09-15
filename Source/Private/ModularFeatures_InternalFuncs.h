@@ -31,14 +31,11 @@ namespace ModularFeaturesHelper
 		{
 			switch (InOwner)
 			{
-				case EControllerOwner::Pawn:
-					return Cast<IAbilityInputBinding>(TargetPawn);
+			case EControllerOwner::Pawn: return Cast<IAbilityInputBinding>(TargetPawn);
 
-				case EControllerOwner::Controller:
-					return Cast<IAbilityInputBinding>(TargetPawn->GetController());
+			case EControllerOwner::Controller: return Cast<IAbilityInputBinding>(TargetPawn->GetController());
 
-				default:
-					return static_cast<IAbilityInputBinding*>(nullptr);
+			default: return nullptr;
 			}
 		}
 
@@ -54,14 +51,11 @@ namespace ModularFeaturesHelper
 
 		switch (InOwner)
 		{
-			case EControllerOwner::Pawn:
-				return Cast<UEnhancedInputComponent>(InPawn->InputComponent.Get());
+		case EControllerOwner::Pawn: return Cast<UEnhancedInputComponent>(InPawn->InputComponent.Get());
 
-			case EControllerOwner::Controller:
-				return Cast<UEnhancedInputComponent>(InPawn->GetController()->InputComponent.Get());
+		case EControllerOwner::Controller: return Cast<UEnhancedInputComponent>(InPawn->GetController()->InputComponent.Get());
 
-			default:
-				break;
+		default: break;
 		}
 
 		return nullptr;
@@ -76,14 +70,11 @@ namespace ModularFeaturesHelper
 
 		switch (InOwner)
 		{
-			case EControllerOwner::Pawn:
-				return Cast<AActor>(InPawn);
+		case EControllerOwner::Pawn: return Cast<AActor>(InPawn);
 
-			case EControllerOwner::Controller:
-				return Cast<AActor>(InPawn->GetController());
+		case EControllerOwner::Controller: return Cast<AActor>(InPawn->GetController());
 
-			default:
-				break;
+		default: break;
 		}
 
 		return nullptr;

@@ -48,8 +48,7 @@ class UGameFeatureAction_AddAbilities final : public UGameFeatureAction_WorldAct
 
 public:
 	/* Target pawn to which abilities will be given */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings",
-		meta = (AllowedClasses = "Pawn", OnlyPlaceable = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", meta = (AllowedClasses = "Pawn", OnlyPlaceable = "true"))
 	TSoftClassPtr<APawn> TargetPawnClass;
 
 	/* Tags required on the target to apply this action */
@@ -61,13 +60,11 @@ public:
 	EControllerOwner InputBindingOwner = EControllerOwner::Controller;
 
 	/* Enumeration class that will be used by the Ability System Component to manage abilities inputs */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings",
-		meta = (DisplayName = "InputID Enumeration Class"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", meta = (DisplayName = "InputID Enumeration Class"))
 	TSoftObjectPtr<UEnum> InputIDEnumerationClass;
 
 	/* Abilities to be added */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings",
-		meta = (DisplayName = "Ability Mapping", ShowOnlyInnerProperties))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", meta = (DisplayName = "Ability Mapping", ShowOnlyInnerProperties))
 	TArray<FAbilityMapping> Abilities;
 
 protected:
