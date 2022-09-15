@@ -132,14 +132,14 @@ void UGameFeatureAction_AddAbilities::AddActorAbilities(AActor* TargetActor, con
 
 void UGameFeatureAction_AddAbilities::RemoveActorAbilities(AActor* TargetActor)
 {
-	if (TargetActor->GetLocalRole() != ROLE_Authority)
-	{
-		return;
-	}
-
 	if (!IsValid(TargetActor))
 	{
 		ActiveExtensions.Remove(TargetActor);
+		return;
+	}
+
+	if (TargetActor->GetLocalRole() != ROLE_Authority)
+	{
 		return;
 	}
 

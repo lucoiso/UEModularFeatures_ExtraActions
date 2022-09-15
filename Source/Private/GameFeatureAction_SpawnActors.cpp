@@ -25,7 +25,7 @@ void UGameFeatureAction_SpawnActors::OnGameFeatureActivating(FGameFeatureActivat
 
 void UGameFeatureAction_SpawnActors::OnGameFeatureDeactivating(FGameFeatureDeactivatingContext& Context)
 {
-	FWorldDelegates::OnStartGameInstance.Remove(WorldInitializedHandle);
+	FWorldDelegates::OnPostWorldInitialization.Remove(WorldInitializedHandle);
 	ResetExtension();
 }
 
@@ -53,6 +53,11 @@ void UGameFeatureAction_SpawnActors::AddToWorld(UWorld* World)
 
 void UGameFeatureAction_SpawnActors::SpawnActors(UWorld* WorldReference)
 {
+	if (!IsValid(WorldReference))
+	{
+		return;
+	}
+
 	for (const auto& [ActorClass, SpawnTransform] : SpawnSettings)
 	{
 		if (ActorClass.IsNull())

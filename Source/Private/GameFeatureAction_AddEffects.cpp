@@ -115,14 +115,14 @@ void UGameFeatureAction_AddEffects::AddEffects(AActor* TargetActor, const FEffec
 
 void UGameFeatureAction_AddEffects::RemoveEffects(AActor* TargetActor)
 {
-	if (TargetActor->GetLocalRole() != ROLE_Authority)
-	{
-		return;
-	}
-
 	if (!IsValid(TargetActor))
 	{
 		ActiveExtensions.Remove(TargetActor);
+		return;
+	}
+
+	if (TargetActor->GetLocalRole() != ROLE_Authority)
+	{
 		return;
 	}
 
