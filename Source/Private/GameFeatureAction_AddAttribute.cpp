@@ -142,7 +142,7 @@ void UGameFeatureAction_AddAttribute::RemoveAttribute(AActor* TargetActor)
 		{
 			UE_LOG(LogGameplayFeaturesExtraActions, Display, TEXT("%s: Attribute %s removed from Actor %s."), *FString(__func__), *AttributeToRemove->GetName(), *TargetActor->GetName());
 			AbilitySystemComponent->ForceReplication();
-		}		
+		}
 #endif
 	}
 	else if (IsValid(GetWorld()) && IsValid(GetWorld()->GetGameInstance()))
