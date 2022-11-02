@@ -28,5 +28,5 @@ class MODULARFEATURES_EXTRAACTIONS_API IAbilityInputBinding
 
 	/* This function is needed for removing ability input binding inside your controller or pawn */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "MF Extra Actions | Modular Interfaces")
-	void RemoveAbilityInputBinding(const UInputAction* Action) const;
+	void RemoveAbilityInputBinding(const UInputAction* Action);
 };

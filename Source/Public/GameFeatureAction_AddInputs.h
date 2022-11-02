@@ -77,7 +77,7 @@ class UGameFeatureAction_AddInputs final : public UGameFeatureAction_WorldAction
 
 public:
 	/* Target pawn to which Input Mapping will be given */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", meta = (AllowedClasses = "Pawn", OnlyPlaceable = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", meta = (AllowedClasses = "/Script/Engine.Pawn", OnlyPlaceable = "true"))
 	TSoftClassPtr<APawn> TargetPawnClass;
 
 	/* Tags required on the target to apply this action */

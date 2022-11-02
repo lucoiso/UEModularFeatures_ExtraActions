@@ -7,6 +7,7 @@
 #include "AbilitySystemInterface.h"
 #include "Components/GameFrameworkComponentManager.h"
 #include "ModularFeatures_InternalFuncs.h"
+#include "Runtime/Launch/Resources/Version.h"
 
 void UGameFeatureAction_AddAttribute::OnGameFeatureActivating(FGameFeatureActivatingContext& Context)
 {
@@ -127,13 +128,22 @@ void UGameFeatureAction_AddAttribute::RemoveAttribute(AActor* TargetActor)
 
 	if (UAbilitySystemComponent* const AbilitySystemComponent = ModularFeaturesHelper::GetAbilitySystemComponentByActor(TargetActor))
 	{
+#if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >= 1
+		if (UAttributeSet* const AttributeToRemove = ActiveExtensions.FindRef(TargetActor).Get())
+		{
+			UE_LOG(LogGameplayFeaturesExtraActions, Display, TEXT("%s: Removing attribute %s from Actor %s."), *FString(__func__), *AttributeToRemove->GetName(), *TargetActor->GetName());
+
+			AbilitySystemComponent->RemoveSpawnedAttribute(AttributeToRemove);
+			AbilitySystemComponent->ForceReplication();
+		}
+#elif ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION == 0
 		if (UAttributeSet* const AttributeToRemove = ActiveExtensions.FindRef(TargetActor).Get();
 			AbilitySystemComponent->GetSpawnedAttributes_Mutable().Remove(AttributeToRemove) != 0)
 		{
 			UE_LOG(LogGameplayFeaturesExtraActions, Display, TEXT("%s: Attribute %s removed from Actor %s."), *FString(__func__), *AttributeToRemove->GetName(), *TargetActor->GetName());
-
 			AbilitySystemComponent->ForceReplication();
 		}
+#endif
 	}
 	else if (IsValid(GetWorld()) && IsValid(GetWorld()->GetGameInstance()))
 	{
