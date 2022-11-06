@@ -60,7 +60,7 @@ void UGameFeatureAction_AddEffects::HandleActorExtension(AActor* Owner, const FN
 
 	else if (EventName == UGameFrameworkComponentManager::NAME_ExtensionAdded || EventName == UGameFrameworkComponentManager::NAME_GameActorReady)
 	{
-		if (ActiveExtensions.Contains(Owner) || !ActorHasAllRequiredTags(Owner, RequireTags))
+		if (ActiveExtensions.Contains(Owner) || !ModularFeaturesHelper::ActorHasAllRequiredTags(Owner, RequireTags))
 		{
 			return;
 		}

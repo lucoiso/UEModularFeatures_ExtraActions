@@ -10,6 +10,8 @@
  *
  */
 
+DECLARE_LOG_CATEGORY_EXTERN(LogGameplayFeaturesExtraActions, Display, All);
+
 class FModularFeatures_ExtraActionsModule : public IModuleInterface
 {
 public:

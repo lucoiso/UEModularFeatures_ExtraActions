@@ -11,9 +11,34 @@
 #include "GameFeatureAction_WorldActionBase.h"
 #include "EnhancedInputComponent.h"
 #include "GameFramework/Controller.h"
+#include "ModularFeatures_ExtraActions.h"
+#include "MFEA_Settings.h"
 
 namespace ModularFeaturesHelper
 {
+	static const UMFEA_Settings* GetPluginSettings()
+	{
+		return GetDefault<UMFEA_Settings>();
+	}
+
+	static bool ActorHasAllRequiredTags(const AActor* Actor, const TArray<FName>& RequiredTags)
+	{
+		if (!IsValid(Actor))
+		{
+			return false;
+		}
+
+		for (const FName& Tag : RequiredTags)
+		{
+			if (!Actor->ActorHasTag(Tag))
+			{
+				return false;
+			}
+		}
+
+		return true;
+	}
+
 	static UAbilitySystemComponent* GetAbilitySystemComponentByActor(AActor* InActor)
 	{
 		const IAbilitySystemInterface* const InterfaceOwner = Cast<IAbilitySystemInterface>(InActor);
@@ -31,11 +56,11 @@ namespace ModularFeaturesHelper
 		{
 			switch (InOwner)
 			{
-			case EControllerOwner::Pawn: return Cast<IAbilityInputBinding>(TargetPawn);
+				case EControllerOwner::Pawn: return Cast<IAbilityInputBinding>(TargetPawn);
 
-			case EControllerOwner::Controller: return Cast<IAbilityInputBinding>(TargetPawn->GetController());
+				case EControllerOwner::Controller: return Cast<IAbilityInputBinding>(TargetPawn->GetController());
 
-			default: return nullptr;
+				default: return nullptr;
 			}
 		}
 
@@ -51,11 +76,11 @@ namespace ModularFeaturesHelper
 
 		switch (InOwner)
 		{
-		case EControllerOwner::Pawn: return Cast<UEnhancedInputComponent>(InPawn->InputComponent.Get());
+			case EControllerOwner::Pawn: return Cast<UEnhancedInputComponent>(InPawn->InputComponent.Get());
 
-		case EControllerOwner::Controller: return Cast<UEnhancedInputComponent>(InPawn->GetController()->InputComponent.Get());
+			case EControllerOwner::Controller: return Cast<UEnhancedInputComponent>(InPawn->GetController()->InputComponent.Get());
 
-		default: break;
+			default: break;
 		}
 
 		return nullptr;
@@ -70,13 +95,70 @@ namespace ModularFeaturesHelper
 
 		switch (InOwner)
 		{
-		case EControllerOwner::Pawn: return Cast<AActor>(InPawn);
+			case EControllerOwner::Pawn: return Cast<AActor>(InPawn);
 
-		case EControllerOwner::Controller: return Cast<AActor>(InPawn->GetController());
+			case EControllerOwner::Controller: return Cast<AActor>(InPawn->GetController());
 
-		default: break;
+			default: break;
 		}
 
 		return nullptr;
+	}
+
+	static UEnum* LoadInputEnum(const UMFEA_Settings* PluginSettings)
+	{
+		if (!IsValid(PluginSettings))
+		{
+			UE_LOG(LogGameplayFeaturesExtraActions, Error, TEXT("%s: Invalid plugin settings"), *FString(__func__));
+			return nullptr;
+		}
+
+		if (!PluginSettings->bUseInputEnumeration)
+		{
+			return nullptr;
+		}
+			
+		if (PluginSettings->InputIDEnumeration.IsNull())
+		{
+			UE_LOG(LogGameplayFeaturesExtraActions, Error, TEXT("%s: bUseInputEnumeration is set to true but Enumeration class is null!"), *FString(__func__));
+			return nullptr;
+		}
+
+		return PluginSettings->InputIDEnumeration.LoadSynchronous();
+	}
+
+	static const bool BindAbilityInputToInterfaceOwner(const IAbilityInputBinding* TargetInterfaceOwner, UInputAction* InputAction, const int32 InputID)
+	{
+		if (!TargetInterfaceOwner)
+		{
+			UE_LOG(LogGameplayFeaturesExtraActions, Error, TEXT("%s: Failed to setup input binding on Actor %s due to a invalid interface owner."), *FString(__func__), *TargetInterfaceOwner->_getUObject()->GetName());
+
+			return false;
+		}
+
+		IAbilityInputBinding::Execute_SetupAbilityInputBinding(TargetInterfaceOwner->_getUObject(), InputAction, InputID);
+
+		return true;
+	}
+
+	static void RemoveAbilityInputInInterfaceOwner(UObject* InterfaceOwner, TArray<TWeakObjectPtr<UInputAction>>& ActionArr)
+	{
+		if (!IsValid(InterfaceOwner))
+		{
+			UE_LOG(LogGameplayFeaturesExtraActions, Error, TEXT("%s: Failed to remove input binding due to invalid interface owner."), *FString(__func__));			
+			return;
+		}
+
+		for (TWeakObjectPtr<UInputAction>& InputRef : ActionArr)
+		{
+			if (InputRef.IsValid())
+			{
+				IAbilityInputBinding::Execute_RemoveAbilityInputBinding(InterfaceOwner, InputRef.Get());
+			}
+
+			InputRef.Reset();
+		}
+
+		ActionArr.Empty();
 	}
 }

@@ -13,16 +13,7 @@
 class UGameInstance;
 struct FWorldContext;
 
-DECLARE_LOG_CATEGORY_EXTERN(LogGameplayFeaturesExtraActions, Display, All);
-
 using FComponentRequestHandlePtr = TSharedPtr<FComponentRequestHandle>;
-
-UENUM(BlueprintType, Category = "MF Extra Actions | Enums")
-enum class EControllerOwner :uint8
-{
-	Pawn,
-	Controller
-};
 
 /**
  *
@@ -40,11 +31,11 @@ protected:
 	{
 	}
 
-	static bool ActorHasAllRequiredTags(const AActor* Actor, const TArray<FName>& RequiredTags);
-
 	UGameFrameworkComponentManager* GetGameFrameworkComponentManager(const FWorldContext& WorldContext) const;
 	TArray<FComponentRequestHandlePtr> ActiveRequests;
 
+	const class UMFEA_Settings* PluginSettings;
+	
 private:
 	void HandleGameInstanceStart(UGameInstance* GameInstance, FGameFeatureStateChangeContext ChangeContext);
 	FDelegateHandle GameInstanceStartHandle;

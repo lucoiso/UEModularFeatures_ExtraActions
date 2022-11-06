@@ -5,11 +5,21 @@
 #include "GameFeatureAction_WorldActionBase.h"
 #include "Engine/World.h"
 #include "Engine/Engine.h"
+#include "ModularFeatures_InternalFuncs.h"
 
 DEFINE_LOG_CATEGORY(LogGameplayFeaturesExtraActions);
 
 void UGameFeatureAction_WorldActionBase::OnGameFeatureActivating(FGameFeatureActivatingContext& Context)
 {
+	Super::OnGameFeatureActivating(Context);
+
+	PluginSettings = ModularFeaturesHelper::GetPluginSettings();
+
+	if (!IsValid(PluginSettings))
+	{
+		UE_LOG(LogGameplayFeaturesExtraActions, Error, TEXT("%s: Failed to get plugin settings."), *FString(__func__));
+	}
+
 	GameInstanceStartHandle = FWorldDelegates::OnStartGameInstance.AddUObject(this, &UGameFeatureAction_WorldActionBase::HandleGameInstanceStart, FGameFeatureStateChangeContext(Context));
 
 	for (const FWorldContext& WorldContext : GEngine->GetWorldContexts())
@@ -23,20 +33,9 @@ void UGameFeatureAction_WorldActionBase::OnGameFeatureActivating(FGameFeatureAct
 
 void UGameFeatureAction_WorldActionBase::OnGameFeatureDeactivating(FGameFeatureDeactivatingContext& Context)
 {
+	Super::OnGameFeatureDeactivating(Context);
+
 	FWorldDelegates::OnStartGameInstance.Remove(GameInstanceStartHandle);
-}
-
-bool UGameFeatureAction_WorldActionBase::ActorHasAllRequiredTags(const AActor* Actor, const TArray<FName>& RequiredTags)
-{
-	for (const FName& Tag : RequiredTags)
-	{
-		if (!Actor->ActorHasTag(Tag))
-		{
-			return false;
-		}
-	}
-
-	return true;
 }
 
 UGameFrameworkComponentManager* UGameFeatureAction_WorldActionBase::GetGameFrameworkComponentManager(const FWorldContext& WorldContext) const

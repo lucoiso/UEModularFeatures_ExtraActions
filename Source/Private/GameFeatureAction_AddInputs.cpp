@@ -64,7 +64,7 @@ void UGameFeatureAction_AddInputs::HandleActorExtension(AActor* Owner, const FNa
 
 	else if (EventName == UGameFrameworkComponentManager::NAME_ExtensionAdded || EventName == UGameFrameworkComponentManager::NAME_GameActorReady)
 	{
-		if (ActiveExtensions.Contains(Owner) || !ActorHasAllRequiredTags(Owner, RequireTags))
+		if (ActiveExtensions.Contains(Owner) || !ModularFeaturesHelper::ActorHasAllRequiredTags(Owner, RequireTags))
 		{
 			return;
 		}
@@ -117,8 +117,8 @@ void UGameFeatureAction_AddInputs::AddActorInputs(AActor* TargetActor)
 
 			NewInputData.Mapping = InputMapping;
 
-			const TWeakObjectPtr<UObject> FunctionOwner = ModularFeaturesHelper::GetPawnInputOwner(TargetPawn, InputBindingOwner);
-			const TWeakObjectPtr<UEnhancedInputComponent> InputComponent = ModularFeaturesHelper::GetEnhancedInputComponentInPawn(TargetPawn, InputBindingOwner);
+			const TWeakObjectPtr<UObject> FunctionOwner = ModularFeaturesHelper::GetPawnInputOwner(TargetPawn, PluginSettings->InputBindingOwner);
+			const TWeakObjectPtr<UEnhancedInputComponent> InputComponent = ModularFeaturesHelper::GetEnhancedInputComponentInPawn(TargetPawn, PluginSettings->InputBindingOwner);
 
 			if (!FunctionOwner.IsValid() || !InputComponent.IsValid())
 			{
@@ -126,45 +126,7 @@ void UGameFeatureAction_AddInputs::AddActorInputs(AActor* TargetActor)
 			}
 			else
 			{
-				const IAbilityInputBinding* const SetupInputInterface = ModularFeaturesHelper::GetAbilityInputBindingInterface(TargetActor, InputBindingOwner);
-				for (const auto& [ActionInput, AbilityBindingData, FunctionBindingData] : ActionsBindings)
-				{
-					if (ActionInput.IsNull())
-					{
-						UE_LOG(LogGameplayFeaturesExtraActions, Error, TEXT("%s: Action Input is null."), *FString(__func__));
-						continue;
-					}
-
-					UInputAction* const InputAction = ActionInput.LoadSynchronous();
-
-					UE_LOG(LogGameplayFeaturesExtraActions, Display, TEXT("%s: Binding Action Input %s to Actor %s."), *FString(__func__), *InputAction->GetName(), *TargetActor->GetName());
-
-					for (const auto& [FunctionName, Triggers] : FunctionBindingData)
-					{
-						for (const ETriggerEvent& Trigger : Triggers)
-						{
-							NewInputData.ActionBinding.Add(InputComponent->BindAction(InputAction, Trigger, FunctionOwner.Get(), FunctionName));
-						}
-					}
-
-					if (!AbilityBindingData.bSetupAbilityInput)
-					{
-						continue;
-					}
-
-					if (SetupInputInterface == nullptr)
-					{
-						UE_LOG(LogGameplayFeaturesExtraActions, Error, TEXT("%s: Actor %s has no AbilityInputBinding."), *FString(__func__), *TargetActor->GetName());
-					}
-					else
-					{
-						const uint32 InputID = AbilityBindingData.InputIDEnumerationClass.LoadSynchronous()->GetValueByName(AbilityBindingData.InputIDValueName, EGetByNameFlags::CheckAuthoredName);
-
-						IAbilityInputBinding::Execute_SetupAbilityInputBinding(SetupInputInterface->_getUObject(), InputAction, InputID);
-
-						AbilityActions.Add(InputAction);
-					}
-				}
+				SetupActionBindings(TargetActor, FunctionOwner.Get(), InputComponent.Get());
 
 				ActiveExtensions.Add(TargetActor, NewInputData);
 			}
@@ -211,7 +173,7 @@ void UGameFeatureAction_AddInputs::RemoveActorInputs(AActor* TargetActor)
 			{
 				UE_LOG(LogGameplayFeaturesExtraActions, Display, TEXT("%s: Removing Enhanced Input Mapping %s from Actor %s."), *FString(__func__), *ActiveInputData->Mapping->GetName(), *TargetActor->GetName());
 
-				if (const TWeakObjectPtr<UEnhancedInputComponent> InputComponent = ModularFeaturesHelper::GetEnhancedInputComponentInPawn(TargetPawn, InputBindingOwner);
+				if (const TWeakObjectPtr<UEnhancedInputComponent> InputComponent = ModularFeaturesHelper::GetEnhancedInputComponentInPawn(TargetPawn, PluginSettings->InputBindingOwner);
 					!InputComponent.IsValid())
 				{
 					UE_LOG(LogGameplayFeaturesExtraActions, Error, TEXT("%s: Failed to find InputComponent on Actor %s."), *FString(__func__), *TargetActor->GetName());
@@ -223,13 +185,9 @@ void UGameFeatureAction_AddInputs::RemoveActorInputs(AActor* TargetActor)
 						InputComponent->RemoveBinding(InputActionBinding);
 					}
 
-					if (const IAbilityInputBinding* const SetupInputInterface = ModularFeaturesHelper::GetAbilityInputBindingInterface(TargetActor, InputBindingOwner))
+					if (const IAbilityInputBinding* const SetupInputInterface = ModularFeaturesHelper::GetAbilityInputBindingInterface(TargetActor, PluginSettings->InputBindingOwner))
 					{
-						for (TWeakObjectPtr<UInputAction>& ActiveAbilityAction : AbilityActions)
-						{
-							IAbilityInputBinding::Execute_RemoveAbilityInputBinding(SetupInputInterface->_getUObject(), ActiveAbilityAction.Get());
-							ActiveAbilityAction.Reset();
-						}
+						ModularFeaturesHelper::RemoveAbilityInputInInterfaceOwner(SetupInputInterface->_getUObject(), AbilityActions);
 					}
 				}
 
@@ -243,4 +201,45 @@ void UGameFeatureAction_AddInputs::RemoveActorInputs(AActor* TargetActor)
 	}
 
 	ActiveExtensions.Remove(TargetActor);
+}
+
+void UGameFeatureAction_AddInputs::SetupActionBindings(AActor* TargetActor, UObject* FunctionOwner, UEnhancedInputComponent* InputComponent)
+{
+	FInputBindingData& NewInputData = ActiveExtensions.FindOrAdd(TargetActor);
+	const IAbilityInputBinding* const SetupInputInterface = ModularFeaturesHelper::GetAbilityInputBindingInterface(TargetActor, PluginSettings->InputBindingOwner);
+
+	// Initializing the enum class here in case of the use of enumeration class is enabled to avoid disk consumption due to loads inside a for-loop
+	TWeakObjectPtr<UEnum> InputIDEnumeration_Ptr = ModularFeaturesHelper::LoadInputEnum(PluginSettings);
+
+	for (const auto& [ActionInput, AbilityBindingData, FunctionBindingData] : ActionsBindings)
+	{
+		if (ActionInput.IsNull())
+		{
+			UE_LOG(LogGameplayFeaturesExtraActions, Error, TEXT("%s: Action Input is null."), *FString(__func__));
+			continue;
+		}
+
+		UInputAction* const InputAction = ActionInput.LoadSynchronous();
+
+		UE_LOG(LogGameplayFeaturesExtraActions, Display, TEXT("%s: Binding Action Input %s to Actor %s."), *FString(__func__), *InputAction->GetName(), *TargetActor->GetName());
+
+		for (const auto& [FunctionName, Triggers] : FunctionBindingData)
+		{
+			for (const ETriggerEvent& Trigger : Triggers)
+			{
+				NewInputData.ActionBinding.Add(InputComponent->BindAction(InputAction, Trigger, FunctionOwner, FunctionName));
+			}
+		}
+
+		if (!AbilityBindingData.bSetupAbilityInput)
+		{
+			continue;
+		}
+
+		const int32 InputID = PluginSettings->bUseInputEnumeration ? InputIDEnumeration_Ptr->GetValueByName(AbilityBindingData.InputIDValueName, EGetByNameFlags::CheckAuthoredName) : -1;
+		if (ModularFeaturesHelper::BindAbilityInputToInterfaceOwner(SetupInputInterface, InputAction, InputID))
+		{
+			AbilityActions.Add(InputAction);
+		}
+	}
 }

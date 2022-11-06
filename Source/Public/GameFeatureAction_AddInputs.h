@@ -40,13 +40,9 @@ struct FAbilityInputBindingData
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	bool bSetupAbilityInput = false;
 
-	/* Enumeration class that will be used by the Ability System Component to manage abilities inputs */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", meta = (DisplayName = "InputID Enumeration Class"))
-	TSoftObjectPtr<UEnum> InputIDEnumerationClass;
-
-	/* Should this action setup call SetupAbilityInput/RemoveAbilityInputBinding using the IAbilityInputBinding interface? */
+	/* If the plugin is using an enumeration class to setup abilities, we need to specify wich enum value this input binding will be associated by its display name - Unnecessary if not using Enumerations to bind abilities */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", meta = (DisplayName = "InputID Value Name"))
-	FName InputIDValueName;
+	FName InputIDValueName = NAME_None;
 };
 
 USTRUCT(BlueprintType, Category = "MF Extra Actions | Modular Structs")
@@ -84,10 +80,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	TArray<FName> RequireTags;
 
-	/* Determines whether the binding will be performed within the controller class or within the pawn */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
-	EControllerOwner InputBindingOwner = EControllerOwner::Controller;
-
 	/* Enhanced Input Mapping Context to be added */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	TSoftObjectPtr<UInputMappingContext> InputMappingContext;
@@ -111,6 +103,8 @@ private:
 
 	void AddActorInputs(AActor* TargetActor);
 	void RemoveActorInputs(AActor* TargetActor);
+
+	void SetupActionBindings(AActor* TargetActor, UObject* FunctionOwner, UEnhancedInputComponent* InputComponent);
 
 	struct FInputBindingData
 	{
