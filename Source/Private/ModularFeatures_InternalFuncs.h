@@ -18,7 +18,8 @@ namespace ModularFeaturesHelper
 {
 	static const UMFEA_Settings* GetPluginSettings()
 	{
-		return GetDefault<UMFEA_Settings>();
+		static const UMFEA_Settings* Instance = GetDefault<UMFEA_Settings>();
+		return Instance;
 	}
 
 	static bool ActorHasAllRequiredTags(const AActor* Actor, const TArray<FName>& RequiredTags)
@@ -105,26 +106,15 @@ namespace ModularFeaturesHelper
 		return nullptr;
 	}
 
-	static UEnum* LoadInputEnum(const UMFEA_Settings* PluginSettings)
+	static UEnum* LoadInputEnum()
 	{
-		if (!IsValid(PluginSettings))
-		{
-			UE_LOG(LogGameplayFeaturesExtraActions, Error, TEXT("%s: Invalid plugin settings"), *FString(__func__));
-			return nullptr;
-		}
-
-		if (!PluginSettings->bUseInputEnumeration)
-		{
-			return nullptr;
-		}
-			
-		if (PluginSettings->InputIDEnumeration.IsNull())
+		if (GetPluginSettings()->InputIDEnumeration.IsNull())
 		{
 			UE_LOG(LogGameplayFeaturesExtraActions, Error, TEXT("%s: bUseInputEnumeration is set to true but Enumeration class is null!"), *FString(__func__));
 			return nullptr;
 		}
 
-		return PluginSettings->InputIDEnumeration.LoadSynchronous();
+		return GetPluginSettings()->InputIDEnumeration.LoadSynchronous();
 	}
 
 	static const bool BindAbilityInputToInterfaceOwner(const IAbilityInputBinding* TargetInterfaceOwner, UInputAction* InputAction, const int32 InputID)
@@ -160,5 +150,20 @@ namespace ModularFeaturesHelper
 		}
 
 		ActionArr.Empty();
+	}
+
+	static const int32 GetInputIDByName(const FName DisplayName, UEnum* Enumeration = nullptr)
+	{
+		if (!GetPluginSettings()->bUseInputEnumeration)
+		{
+			return -1;
+		}
+
+		if (!Enumeration)
+		{
+			Enumeration = GetPluginSettings()->InputIDEnumeration.LoadSynchronous();
+		}
+
+		return Enumeration->GetValueByName(DisplayName, EGetByNameFlags::CheckAuthoredName);
 	}
 }

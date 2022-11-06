@@ -33,8 +33,6 @@ protected:
 
 	UGameFrameworkComponentManager* GetGameFrameworkComponentManager(const FWorldContext& WorldContext) const;
 	TArray<FComponentRequestHandlePtr> ActiveRequests;
-
-	const class UMFEA_Settings* PluginSettings;
 	
 private:
 	void HandleGameInstanceStart(UGameInstance* GameInstance, FGameFeatureStateChangeContext ChangeContext);

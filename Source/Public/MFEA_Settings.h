@@ -24,21 +24,21 @@ class MODULARFEATURES_EXTRAACTIONS_API UMFEA_Settings : public UDeveloperSetting
 	GENERATED_BODY()
 	
 public:
-	explicit UMFEA_Settings(const FObjectInitializer& ObjectInitializer);
+	explicit UMFEA_Settings(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
-	/* Work in Progress: If true, will auto bind the ability input directly using the given Input Action */
+	/* If true, will auto bind the ability input directly using the given Input Action */
 	UPROPERTY(GlobalConfig, EditAnywhere, Category = "Settings")
 	bool bEnableAbilityAutoBinding;
 
 	/* Determine if we'll be using the InputID Enumeration Class or not to setup abilities. If false, SetupAbilityInputBinding will receive -1 as InputID value and you will need to bind the ability activation directly to the input action or activate the bEnableAutoBinding to let the plugin manage the bindings */
-	UPROPERTY(GlobalConfig, EditAnywhere, Category = "Settings", Meta = (DisplayName = "Use InputID Enumeration Class", EditCondition = "bEnableAbilityAutoBinding == false"))
+	UPROPERTY(GlobalConfig, EditAnywhere, Category = "Settings", Meta = (DisplayName = "Use InputID Enumeration Class", EditCondition = "bEnableAbilityAutoBinding"))
 	bool bUseInputEnumeration;
 
-	/* Enumeration class that will be used by the Ability System Component to manage abilities inputs */
-	UPROPERTY(GlobalConfig, EditAnywhere, Category = "Settings", Meta = (DisplayName = "InputID Enumeration", EditCondition = "bEnableAbilityAutoBinding == false && bUseInputEnumeration == true"))
+	/* Enumeration class that will be used by the Ability System Component to manage abilities inputs if bUseInputEnumeration is enabled */
+	UPROPERTY(GlobalConfig, EditAnywhere, Category = "Settings", Meta = (DisplayName = "InputID Enumeration", EditCondition = "!bEnableAbilityAutoBinding && bUseInputEnumeration"))
 	TSoftObjectPtr<UEnum> InputIDEnumeration;
 
-	/* Determine if the ability binding will be performed to the pawn or its controller */
+	/* Determine if the ability binding will be performed to the pawn or its controller - Must be the owner of the binding interface */
 	UPROPERTY(GlobalConfig, EditAnywhere, Category = "Settings")
 	EControllerOwner InputBindingOwner;
 };

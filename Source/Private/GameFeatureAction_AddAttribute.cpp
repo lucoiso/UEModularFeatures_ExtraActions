@@ -61,6 +61,7 @@ void UGameFeatureAction_AddAttribute::HandleActorExtension(AActor* Owner, const 
 
 	else if (EventName == UGameFrameworkComponentManager::NAME_ExtensionAdded || EventName == UGameFrameworkComponentManager::NAME_GameActorReady)
 	{
+		// We don't want to repeat the addition and cannot add if the user don't have the required tags
 		if (ActiveExtensions.Contains(Owner) || !ModularFeaturesHelper::ActorHasAllRequiredTags(Owner, RequireTags))
 		{
 			return;
@@ -79,23 +80,31 @@ void UGameFeatureAction_AddAttribute::HandleActorExtension(AActor* Owner, const 
 
 void UGameFeatureAction_AddAttribute::AddAttribute(AActor* TargetActor)
 {
+	// Only proceed if the target actor is valid and has authority
 	if (!IsValid(TargetActor) || TargetActor->GetLocalRole() != ROLE_Authority)
 	{
 		return;
 	}
 
+	// Get the ability system component of the target actor
 	if (UAbilitySystemComponent* const AbilitySystemComponent = ModularFeaturesHelper::GetAbilitySystemComponentByActor(TargetActor))
 	{
+		// Load and store the AttributeSet Class into a const variable
 		if (const TSubclassOf<UAttributeSet> SetType = Attribute.LoadSynchronous())
 		{
+			// Create the AttributeSet object
 			UAttributeSet* const NewSet = NewObject<UAttributeSet>(AbilitySystemComponent->GetOwnerActor(), SetType);
 
+			// Check if the user wants to initialize the AttributeSet with a DataTable. If true, will load and initialize the AttributeSet using the metadatas from it
 			if (!InitializationData.IsNull())
 			{
 				NewSet->InitFromMetaDataTable(InitializationData.LoadSynchronous());
 			}
 
+			// Add the attribute set to the ability system component
 			AbilitySystemComponent->AddAttributeSetSubobject(NewSet);
+
+			// Force the ability system component to replicate the attribute addition
 			AbilitySystemComponent->ForceReplication();
 
 			UE_LOG(LogGameplayFeaturesExtraActions, Display, TEXT("%s: Attribute %s added to Actor %s."), *FString(__func__), *SetType->GetName(), *TargetActor->GetName());
@@ -115,19 +124,23 @@ void UGameFeatureAction_AddAttribute::AddAttribute(AActor* TargetActor)
 
 void UGameFeatureAction_AddAttribute::RemoveAttribute(AActor* TargetActor)
 {
+	// Only proceed if the target actor is valid
 	if (!IsValid(TargetActor))
 	{
 		ActiveExtensions.Remove(TargetActor);
 		return;
 	}
-
+	
+	// Only proceed if the target actor has authority
 	if (TargetActor->GetLocalRole() != ROLE_Authority)
 	{
 		return;
 	}
 
+	// Get the ability system component of the target actor
 	if (UAbilitySystemComponent* const AbilitySystemComponent = ModularFeaturesHelper::GetAbilitySystemComponentByActor(TargetActor))
 	{
+		// Get the added Attribute Set to the target actor by searching inside the Active Extensions, remove it from the Ability System Component and force a replication
 #if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >= 1
 		if (UAttributeSet* const AttributeToRemove = ActiveExtensions.FindRef(TargetActor).Get())
 		{
@@ -145,6 +158,7 @@ void UGameFeatureAction_AddAttribute::RemoveAttribute(AActor* TargetActor)
 		}
 #endif
 	}
+	// We don't need to warn the user if there's no valid world or game instance, since this is a common case when the game is shutting down
 	else if (IsValid(GetWorld()) && IsValid(GetWorld()->GetGameInstance()))
 	{
 		UE_LOG(LogGameplayFeaturesExtraActions, Error, TEXT("%s: Failed to find AbilitySystemComponent on Actor %s."), *FString(__func__), *TargetActor->GetName());

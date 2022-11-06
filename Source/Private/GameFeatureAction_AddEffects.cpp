@@ -60,6 +60,7 @@ void UGameFeatureAction_AddEffects::HandleActorExtension(AActor* Owner, const FN
 
 	else if (EventName == UGameFrameworkComponentManager::NAME_ExtensionAdded || EventName == UGameFrameworkComponentManager::NAME_GameActorReady)
 	{
+		// We don't want to repeat the addition and cannot add if the user don't have the required tags
 		if (ActiveExtensions.Contains(Owner) || !ModularFeaturesHelper::ActorHasAllRequiredTags(Owner, RequireTags))
 		{
 			return;
@@ -81,28 +82,36 @@ void UGameFeatureAction_AddEffects::HandleActorExtension(AActor* Owner, const FN
 
 void UGameFeatureAction_AddEffects::AddEffects(AActor* TargetActor, const FEffectStackedData& Effect)
 {
+	// Only proceed if the target actor is valid and has authority
 	if (!IsValid(TargetActor) || TargetActor->GetLocalRole() != ROLE_Authority)
 	{
 		return;
 	}
 
+	// Get the ability system component of the target actor
 	if (UAbilitySystemComponent* const AbilitySystemComponent = ModularFeaturesHelper::GetAbilitySystemComponentByActor(TargetActor))
 	{
+		// Check if there's already added spec data applied to the target actor
 		TArray<FActiveGameplayEffectHandle>& SpecData = ActiveExtensions.FindOrAdd(TargetActor);
 
+		// Load the Effect class into a const variable
 		const TSubclassOf<UGameplayEffect> EffectClass = Effect.EffectClass.LoadSynchronous();
 
 		UE_LOG(LogGameplayFeaturesExtraActions, Display, TEXT("%s: Adding effect %s level %u to Actor %s with %u SetByCaller params."), *FString(__func__), *EffectClass->GetName(), Effect.EffectLevel, *TargetActor->GetName(), Effect.SetByCallerParams.Num());
 
+		// Create the outgoing spec handle to define the SetByCaller settings and apply the data to the target Ability System Component
 		const FGameplayEffectSpecHandle SpecHandle = AbilitySystemComponent->MakeOutgoingSpec(EffectClass, Effect.EffectLevel, AbilitySystemComponent->MakeEffectContext());
 
+		// Iterate the Set By Caller params and add the data to the Spec Handle Data
 		for (const TPair<FGameplayTag, float>& SetByCallerParam : Effect.SetByCallerParams)
 		{
 			SpecHandle.Data.Get()->SetSetByCallerMagnitude(SetByCallerParam.Key, SetByCallerParam.Value);
 		}
 
+		// Apply the effect data to the target Ability System Component
 		const FActiveGameplayEffectHandle NewActiveEffect = AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
 
+		// Add the active effect handle to the Spec Data before adding it to the ActiveExtensions map
 		SpecData.Add(NewActiveEffect);
 
 		ActiveExtensions.Add(TargetActor, SpecData);
@@ -115,24 +124,29 @@ void UGameFeatureAction_AddEffects::AddEffects(AActor* TargetActor, const FEffec
 
 void UGameFeatureAction_AddEffects::RemoveEffects(AActor* TargetActor)
 {
+	// Only proceed if the target actor is valid
 	if (!IsValid(TargetActor))
 	{
 		ActiveExtensions.Remove(TargetActor);
 		return;
 	}
 
+	// Only proceed if the target actor has authority
 	if (TargetActor->GetLocalRole() != ROLE_Authority)
 	{
 		return;
 	}
 
+	// Get the active effects and check if it's empty
 	if (TArray<FActiveGameplayEffectHandle> ActiveEffects = ActiveExtensions.FindRef(TargetActor);
 		!ActiveEffects.IsEmpty())
 	{
+		// Get the target ability system component
 		if (UAbilitySystemComponent* const AbilitySystemComponent = ModularFeaturesHelper::GetAbilitySystemComponentByActor(TargetActor))
 		{
 			UE_LOG(LogGameplayFeaturesExtraActions, Display, TEXT("%s: Removing effects from Actor %s."), *FString(__func__), *TargetActor->GetName());
 
+			// Iterate through the active effects and remove the specified effect by its effect handle if its valid
 			for (const FActiveGameplayEffectHandle& EffectHandle : ActiveEffects)
 			{
 				if (EffectHandle.IsValid())

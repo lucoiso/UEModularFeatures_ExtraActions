@@ -13,15 +13,10 @@ void UGameFeatureAction_WorldActionBase::OnGameFeatureActivating(FGameFeatureAct
 {
 	Super::OnGameFeatureActivating(Context);
 
-	PluginSettings = ModularFeaturesHelper::GetPluginSettings();
-
-	if (!IsValid(PluginSettings))
-	{
-		UE_LOG(LogGameplayFeaturesExtraActions, Error, TEXT("%s: Failed to get plugin settings."), *FString(__func__));
-	}
-
+	// When the game instance starts, will perform the modular feature activation behavior
 	GameInstanceStartHandle = FWorldDelegates::OnStartGameInstance.AddUObject(this, &UGameFeatureAction_WorldActionBase::HandleGameInstanceStart, FGameFeatureStateChangeContext(Context));
 
+	// Useful to activate the feature even if the game instance has already started
 	for (const FWorldContext& WorldContext : GEngine->GetWorldContexts())
 	{
 		if (Context.ShouldApplyToWorldContext(WorldContext))

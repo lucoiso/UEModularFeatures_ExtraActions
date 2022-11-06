@@ -11,6 +11,7 @@
 #include "GameFeatureAction_AddInputs.generated.h"
 
 class UInputMappingContext;
+class UEnhancedInputLocalPlayerSubsystem;
 struct FComponentRequestHandle;
 
 /**
@@ -36,11 +37,11 @@ struct FAbilityInputBindingData
 {
 	GENERATED_BODY()
 
-	/* Should this action setup call SetupAbilityInput/RemoveAbilityInputBinding using the IAbilityInputBinding interface? */
+	/* Should this action setup call SetupAbilityInput/RemoveAbilityInputBinding using the IAbilityInputBinding interface? Will call using -1 as InputID value if bUseInputEnumeration is false */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	bool bSetupAbilityInput = false;
 
-	/* If the plugin is using an enumeration class to setup abilities, we need to specify wich enum value this input binding will be associated by its display name - Unnecessary if not using Enumerations to bind abilities */
+	/* If the plugin is using an enumeration class to setup abilities, we need to specify wich enum value this input binding will be associated by its display name - Can ignore if bUseInputEnumeration is disabled in Project Settings */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", meta = (DisplayName = "InputID Value Name"))
 	FName InputIDValueName = NAME_None;
 };
@@ -105,6 +106,8 @@ private:
 	void RemoveActorInputs(AActor* TargetActor);
 
 	void SetupActionBindings(AActor* TargetActor, UObject* FunctionOwner, UEnhancedInputComponent* InputComponent);
+
+	UEnhancedInputLocalPlayerSubsystem* GetEnhancedInputComponentFromPawn(APawn* TargetPawn);
 
 	struct FInputBindingData
 	{

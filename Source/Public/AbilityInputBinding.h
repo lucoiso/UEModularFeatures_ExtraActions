@@ -25,7 +25,7 @@ class MODULARFEATURES_EXTRAACTIONS_API IAbilityInputBinding
 {
 	GENERATED_IINTERFACE_BODY()
 		
-	/* This function is needed for setup ability input binding inside your controller or pawn */
+	/* This function is needed for setup ability input binding inside your controller or pawn - InputID will be always -1 if bUseInputEnumeration is disabled on Project Settings */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "MF Extra Actions | Modular Interfaces")
 	void SetupAbilityInputBinding(UInputAction* Action, const int32 InputID = -1);
 

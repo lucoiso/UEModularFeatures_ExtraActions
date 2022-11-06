@@ -33,7 +33,7 @@ struct FAbilityMapping
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	int32 AbilityLevel = 1;
 
-	/* InputID Value Name associated by Enumeration Class - Unnecessary if not using Enumerations to bind abilities */
+	/* If the plugin is using an enumeration class to setup abilities, we need to specify wich enum value this input binding will be associated by its display name - Can ignore if bUseInputEnumeration is disabled in Project Settings */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", meta = (DisplayName = "InputID Value Name"))
 	FName InputIDValueName = NAME_None;
 };

@@ -64,6 +64,7 @@ void UGameFeatureAction_AddInputs::HandleActorExtension(AActor* Owner, const FNa
 
 	else if (EventName == UGameFrameworkComponentManager::NAME_ExtensionAdded || EventName == UGameFrameworkComponentManager::NAME_GameActorReady)
 	{
+		// We don't want to repeat the addition and cannot add if the user don't have the required tags
 		if (ActiveExtensions.Contains(Owner) || !ModularFeaturesHelper::ActorHasAllRequiredTags(Owner, RequireTags))
 		{
 			return;
@@ -82,55 +83,55 @@ void UGameFeatureAction_AddInputs::HandleActorExtension(AActor* Owner, const FNa
 
 void UGameFeatureAction_AddInputs::AddActorInputs(AActor* TargetActor)
 {
+	// Only proceed if the target actor is valid
 	if (!IsValid(TargetActor))
 	{
 		return;
 	}
 
+	// Get the target pawn and check if it is valid. We don't want to add inputs to a non-pawn actor
 	APawn* const TargetPawn = Cast<APawn>(TargetActor);
-
 	if (!IsValid(TargetPawn))
 	{
 		return;
 	}
 
-	if (const APlayerController* const PlayerController = TargetPawn->GetController<APlayerController>())
+	// Try to get the enhanced input subsystem from the pawn
+	if (UEnhancedInputLocalPlayerSubsystem* const Subsystem = GetEnhancedInputComponentFromPawn(TargetPawn))
 	{
-		if (const ULocalPlayer* const LocalPlayer = PlayerController->GetLocalPlayer();
-			PlayerController->IsLocalController() && IsValid(LocalPlayer))
+		// Cehck if there's already an existing input data associated to the target actor and get it or create a new one
+		FInputBindingData& NewInputData = ActiveExtensions.FindOrAdd(TargetActor);
+
+		// Load the Input Mapping context and store it into a variable
+		UInputMappingContext* const InputMapping = InputMappingContext.LoadSynchronous();
+
+		UE_LOG(LogGameplayFeaturesExtraActions, Display, TEXT("%s: Adding Enhanced Input Mapping %s to Actor %s."), *FString(__func__), *InputMapping->GetName(), *TargetActor->GetName());
+
+		// Add the loaded mapping context into the enhanced input subsystem
+		Subsystem->AddMappingContext(InputMapping, MappingPriority);
+
+		// Add the mapping context to the input data
+		NewInputData.Mapping = InputMapping;
+
+		// Get the Function Owner, the UObject which owns the specified UFunction that will be used to bind the input activation and check if it's valid
+		const TWeakObjectPtr<UObject> FunctionOwner = ModularFeaturesHelper::GetPawnInputOwner(TargetPawn, ModularFeaturesHelper::GetPluginSettings()->InputBindingOwner);
+		if (!FunctionOwner.IsValid())
 		{
-			UEnhancedInputLocalPlayerSubsystem* const Subsystem = LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
-
-			if (!IsValid(Subsystem))
-			{
-				UE_LOG(LogGameplayFeaturesExtraActions, Error, TEXT("%s: LocalPlayer %s has no EnhancedInputLocalPlayerSubsystem."), *FString(__func__), *LocalPlayer->GetName());
-
-				return;
-			}
-
-			FInputBindingData& NewInputData = ActiveExtensions.FindOrAdd(TargetActor);
-			UInputMappingContext* const InputMapping = InputMappingContext.LoadSynchronous();
-
-			UE_LOG(LogGameplayFeaturesExtraActions, Display, TEXT("%s: Adding Enhanced Input Mapping %s to Actor %s."), *FString(__func__), *InputMapping->GetName(), *TargetActor->GetName());
-
-			Subsystem->AddMappingContext(InputMapping, MappingPriority);
-
-			NewInputData.Mapping = InputMapping;
-
-			const TWeakObjectPtr<UObject> FunctionOwner = ModularFeaturesHelper::GetPawnInputOwner(TargetPawn, PluginSettings->InputBindingOwner);
-			const TWeakObjectPtr<UEnhancedInputComponent> InputComponent = ModularFeaturesHelper::GetEnhancedInputComponentInPawn(TargetPawn, PluginSettings->InputBindingOwner);
-
-			if (!FunctionOwner.IsValid() || !InputComponent.IsValid())
-			{
-				UE_LOG(LogGameplayFeaturesExtraActions, Error, TEXT("%s: Failed to find InputComponent on Actor %s."), *FString(__func__), *TargetActor->GetName());
-			}
-			else
-			{
-				SetupActionBindings(TargetActor, FunctionOwner.Get(), InputComponent.Get());
-
-				ActiveExtensions.Add(TargetActor, NewInputData);
-			}
+			UE_LOG(LogGameplayFeaturesExtraActions, Error, TEXT("%s: Failed to get the function owner using the Actor %s."), *FString(__func__), *TargetActor->GetName());
+			return;
 		}
+
+		// Get the Enhanced Input component of the target Pawn and check if it's valid
+		const TWeakObjectPtr<UEnhancedInputComponent> InputComponent = ModularFeaturesHelper::GetEnhancedInputComponentInPawn(TargetPawn, ModularFeaturesHelper::GetPluginSettings()->InputBindingOwner);
+		if (!InputComponent.IsValid())
+		{
+			UE_LOG(LogGameplayFeaturesExtraActions, Error, TEXT("%s: Failed to find InputComponent on Actor %s."), *FString(__func__), *TargetActor->GetName());
+			return;
+		}
+
+		// If everything is okay, setup the action bindings and add the extension to the active map
+		SetupActionBindings(TargetActor, FunctionOwner.Get(), InputComponent.Get());
+		ActiveExtensions.Add(TargetActor, NewInputData);
 	}
 	else if (TargetPawn->IsPawnControlled())
 	{
@@ -140,61 +141,55 @@ void UGameFeatureAction_AddInputs::AddActorInputs(AActor* TargetActor)
 
 void UGameFeatureAction_AddInputs::RemoveActorInputs(AActor* TargetActor)
 {
+	// Only proceed if the target actor is valid
 	if (!IsValid(TargetActor))
 	{
 		ActiveExtensions.Remove(TargetActor);
 		return;
 	}
 
+	// Get the target pawn and check if it is valid. We don't want to check inputs from a non-pawn actor
 	APawn* const TargetPawn = Cast<APawn>(TargetActor);
-
 	if (!IsValid(TargetPawn))
 	{
 		ActiveExtensions.Remove(TargetActor);
 		return;
 	}
-
-	if (const APlayerController* const PlayerController = TargetPawn->GetController<APlayerController>())
+	
+	// Check if there's existing active input data
+	if (const FInputBindingData* const ActiveInputData = ActiveExtensions.Find(TargetActor))
 	{
-		if (const ULocalPlayer* const LocalPlayer = PlayerController->GetLocalPlayer();
-			PlayerController->IsLocalController() && IsValid(LocalPlayer))
+		// Try to get the enhanced input subsystem from the pawn
+		if (UEnhancedInputLocalPlayerSubsystem* const Subsystem = GetEnhancedInputComponentFromPawn(TargetPawn))
 		{
-			UEnhancedInputLocalPlayerSubsystem* const Subsystem = LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
+			UE_LOG(LogGameplayFeaturesExtraActions, Display, TEXT("%s: Removing Enhanced Input Mapping %s from Actor %s."), *FString(__func__), *ActiveInputData->Mapping->GetName(), *TargetActor->GetName());
 
-			if (!IsValid(Subsystem))
+			// Try to get the enhanced input component of the target pawn
+			if (const TWeakObjectPtr<UEnhancedInputComponent> InputComponent = ModularFeaturesHelper::GetEnhancedInputComponentInPawn(TargetPawn, ModularFeaturesHelper::GetPluginSettings()->InputBindingOwner);
+				!InputComponent.IsValid())
 			{
-				UE_LOG(LogGameplayFeaturesExtraActions, Error, TEXT("%s: LocalPlayer %s has no EnhancedInputLocalPlayerSubsystem."), *FString(__func__), *LocalPlayer->GetName());
-
-				return;
+				UE_LOG(LogGameplayFeaturesExtraActions, Error, TEXT("%s: Failed to find InputComponent on Actor %s."), *FString(__func__), *TargetActor->GetName());
 			}
-
-			if (const FInputBindingData* const ActiveInputData = ActiveExtensions.Find(TargetActor);
-				ActiveInputData != nullptr)
+			else
 			{
-				UE_LOG(LogGameplayFeaturesExtraActions, Display, TEXT("%s: Removing Enhanced Input Mapping %s from Actor %s."), *FString(__func__), *ActiveInputData->Mapping->GetName(), *TargetActor->GetName());
-
-				if (const TWeakObjectPtr<UEnhancedInputComponent> InputComponent = ModularFeaturesHelper::GetEnhancedInputComponentInPawn(TargetPawn, PluginSettings->InputBindingOwner);
-					!InputComponent.IsValid())
+				// Iterate through the active bindings and remove all
+				for (const FInputBindingHandle& InputActionBinding : ActiveInputData->ActionBinding)
 				{
-					UE_LOG(LogGameplayFeaturesExtraActions, Error, TEXT("%s: Failed to find InputComponent on Actor %s."), *FString(__func__), *TargetActor->GetName());
-				}
-				else
-				{
-					for (const FInputBindingHandle& InputActionBinding : ActiveInputData->ActionBinding)
-					{
-						InputComponent->RemoveBinding(InputActionBinding);
-					}
-
-					if (const IAbilityInputBinding* const SetupInputInterface = ModularFeaturesHelper::GetAbilityInputBindingInterface(TargetActor, PluginSettings->InputBindingOwner))
-					{
-						ModularFeaturesHelper::RemoveAbilityInputInInterfaceOwner(SetupInputInterface->_getUObject(), AbilityActions);
-					}
+					InputComponent->RemoveBinding(InputActionBinding);
 				}
 
-				Subsystem->RemoveMappingContext(ActiveInputData->Mapping.Get());
+				// Verify and try to remove the ability bindings by calling the RemoveAbilityInputBinding from IAbilityInputBinding interface
+				if (const IAbilityInputBinding* const SetupInputInterface = ModularFeaturesHelper::GetAbilityInputBindingInterface(TargetActor, ModularFeaturesHelper::GetPluginSettings()->InputBindingOwner))
+				{
+					ModularFeaturesHelper::RemoveAbilityInputInInterfaceOwner(SetupInputInterface->_getUObject(), AbilityActions);
+				}
 			}
+
+			// Remove the mapping context from the subsystem
+			Subsystem->RemoveMappingContext(ActiveInputData->Mapping.Get());
 		}
 	}
+	// We don't want to warn the user if the pawn is not being controlled
 	else if (TargetPawn->IsPawnControlled())
 	{
 		UE_LOG(LogGameplayFeaturesExtraActions, Error, TEXT("%s: Failed to find PlayerController on Actor %s."), *FString(__func__), *TargetActor->GetName());
@@ -205,41 +200,82 @@ void UGameFeatureAction_AddInputs::RemoveActorInputs(AActor* TargetActor)
 
 void UGameFeatureAction_AddInputs::SetupActionBindings(AActor* TargetActor, UObject* FunctionOwner, UEnhancedInputComponent* InputComponent)
 {
+	// Get the existing input data
 	FInputBindingData& NewInputData = ActiveExtensions.FindOrAdd(TargetActor);
-	const IAbilityInputBinding* const SetupInputInterface = ModularFeaturesHelper::GetAbilityInputBindingInterface(TargetActor, PluginSettings->InputBindingOwner);
 
-	// Initializing the enum class here in case of the use of enumeration class is enabled to avoid disk consumption due to loads inside a for-loop
-	TWeakObjectPtr<UEnum> InputIDEnumeration_Ptr = ModularFeaturesHelper::LoadInputEnum(PluginSettings);
+	// Get and store the interface owner before the for-loop
+	const IAbilityInputBinding* const SetupInputInterface = ModularFeaturesHelper::GetAbilityInputBindingInterface(TargetActor, ModularFeaturesHelper::GetPluginSettings()->InputBindingOwner);
 
+	// Load the enumeration and save it before the loop to avoid high disk consumption due to loading a soft reference a lot of times since there's only 1 enumeration
+	TWeakObjectPtr<UEnum> InputIDEnumeration_Ptr = ModularFeaturesHelper::LoadInputEnum();
+
+	// Iterate through the bindings to add all of them
 	for (const auto& [ActionInput, AbilityBindingData, FunctionBindingData] : ActionsBindings)
 	{
+		// Check if the action input is valid
 		if (ActionInput.IsNull())
 		{
 			UE_LOG(LogGameplayFeaturesExtraActions, Error, TEXT("%s: Action Input is null."), *FString(__func__));
 			continue;
 		}
 
+		// Load and store the Action Input into a variable
 		UInputAction* const InputAction = ActionInput.LoadSynchronous();
 
 		UE_LOG(LogGameplayFeaturesExtraActions, Display, TEXT("%s: Binding Action Input %s to Actor %s."), *FString(__func__), *InputAction->GetName(), *TargetActor->GetName());
 
+		// Iterate through all function binding data to bind the UFunctions to it's corresponding input
 		for (const auto& [FunctionName, Triggers] : FunctionBindingData)
 		{
+			// Iterate through all triggersto bind the UFunctions to it's corresponding trigger type
 			for (const ETriggerEvent& Trigger : Triggers)
 			{
 				NewInputData.ActionBinding.Add(InputComponent->BindAction(InputAction, Trigger, FunctionOwner, FunctionName));
 			}
 		}
 
+		// Check if this input will be used to setup existing abilities
 		if (!AbilityBindingData.bSetupAbilityInput)
 		{
 			continue;
 		}
 
-		const int32 InputID = PluginSettings->bUseInputEnumeration ? InputIDEnumeration_Ptr->GetValueByName(AbilityBindingData.InputIDValueName, EGetByNameFlags::CheckAuthoredName) : -1;
+		// Get the ability input ID from the enumeration by its value name
+		const int32 InputID = ModularFeaturesHelper::GetInputIDByName(AbilityBindingData.InputIDValueName, InputIDEnumeration_Ptr.Get());
+
+		// Try to bind this input by calling the function SetupAbilityInputBinding from IAbilityInputBinding interface
 		if (ModularFeaturesHelper::BindAbilityInputToInterfaceOwner(SetupInputInterface, InputAction, InputID))
 		{
 			AbilityActions.Add(InputAction);
 		}
 	}
+}
+
+UEnhancedInputLocalPlayerSubsystem* UGameFeatureAction_AddInputs::GetEnhancedInputComponentFromPawn(APawn* TargetPawn)
+{
+	// Get the Player Controller associated to this pawn
+	if (const APlayerController* const PlayerController = TargetPawn->GetController<APlayerController>())
+	{
+		// Check if the controller is local. We don't want to add inputs to a non-local player
+		if (!PlayerController->IsLocalController())
+		{
+			return nullptr;
+		}
+
+		// Get the local player associated to the controller
+		if (const ULocalPlayer* const LocalPlayer = PlayerController->GetLocalPlayer())
+		{
+			// Get the enhanced input subsystem of the local player and check if its valid
+			UEnhancedInputLocalPlayerSubsystem* const Subsystem = LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
+			if (!IsValid(Subsystem))
+			{
+				UE_LOG(LogGameplayFeaturesExtraActions, Error, TEXT("%s: LocalPlayer %s has no EnhancedInputLocalPlayerSubsystem."), *FString(__func__), *LocalPlayer->GetName());
+				return nullptr;
+			}
+
+			return Subsystem;
+		}
+	}
+	
+	return nullptr;
 }
