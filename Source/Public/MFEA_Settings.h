@@ -27,7 +27,7 @@ enum class EAbilityBindingMode :uint8
 	AbilityClass
 };
 
-UCLASS(Config = Game, DefaultConfig, meta = (DisplayName = "Modular Features - Extra Actions: Plugin Settings"))
+UCLASS(Config = Game, DefaultConfig, meta = (DisplayName = "Modular Features - Extra Actions"))
 class MODULARFEATURES_EXTRAACTIONS_API UMFEA_Settings : public UDeveloperSettings
 {
 	GENERATED_BODY()

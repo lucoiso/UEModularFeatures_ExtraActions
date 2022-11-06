@@ -8,4 +8,5 @@
 
 UMFEA_Settings::UMFEA_Settings(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer), bEnableAbilityAutoBinding(false), AbilityBindingMode(EAbilityBindingMode::InputID), InputBindingOwner(EControllerOwner::Controller)
 {
+	CategoryName = TEXT("Plugins");
 }
