@@ -239,12 +239,10 @@ void UGameFeatureAction_AddInputs::SetupActionBindings(AActor* TargetActor, UObj
 		{
 			continue;
 		}
-
-		// Get the ability input ID from the enumeration by its value name
-		const int32 InputID = ModularFeaturesHelper::GetInputIDByName(AbilityBindingData.InputIDValueName, InputIDEnumeration_Ptr.Get());
-
+		
 		// Try to bind this input by calling the function SetupAbilityInputBinding from IAbilityInputBinding interface
-		if (ModularFeaturesHelper::BindAbilityInputToInterfaceOwner(SetupInputInterface, InputAction, InputID))
+		if (FGameplayAbilitySpec NewAbilitySpec = GetAbilitySpecInformationFromBindingData(TargetActor, AbilityBindingData, InputIDEnumeration_Ptr.Get()); 
+			ModularFeaturesHelper::BindAbilityInputToInterfaceOwner(SetupInputInterface, InputAction, NewAbilitySpec))
 		{
 			AbilityActions.Add(InputAction);
 		}
@@ -278,4 +276,46 @@ UEnhancedInputLocalPlayerSubsystem* UGameFeatureAction_AddInputs::GetEnhancedInp
 	}
 	
 	return nullptr;
+}
+
+FGameplayAbilitySpec UGameFeatureAction_AddInputs::GetAbilitySpecInformationFromBindingData(AActor* TargetActor, const FAbilityInputBindingData& AbilityBindingData, UEnum* InputIDEnum)
+{
+	// Get the ability input ID from the enumeration by its value name
+	const int32 InputID = ModularFeaturesHelper::GetInputIDByName(AbilityBindingData.InputIDValueName, InputIDEnum);
+
+	// Create the spec, used as param of ability binding
+	FGameplayAbilitySpec NewAbilitySpec;
+
+	// If the user wants to find a active ability spec, we'll try to get the ability system component of the target actor and get the spec using the specified ability class
+	if (AbilityBindingData.bFindAbilitySpec)
+	{
+		if (UAbilitySystemComponent* const AbilitySystemComponent = ModularFeaturesHelper::GetAbilitySystemComponentByActor(TargetActor))
+		{
+			// We're not using the InputID to search for existing spec because more than 1 abilities can have the same Input Id
+			AbilitySystemComponent->FindAbilitySpecFromClass(TSubclassOf<UGameplayAbility>(AbilityBindingData.AbilityClass.LoadSynchronous()));
+		}
+		else
+		{
+			UE_LOG(LogGameplayFeaturesExtraActions, Error, TEXT("%s: Failed to find AbilitySystemComponent on Actor %s."), *FString(__func__), *TargetActor->GetName());
+		}
+	}
+	// If we are not using an existing spec, we'll create a basic spec just to pass some parameters to the ability binding
+	else
+	{
+		// Only add the class if it's valid
+		if (!AbilityBindingData.AbilityClass.IsNull())
+		{
+			NewAbilitySpec.Ability = Cast<UGameplayAbility>(AbilityBindingData.AbilityClass.LoadSynchronous()->GetDefaultObject());
+		}
+
+		// Only append tags if the container is not empty
+		if (!AbilityBindingData.AbilityTags.IsEmpty())
+		{
+			NewAbilitySpec.Ability->AbilityTags.AppendTags(AbilityBindingData.AbilityTags);
+		}
+
+		NewAbilitySpec.InputID = InputID;
+	}
+
+	return NewAbilitySpec;
 }

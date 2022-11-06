@@ -110,7 +110,7 @@ void UGameFeatureAction_AddAbilities::AddActorAbilities(AActor* TargetActor, con
 		UE_LOG(LogGameplayFeaturesExtraActions, Display, TEXT("%s: Adding ability %s to Actor %s."), *FString(__func__), *AbilityToAdd->GetName(), *TargetActor->GetName());
 		
 		// Create the spec, used to give the ability to target's ability system component
-		const FGameplayAbilitySpec NewAbilitySpec(AbilityToAdd, Ability.AbilityLevel, InputID, TargetActor);
+		FGameplayAbilitySpec NewAbilitySpec(AbilityToAdd, Ability.AbilityLevel, InputID, TargetActor);
 
 		// Try to give the ability to the target and check if the spec handle is valid
 		if (const FGameplayAbilitySpecHandle NewSpecHandle = AbilitySystemComponent->GiveAbility(NewAbilitySpec);
@@ -127,7 +127,7 @@ void UGameFeatureAction_AddAbilities::AddActorAbilities(AActor* TargetActor, con
 
 				// If we can bind the input to the target interface, we must add the input reference to the ability data
 				if (UInputAction* const AbilityInput = Ability.InputAction.LoadSynchronous(); 
-					ModularFeaturesHelper::BindAbilityInputToInterfaceOwner(SetupInputInterface, AbilityInput, InputID))
+					ModularFeaturesHelper::BindAbilityInputToInterfaceOwner(SetupInputInterface, AbilityInput, NewAbilitySpec))
 				{
 					NewAbilityData.InputReference.Add(AbilityInput);
 				}

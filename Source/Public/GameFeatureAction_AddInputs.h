@@ -24,26 +24,39 @@ struct FFunctionStackedData
 	GENERATED_BODY()
 
 	/* UFunction name */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FName FunctionName;
 
 	/* Input Trigger event type */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TArray<ETriggerEvent> Triggers;
 };
 
+/* Settings for ability binding: Use InputID Value Name if Ability Binding Mode is InputID | Use AbilityTags if Ability Binding Mode is AbilityTags | Use AbilityClass if Ability Binding Mode is AbilityClass | Use bFindAbilitySpec and AbilityClass if Ability Binding Mode is AbilitySpec */
 USTRUCT(BlueprintType, Category = "MF Extra Actions | Modular Structs")
 struct FAbilityInputBindingData
 {
 	GENERATED_BODY()
 
-	/* Should this action setup call SetupAbilityInput/RemoveAbilityInputBinding using the IAbilityInputBinding interface? Will call using -1 as InputID value if bUseInputEnumeration is false */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
+	/* Should this action setup call SetupAbilityInput/RemoveAbilityInputBinding using the IAbilityInputBinding interface? */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	bool bSetupAbilityInput = false;
 
-	/* If the plugin is using an enumeration class to setup abilities, we need to specify wich enum value this input binding will be associated by its display name - Can ignore if bUseInputEnumeration is disabled in Project Settings */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", meta = (DisplayName = "InputID Value Name"))
+	/* Bind this input to an ability activation using an Input ID */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (DisplayName = "InputID Value Name", EditCondition = "bSetupAbilityInput"))
 	FName InputIDValueName = NAME_None;
+
+	/* Bind this input to an ability activation using Ability Tags container */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (DisplayName = "InputID Value Name", EditCondition = "bSetupAbilityInput"))
+	FGameplayTagContainer AbilityTags = FGameplayTagContainer::EmptyContainer;
+
+	/* Bind this input to an ability activation using the Ability Class */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (DisplayName = "InputID Value Name", EditCondition = "bSetupAbilityInput"))
+	TSoftClassPtr<UGameplayAbility> AbilityClass;
+
+	/* Bind this input to an ability activation using the an active ability spec - Must specify the Ability Class! */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (DisplayName = "InputID Value Name", EditCondition = "bSetupAbilityInput && AbilityClass != nullptr"))
+	bool bFindAbilitySpec;
 };
 
 USTRUCT(BlueprintType, Category = "MF Extra Actions | Modular Structs")
@@ -52,15 +65,15 @@ struct FInputMappingStack
 	GENERATED_BODY()
 
 	/* Enhanced Input Action to bind with these settings */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TSoftObjectPtr<UInputAction> ActionInput;
 
 	/* Settings to bind this Action Input to a Ability System Component */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FAbilityInputBindingData AbilityBindingData;
 
 	/* UFunction and Triggers to bind activation by Enhanced Input */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", meta = (DisplayName = "UFunction Bindings"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (DisplayName = "UFunction Bindings"))
 	TArray<FFunctionStackedData> FunctionBindingData;
 };
 
@@ -107,6 +120,7 @@ private:
 
 	void SetupActionBindings(AActor* TargetActor, UObject* FunctionOwner, UEnhancedInputComponent* InputComponent);
 
+	FGameplayAbilitySpec GetAbilitySpecInformationFromBindingData(AActor* TargetActor, const FAbilityInputBindingData& AbilityBindingData, UEnum* InputIDEnum = nullptr);
 	UEnhancedInputLocalPlayerSubsystem* GetEnhancedInputComponentFromPawn(APawn* TargetPawn);
 
 	struct FInputBindingData

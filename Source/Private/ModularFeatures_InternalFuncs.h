@@ -117,7 +117,8 @@ namespace ModularFeaturesHelper
 		return GetPluginSettings()->InputIDEnumeration.LoadSynchronous();
 	}
 
-	static const bool BindAbilityInputToInterfaceOwner(const IAbilityInputBinding* TargetInterfaceOwner, UInputAction* InputAction, const int32 InputID)
+	// Will be removed in the future - but i don't want to break existing projects :)
+	static const bool BindAbilityInputToInterfaceOwnerWithID(const IAbilityInputBinding* TargetInterfaceOwner, UInputAction* InputAction, const int32 InputID)
 	{
 		if (!TargetInterfaceOwner)
 		{
@@ -127,6 +128,38 @@ namespace ModularFeaturesHelper
 		}
 
 		IAbilityInputBinding::Execute_SetupAbilityInputBinding(TargetInterfaceOwner->_getUObject(), InputAction, InputID);
+
+		return true;
+	}
+	
+	static const bool BindAbilityInputToInterfaceOwner(const IAbilityInputBinding* TargetInterfaceOwner, UInputAction* InputAction, FGameplayAbilitySpec& AbilitySpec)
+	{
+		if (!BindAbilityInputToInterfaceOwnerWithID(TargetInterfaceOwner, InputAction, AbilitySpec.InputID))
+		{
+			return false;
+		}
+
+		switch (GetPluginSettings()->AbilityBindingMode)
+		{
+			case (EAbilityBindingMode::InputID):
+				IAbilityInputBinding::Execute_SetupAbilityBindingByInput(TargetInterfaceOwner->_getUObject(), InputAction, AbilitySpec.InputID);
+				break;
+
+			case (EAbilityBindingMode::AbilitySpec):
+				IAbilityInputBinding::Execute_SetupAbilityBindingBySpec(TargetInterfaceOwner->_getUObject(), InputAction, AbilitySpec);
+				break;
+
+			case (EAbilityBindingMode::AbilityTags):
+				IAbilityInputBinding::Execute_SetupAbilityBindingByTags(TargetInterfaceOwner->_getUObject(), InputAction, AbilitySpec.Ability->AbilityTags);
+				break;
+
+			case (EAbilityBindingMode::AbilityClass):
+				IAbilityInputBinding::Execute_SetupAbilityBindingByClass(TargetInterfaceOwner->_getUObject(), InputAction, TSubclassOf<UGameplayAbility>(AbilitySpec.Ability.GetClass()));
+				break;
+
+			default:
+				return false;
+		}
 
 		return true;
 	}
@@ -152,9 +185,14 @@ namespace ModularFeaturesHelper
 		ActionArr.Empty();
 	}
 
+	static const bool IsUsingInputIDEnumeration()
+	{
+		return GetPluginSettings()->AbilityBindingMode == EAbilityBindingMode::InputID;
+	}
+
 	static const int32 GetInputIDByName(const FName DisplayName, UEnum* Enumeration = nullptr)
 	{
-		if (!GetPluginSettings()->bUseInputEnumeration)
+		if (!IsUsingInputIDEnumeration())
 		{
 			return -1;
 		}
