@@ -85,6 +85,9 @@ void UGameFeatureAction_AddAbilities::HandleActorExtension(AActor* Owner, const 
 				AddActorAbilities(Owner, Entry);
 			}
 		}
+
+		// Free the pointer. We only need this enum when we're adding abilities
+		InputIDEnumeration_Ptr.Reset();
 	}
 }
 
