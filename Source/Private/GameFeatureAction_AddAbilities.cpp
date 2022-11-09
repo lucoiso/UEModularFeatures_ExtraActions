@@ -126,7 +126,7 @@ void UGameFeatureAction_AddAbilities::AddActorAbilities(AActor* TargetActor, con
 			if (!Ability.InputAction.IsNull())
 			{
 				// Get the target Ability Input Binding interface
-				const IAbilityInputBinding* const SetupInputInterface = ModularFeaturesHelper::GetAbilityInputBindingInterface(TargetActor, ModularFeaturesHelper::GetPluginSettings()->InputBindingOwner);
+				const IAbilityInputBinding* const SetupInputInterface = ModularFeaturesHelper::GetAbilityInputBindingInterface(TargetActor, InputBindingOwnerOverride);
 
 				// If we can bind the input to the target interface, we must add the input reference to the ability data
 				if (UInputAction* const AbilityInput = Ability.InputAction.LoadSynchronous(); 
@@ -185,7 +185,7 @@ void UGameFeatureAction_AddAbilities::RemoveActorAbilities(AActor* TargetActor)
 		}
 
 		// Get the interface owner and try to remove the input bindings
-		if (const IAbilityInputBinding* const SetupInputInterface = ModularFeaturesHelper::GetAbilityInputBindingInterface(TargetActor, ModularFeaturesHelper::GetPluginSettings()->InputBindingOwner))
+		if (const IAbilityInputBinding* const SetupInputInterface = ModularFeaturesHelper::GetAbilityInputBindingInterface(TargetActor, InputBindingOwnerOverride))
 		{
 			ModularFeaturesHelper::RemoveAbilityInputInInterfaceOwner(SetupInputInterface->_getUObject(), ActiveAbilities.InputReference);
 		}

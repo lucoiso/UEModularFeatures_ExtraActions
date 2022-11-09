@@ -16,13 +16,13 @@
 
 namespace ModularFeaturesHelper
 {
-	static const UMFEA_Settings* GetPluginSettings()
+	const UMFEA_Settings* GetPluginSettings()
 	{
 		static const UMFEA_Settings* Instance = GetDefault<UMFEA_Settings>();
 		return Instance;
 	}
 
-	static bool ActorHasAllRequiredTags(const AActor* Actor, const TArray<FName>& RequiredTags)
+	bool ActorHasAllRequiredTags(const AActor* Actor, const TArray<FName>& RequiredTags)
 	{
 		if (!IsValid(Actor))
 		{
@@ -40,13 +40,25 @@ namespace ModularFeaturesHelper
 		return true;
 	}
 
-	static UAbilitySystemComponent* GetAbilitySystemComponentByActor(AActor* InActor)
+	UAbilitySystemComponent* GetAbilitySystemComponentByActor(AActor* InActor)
 	{
 		const IAbilitySystemInterface* const InterfaceOwner = Cast<IAbilitySystemInterface>(InActor);
 		return InterfaceOwner != nullptr ? InterfaceOwner->GetAbilitySystemComponent() : InActor->FindComponentByClass<UAbilitySystemComponent>();
 	}
 
-	static IAbilityInputBinding* GetAbilityInputBindingInterface(AActor* InActor, const EControllerOwner& InOwner)
+	EInputBindingOwner GetValidatedInputBindingOwner(const EInputBindingOwnerOverride& InOwner)
+	{
+		switch (InOwner)
+		{
+		case EInputBindingOwnerOverride::Pawn: return EInputBindingOwner::Pawn;
+		case EInputBindingOwnerOverride::Controller: return EInputBindingOwner::Controller;
+		default: break;
+		}
+
+		return GetPluginSettings()->InputBindingOwner;
+	}
+
+	IAbilityInputBinding* GetAbilityInputBindingInterface(AActor* InActor, const EInputBindingOwnerOverride& InOwner)
 	{
 		if (!IsValid(InActor))
 		{
@@ -55,11 +67,11 @@ namespace ModularFeaturesHelper
 
 		if (APawn* const TargetPawn = Cast<APawn>(InActor))
 		{
-			switch (InOwner)
+			switch (GetValidatedInputBindingOwner(InOwner))
 			{
-				case EControllerOwner::Pawn: return Cast<IAbilityInputBinding>(TargetPawn);
+				case EInputBindingOwner::Pawn: return Cast<IAbilityInputBinding>(TargetPawn);
 
-				case EControllerOwner::Controller: return Cast<IAbilityInputBinding>(TargetPawn->GetController());
+				case EInputBindingOwner::Controller: return Cast<IAbilityInputBinding>(TargetPawn->GetController());
 
 				default: return nullptr;
 			}
@@ -68,45 +80,34 @@ namespace ModularFeaturesHelper
 		return nullptr;
 	}
 
-	static UEnhancedInputComponent* GetEnhancedInputComponentInPawn(APawn* InPawn, const EControllerOwner& InOwner)
+	UEnhancedInputComponent* GetEnhancedInputComponentInPawn(APawn* InPawn)
 	{
 		if (!IsValid(InPawn))
 		{
 			return nullptr;
 		}
 
-		switch (InOwner)
-		{
-			case EControllerOwner::Pawn: return Cast<UEnhancedInputComponent>(InPawn->InputComponent.Get());
-
-			case EControllerOwner::Controller: return Cast<UEnhancedInputComponent>(InPawn->GetController()->InputComponent.Get());
-
-			default: break;
-		}
-
-		return nullptr;
+		return Cast<UEnhancedInputComponent>(InPawn->GetController()->InputComponent.Get());
 	}
 
-	static AActor* GetPawnInputOwner(APawn* InPawn, const EControllerOwner& InOwner)
+	AActor* GetPawnInputOwner(APawn* InPawn, const EInputBindingOwnerOverride& InOwner)
 	{
 		if (!IsValid(InPawn))
 		{
 			return nullptr;
 		}
 
-		switch (InOwner)
+		switch (GetValidatedInputBindingOwner(InOwner))
 		{
-			case EControllerOwner::Pawn: return Cast<AActor>(InPawn);
-
-			case EControllerOwner::Controller: return Cast<AActor>(InPawn->GetController());
-
+			case EInputBindingOwner::Pawn: return Cast<AActor>(InPawn);
+			case EInputBindingOwner::Controller: return Cast<AActor>(InPawn->GetController());
 			default: break;
 		}
 
 		return nullptr;
 	}
 
-	static UEnum* LoadInputEnum()
+	UEnum* LoadInputEnum()
 	{
 		if (GetPluginSettings()->InputIDEnumeration.IsNull())
 		{
@@ -118,7 +119,7 @@ namespace ModularFeaturesHelper
 	}
 
 	// Will be removed in the future - but i don't want to break existing projects :)
-	static const bool BindAbilityInputToInterfaceOwnerWithID(const IAbilityInputBinding* TargetInterfaceOwner, UInputAction* InputAction, const int32 InputID)
+	const bool BindAbilityInputToInterfaceOwnerWithID(const IAbilityInputBinding* TargetInterfaceOwner, UInputAction* InputAction, const int32 InputID)
 	{
 		if (!TargetInterfaceOwner)
 		{
@@ -132,7 +133,7 @@ namespace ModularFeaturesHelper
 		return true;
 	}
 	
-	static const bool BindAbilityInputToInterfaceOwner(const IAbilityInputBinding* TargetInterfaceOwner, UInputAction* InputAction, FGameplayAbilitySpec& AbilitySpec)
+	const bool BindAbilityInputToInterfaceOwner(const IAbilityInputBinding* TargetInterfaceOwner, UInputAction* InputAction, FGameplayAbilitySpec& AbilitySpec)
 	{
 		if (!BindAbilityInputToInterfaceOwnerWithID(TargetInterfaceOwner, InputAction, AbilitySpec.InputID))
 		{
@@ -154,7 +155,7 @@ namespace ModularFeaturesHelper
 				break;
 
 			case (EAbilityBindingMode::AbilityClass):
-				IAbilityInputBinding::Execute_SetupAbilityBindingByClass(TargetInterfaceOwner->_getUObject(), InputAction, TSubclassOf<UGameplayAbility>(AbilitySpec.Ability.GetClass()));
+				IAbilityInputBinding::Execute_SetupAbilityBindingByClass(TargetInterfaceOwner->_getUObject(), InputAction, TSubclassOf<UGameplayAbility>(AbilitySpec.Ability->GetClass()));
 				break;
 
 			default:
@@ -164,7 +165,7 @@ namespace ModularFeaturesHelper
 		return true;
 	}
 
-	static void RemoveAbilityInputInInterfaceOwner(UObject* InterfaceOwner, TArray<TWeakObjectPtr<UInputAction>>& ActionArr)
+	void RemoveAbilityInputInInterfaceOwner(UObject* InterfaceOwner, TArray<TWeakObjectPtr<UInputAction>>& ActionArr)
 	{
 		if (!IsValid(InterfaceOwner))
 		{
@@ -185,12 +186,12 @@ namespace ModularFeaturesHelper
 		ActionArr.Empty();
 	}
 
-	static const bool IsUsingInputIDEnumeration()
+	const bool IsUsingInputIDEnumeration()
 	{
 		return GetPluginSettings()->AbilityBindingMode == EAbilityBindingMode::InputID;
 	}
 
-	static const int32 GetInputIDByName(const FName DisplayName, UEnum* Enumeration = nullptr)
+	const int32 GetInputIDByName(const FName DisplayName, UEnum* Enumeration = nullptr)
 	{
 		if (!IsUsingInputIDEnumeration())
 		{

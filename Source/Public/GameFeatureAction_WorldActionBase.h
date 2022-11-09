@@ -15,6 +15,14 @@ struct FWorldContext;
 
 using FComponentRequestHandlePtr = TSharedPtr<FComponentRequestHandle>;
 
+UENUM(BlueprintType, Category = "MF Extra Actions | Enums")
+enum class EInputBindingOwnerOverride : uint8
+{
+	Default,
+	Pawn,
+	Controller
+};
+
 /**
  *
  */

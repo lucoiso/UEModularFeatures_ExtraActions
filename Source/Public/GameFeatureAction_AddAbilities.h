@@ -51,6 +51,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", meta = (AllowedClasses = "/Script/Engine.Pawn", OnlyPlaceable = "true"))
 	TSoftClassPtr<APawn> TargetPawnClass;
 
+	/* Determines whether the binding will be performed within the controller class or within the pawn */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
+	EInputBindingOwnerOverride InputBindingOwnerOverride = EInputBindingOwnerOverride::Default;
+
 	/* Tags required on the target to apply this action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	TArray<FName> RequireTags;

@@ -12,7 +12,7 @@
  *
  */
 UENUM(BlueprintType, Category = "MF Extra Actions | Enums")
-enum class EControllerOwner :uint8
+enum class EInputBindingOwner : uint8
 {
 	Pawn,
 	Controller
@@ -49,5 +49,5 @@ public:
 
 	/* Determine if the ability binding will be performed to the pawn or its controller - Must be the owner of the binding interface */
 	UPROPERTY(GlobalConfig, EditAnywhere, Category = "Settings")
-	EControllerOwner InputBindingOwner;
+	EInputBindingOwner InputBindingOwner;
 };

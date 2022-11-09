@@ -114,7 +114,7 @@ void UGameFeatureAction_AddInputs::AddActorInputs(AActor* TargetActor)
 		NewInputData.Mapping = InputMapping;
 
 		// Get the Function Owner, the UObject which owns the specified UFunction that will be used to bind the input activation and check if it's valid
-		const TWeakObjectPtr<UObject> FunctionOwner = ModularFeaturesHelper::GetPawnInputOwner(TargetPawn, ModularFeaturesHelper::GetPluginSettings()->InputBindingOwner);
+		const TWeakObjectPtr<UObject> FunctionOwner = ModularFeaturesHelper::GetPawnInputOwner(TargetPawn, InputBindingOwnerOverride);
 		if (!FunctionOwner.IsValid())
 		{
 			UE_LOG(LogGameplayFeaturesExtraActions, Error, TEXT("%s: Failed to get the function owner using the Actor %s."), *FString(__func__), *TargetActor->GetName());
@@ -122,7 +122,7 @@ void UGameFeatureAction_AddInputs::AddActorInputs(AActor* TargetActor)
 		}
 
 		// Get the Enhanced Input component of the target Pawn and check if it's valid
-		const TWeakObjectPtr<UEnhancedInputComponent> InputComponent = ModularFeaturesHelper::GetEnhancedInputComponentInPawn(TargetPawn, ModularFeaturesHelper::GetPluginSettings()->InputBindingOwner);
+		const TWeakObjectPtr<UEnhancedInputComponent> InputComponent = ModularFeaturesHelper::GetEnhancedInputComponentInPawn(TargetPawn);
 		if (!InputComponent.IsValid())
 		{
 			UE_LOG(LogGameplayFeaturesExtraActions, Error, TEXT("%s: Failed to find InputComponent on Actor %s."), *FString(__func__), *TargetActor->GetName());
@@ -165,7 +165,7 @@ void UGameFeatureAction_AddInputs::RemoveActorInputs(AActor* TargetActor)
 			UE_LOG(LogGameplayFeaturesExtraActions, Display, TEXT("%s: Removing Enhanced Input Mapping %s from Actor %s."), *FString(__func__), *ActiveInputData->Mapping->GetName(), *TargetActor->GetName());
 
 			// Try to get the enhanced input component of the target pawn
-			if (const TWeakObjectPtr<UEnhancedInputComponent> InputComponent = ModularFeaturesHelper::GetEnhancedInputComponentInPawn(TargetPawn, ModularFeaturesHelper::GetPluginSettings()->InputBindingOwner);
+			if (const TWeakObjectPtr<UEnhancedInputComponent> InputComponent = ModularFeaturesHelper::GetEnhancedInputComponentInPawn(TargetPawn);
 				!InputComponent.IsValid())
 			{
 				UE_LOG(LogGameplayFeaturesExtraActions, Error, TEXT("%s: Failed to find InputComponent on Actor %s."), *FString(__func__), *TargetActor->GetName());
@@ -179,7 +179,7 @@ void UGameFeatureAction_AddInputs::RemoveActorInputs(AActor* TargetActor)
 				}
 
 				// Verify and try to remove the ability bindings by calling the RemoveAbilityInputBinding from IAbilityInputBinding interface
-				if (const IAbilityInputBinding* const SetupInputInterface = ModularFeaturesHelper::GetAbilityInputBindingInterface(TargetActor, ModularFeaturesHelper::GetPluginSettings()->InputBindingOwner))
+				if (const IAbilityInputBinding* const SetupInputInterface = ModularFeaturesHelper::GetAbilityInputBindingInterface(TargetActor, InputBindingOwnerOverride))
 				{
 					ModularFeaturesHelper::RemoveAbilityInputInInterfaceOwner(SetupInputInterface->_getUObject(), AbilityActions);
 				}
@@ -204,7 +204,7 @@ void UGameFeatureAction_AddInputs::SetupActionBindings(AActor* TargetActor, UObj
 	FInputBindingData& NewInputData = ActiveExtensions.FindOrAdd(TargetActor);
 
 	// Get and store the interface owner before the for-loop
-	const IAbilityInputBinding* const SetupInputInterface = ModularFeaturesHelper::GetAbilityInputBindingInterface(TargetActor, ModularFeaturesHelper::GetPluginSettings()->InputBindingOwner);
+	const IAbilityInputBinding* const SetupInputInterface = ModularFeaturesHelper::GetAbilityInputBindingInterface(TargetActor, InputBindingOwnerOverride);
 
 	// Load the enumeration and save it before the loop to avoid high disk consumption due to loading a soft reference a lot of times since there's only 1 enumeration
 	TWeakObjectPtr<UEnum> InputIDEnumeration_Ptr = ModularFeaturesHelper::LoadInputEnum();

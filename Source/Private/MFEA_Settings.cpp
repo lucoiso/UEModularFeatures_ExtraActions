@@ -6,7 +6,7 @@
 
 #include "MFEA_Settings.h"
 
-UMFEA_Settings::UMFEA_Settings(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer), bEnableAbilityAutoBinding(false), AbilityBindingMode(EAbilityBindingMode::InputID), InputBindingOwner(EControllerOwner::Controller)
+UMFEA_Settings::UMFEA_Settings(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer), bEnableAbilityAutoBinding(false), AbilityBindingMode(EAbilityBindingMode::InputID), InputBindingOwner(EInputBindingOwner::Controller)
 {
 	CategoryName = TEXT("Plugins");
 }
