@@ -23,15 +23,15 @@ struct FEffectStackedData
 	GENERATED_BODY()
 
 	/* Gameplay Effect Class */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	TSoftClassPtr<UGameplayEffect> EffectClass;
 
 	/* Gameplay Effect level */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	int32 EffectLevel = 1;
 
 	/* Set By Caller parameters */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (TitleProperty = "{SetByCaller Tag} -> {SetByCaller Value}"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", meta = (TitleProperty = "{SetByCaller Tag} -> {SetByCaller Value}"))
 	TMap<FGameplayTag, float> SetByCallerParams;
 };
 

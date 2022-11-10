@@ -3,8 +3,6 @@
 // Repo: https://github.com/lucoiso/UEModularFeatures_ExtraActions
 
 #include "GameFeatureAction_AddAttribute.h"
-#include "AbilitySystemComponent.h"
-#include "AbilitySystemInterface.h"
 #include "Components/GameFrameworkComponentManager.h"
 #include "ModularFeatures_InternalFuncs.h"
 #include "Runtime/Launch/Resources/Version.h"

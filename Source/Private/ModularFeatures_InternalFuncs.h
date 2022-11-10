@@ -8,10 +8,9 @@
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemInterface.h"
 #include "AbilityInputBinding.h"
-#include "GameFeatureAction_WorldActionBase.h"
 #include "EnhancedInputComponent.h"
 #include "GameFramework/Controller.h"
-#include "ModularFeatures_ExtraActions.h"
+#include "LogModularFeatures_ExtraActions.h"
 #include "MFEA_Settings.h"
 
 namespace ModularFeaturesHelper
@@ -70,9 +69,7 @@ namespace ModularFeaturesHelper
 			switch (GetValidatedInputBindingOwner(InOwner))
 			{
 				case EInputBindingOwner::Pawn: return Cast<IAbilityInputBinding>(TargetPawn);
-
 				case EInputBindingOwner::Controller: return Cast<IAbilityInputBinding>(TargetPawn->GetController());
-
 				default: return nullptr;
 			}
 		}

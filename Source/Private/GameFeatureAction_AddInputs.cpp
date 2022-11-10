@@ -3,10 +3,8 @@
 // Repo: https://github.com/lucoiso/UEModularFeatures_ExtraActions
 
 #include "GameFeatureAction_AddInputs.h"
-#include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputMappingContext.h"
-#include "AbilityInputBinding.h"
 #include "Components/GameFrameworkComponentManager.h"
 #include "GameFramework/PlayerController.h"
 #include "Engine/LocalPlayer.h"

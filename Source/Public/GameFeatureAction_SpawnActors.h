@@ -18,11 +18,11 @@ struct FActorSpawnSettings
 	GENERATED_BODY()
 
 	/* Actor class to be spawned */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (OnlyPlaceable = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", meta = (OnlyPlaceable = "true"))
 	TSoftClassPtr<AActor> ActorClass;
 
 	/* Transform settings to be added to spawned actor */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	FTransform SpawnTransform;
 };
 

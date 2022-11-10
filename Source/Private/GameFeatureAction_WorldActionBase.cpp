@@ -3,11 +3,6 @@
 // Repo: https://github.com/lucoiso/UEModularFeatures_ExtraActions
 
 #include "GameFeatureAction_WorldActionBase.h"
-#include "Engine/World.h"
-#include "Engine/Engine.h"
-#include "ModularFeatures_InternalFuncs.h"
-
-DEFINE_LOG_CATEGORY(LogGameplayFeaturesExtraActions);
 
 void UGameFeatureAction_WorldActionBase::OnGameFeatureActivating(FGameFeatureActivatingContext& Context)
 {

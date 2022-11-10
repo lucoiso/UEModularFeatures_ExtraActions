@@ -22,19 +22,19 @@ struct FAbilityMapping
 	GENERATED_BODY()
 
 	/* Ability class to be added */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	TSoftClassPtr<UGameplayAbility> AbilityClass;
 
 	/* Enhanced Input Action to bind ability activation */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	TSoftObjectPtr<UInputAction> InputAction;
 
 	/* Ability Level */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	int32 AbilityLevel = 1;
 
 	/* If the plugin is using an enumeration class to setup abilities, we need to specify wich enum value this input binding will be associated by its display name - Can ignore if not using enums to manage ability inputs */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (DisplayName = "InputID Value Name"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", meta = (DisplayName = "InputID Value Name"))
 	FName InputIDValueName = NAME_None;
 };
 
