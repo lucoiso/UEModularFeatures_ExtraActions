@@ -35,10 +35,12 @@ class MODULARFEATURES_EXTRAACTIONS_API UMFEA_Settings : public UDeveloperSetting
 public:
 	explicit UMFEA_Settings(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
+private:
 	/* Work in Progress: If true, will auto bind the ability input directly using the given Input Action */
-	UPROPERTY(GlobalConfig, EditAnywhere, Category = "Settings", Meta = (DisplayName = "Work in Progress: Enable Ability Auto Binding"))
+	UPROPERTY(GlobalConfig, EditAnywhere, Category = "Settings", Meta = (DisplayName = "Work in Progress: Enable Ability Auto Binding", EditCondition = "false"))
 	bool bEnableAbilityAutoBinding;
 
+public:
 	/* Determine the binding mode that will be used by this plugin - This choice affects which function from IAbilityInputBinding interface will be used to bind the abilities */
 	UPROPERTY(GlobalConfig, EditAnywhere, Category = "Settings", Meta = (EditCondition = "!bEnableAbilityAutoBinding"))
 	EAbilityBindingMode AbilityBindingMode;
