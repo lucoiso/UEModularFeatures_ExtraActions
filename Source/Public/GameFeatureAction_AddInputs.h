@@ -6,14 +6,13 @@
 
 #include "CoreMinimal.h"
 #include "InputTriggers.h"
+#include "EnhancedInputComponent.h"
 #include "GameFeatureAction_WorldActionBase.h"
 #include "GameFeatureAction_AddInputs.generated.h"
 
 class UInputMappingContext;
 class UEnhancedInputLocalPlayerSubsystem;
-class UEnhancedInputComponent;
 struct FComponentRequestHandle;
-struct FInputBindingHandle;
 
 /**
  *
