@@ -187,11 +187,6 @@ void UGameFeatureAction_AddInputs::RemoveActorInputs(AActor* TargetActor)
 			Subsystem->RemoveMappingContext(ActiveInputData->Mapping.Get());
 		}
 	}
-	// We don't want to warn the user if the pawn is not being controlled
-	else if (TargetPawn->IsPawnControlled())
-	{
-		UE_LOG(LogGameplayFeaturesExtraActions, Error, TEXT("%s: Failed to find PlayerController on Actor %s."), *FString(__func__), *TargetActor->GetName());
-	}
 
 	ActiveExtensions.Remove(TargetActor);
 }
