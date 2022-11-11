@@ -36,8 +36,8 @@ public:
 	explicit UMFEA_Settings(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
 private:
-	/* Work in Progress: If true, will auto bind the ability input directly using the given Input Action */
-	UPROPERTY(GlobalConfig, EditAnywhere, Category = "Settings", Meta = (DisplayName = "Work in Progress: Enable Ability Auto Binding", EditCondition = "false"))
+	/* Work in Progress: If true, will auto bind the ability input directly using the given Input Action. Will be added in a next update. */
+	UPROPERTY(GlobalConfig, EditAnywhere, Category = "Settings", Meta = (DisplayName = "Enable Ability Auto Binding", EditCondition = "false"))
 	bool bEnableAbilityAutoBinding;
 
 public:
@@ -49,7 +49,7 @@ public:
 	UPROPERTY(GlobalConfig, EditAnywhere, Category = "Settings", Meta = (DisplayName = "InputID Enumeration", EditCondition = "!bEnableAbilityAutoBinding && AbilityBindingMode == EAbilityBindingMode::InputID"))
 	TSoftObjectPtr<UEnum> InputIDEnumeration;
 
-	/* Determine if the ability binding will be performed to the pawn or its controller - Must be the owner of the binding interface */
-	UPROPERTY(GlobalConfig, EditAnywhere, Category = "Settings")
+	/* Determine if the ability binding will be performed to the pawn or its controller - Must be the owner of the binding interface. Can be overrided by actions. */
+	UPROPERTY(GlobalConfig, EditAnywhere, Category = "Settings", Meta = (DisplayName = "Default Input Binding Owner"))
 	EInputBindingOwner InputBindingOwner;
 };
