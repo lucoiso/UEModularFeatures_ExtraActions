@@ -37,7 +37,7 @@ class MODULARFEATURES_EXTRAACTIONS_API IAbilityInputBinding
 
 	/* Setup ability bind using the ability spec - AbilitySpecInputPressed(AbilitySpec) */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "MF Extra Actions | Modular Interfaces")
-	void SetupAbilityBindingBySpec(UInputAction* Action, FGameplayAbilitySpec& AbilitySpec);
+	void SetupAbilityBindingBySpec(UInputAction* Action, const FGameplayAbilitySpec& AbilitySpec);
 
 	/* Setup ability bind using the ability tags container - TryActivateAbilitiesByTag(AbilityTags) */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "MF Extra Actions | Modular Interfaces")

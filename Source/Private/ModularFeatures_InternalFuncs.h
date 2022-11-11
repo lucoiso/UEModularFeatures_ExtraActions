@@ -130,7 +130,7 @@ namespace ModularFeaturesHelper
 		return true;
 	}
 	
-	const bool BindAbilityInputToInterfaceOwner(const IAbilityInputBinding* TargetInterfaceOwner, UInputAction* InputAction, FGameplayAbilitySpec& AbilitySpec)
+	const bool BindAbilityInputToInterfaceOwner(const IAbilityInputBinding* TargetInterfaceOwner, UInputAction* InputAction, const FGameplayAbilitySpec& AbilitySpec)
 	{
 		if (!BindAbilityInputToInterfaceOwnerWithID(TargetInterfaceOwner, InputAction, AbilitySpec.InputID))
 		{
