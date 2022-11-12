@@ -44,20 +44,20 @@ struct FAbilityInputBindingData
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	bool bSetupAbilityInput = false;
 
-	/* Bind this input to an ability activation using an Input ID */
+	/* Bind this input to an ability activation using the Input ID - If binding mode is set to InputID */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", meta = (DisplayName = "InputID Value Name", EditCondition = "bSetupAbilityInput"))
 	FName InputIDValueName = NAME_None;
 
-	/* Bind this input to an ability activation using Ability Tags container */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", meta = (DisplayName = "InputID Value Name", EditCondition = "bSetupAbilityInput"))
+	/* Bind this input to an ability activation using Ability Tags container - If binding mode is set to Ability Tags */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", meta = (EditCondition = "bSetupAbilityInput"))
 	FGameplayTagContainer AbilityTags = FGameplayTagContainer::EmptyContainer;
 
-	/* Bind this input to an ability activation using the Ability Class */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", meta = (DisplayName = "InputID Value Name", EditCondition = "bSetupAbilityInput"))
+	/* Bind this input to an ability activation using the Ability Class - If binding mode is set to Ability Class */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", meta = (EditCondition = "bSetupAbilityInput"))
 	TSoftClassPtr<UGameplayAbility> AbilityClass;
 
-	/* Bind this input to an ability activation using the an active ability spec - Must specify the Ability Class! */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", meta = (DisplayName = "InputID Value Name", EditCondition = "bSetupAbilityInput && AbilityClass != nullptr"))
+	/* Bind this input to an ability activation using the active ability spec - If binding mode is set to Ability Spec - Must specify the Ability Class! */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", meta = (EditCondition = "bSetupAbilityInput && AbilityClass != nullptr"))
 	bool bFindAbilitySpec = false;
 };
 
