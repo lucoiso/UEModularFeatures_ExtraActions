@@ -4,7 +4,6 @@
 
 #include "GameFeatureAction_AddAbilities.h"
 #include "Components/GameFrameworkComponentManager.h"
-#include "Engine/AssetManager.h"
 #include "InputAction.h"
 #include "ModularFeatures_InternalFuncs.h"
 

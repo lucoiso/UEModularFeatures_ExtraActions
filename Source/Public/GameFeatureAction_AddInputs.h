@@ -7,9 +7,11 @@
 #include "CoreMinimal.h"
 #include "InputTriggers.h"
 #include "EnhancedInputComponent.h"
+#include "GameplayAbilitySpec.h"
 #include "GameFeatureAction_WorldActionBase.h"
 #include "GameFeatureAction_AddInputs.generated.h"
 
+class UGameplayAbility;
 class UInputMappingContext;
 class UEnhancedInputLocalPlayerSubsystem;
 struct FComponentRequestHandle;
@@ -56,7 +58,7 @@ struct FAbilityInputBindingData
 
 	/* Bind this input to an ability activation using the an active ability spec - Must specify the Ability Class! */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", meta = (DisplayName = "InputID Value Name", EditCondition = "bSetupAbilityInput && AbilityClass != nullptr"))
-	bool bFindAbilitySpec;
+	bool bFindAbilitySpec = false;
 };
 
 USTRUCT(BlueprintType, Category = "MF Extra Actions | Modular Structs")
