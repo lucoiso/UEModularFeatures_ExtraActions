@@ -3,11 +3,7 @@
 // Repo: https://github.com/lucoiso/UEModularFeatures_ExtraActions
 
 #include "GameFeatureAction_AddAbilities.h"
-#include "AbilityInputBinding.h"
-#include "AbilitySystemComponent.h"
-#include "AbilitySystemInterface.h"
 #include "Components/GameFrameworkComponentManager.h"
-#include "Engine/AssetManager.h"
 #include "InputAction.h"
 #include "ModularFeatures_InternalFuncs.h"
 
@@ -63,11 +59,17 @@ void UGameFeatureAction_AddAbilities::HandleActorExtension(AActor* Owner, const 
 
 	else if (EventName == UGameFrameworkComponentManager::NAME_ExtensionAdded || EventName == UGameFrameworkComponentManager::NAME_GameActorReady)
 	{
-		if (ActiveExtensions.Contains(Owner) || !ActorHasAllRequiredTags(Owner, RequireTags))
+		// We don't want to repeat the addition and cannot add if the user don't have the required tags
+		if (ActiveExtensions.Contains(Owner) || !ModularFeaturesHelper::ActorHasAllRequiredTags(Owner, RequireTags))
 		{
 			return;
 		}
 
+		InputIDEnumeration_Ptr.Reset();
+
+		// Load the enumeration and save it before the loop to avoid high disk consumption due to loading a soft reference a lot of times since there's only 1 enumeration
+		InputIDEnumeration_Ptr = ModularFeaturesHelper::LoadInputEnum();
+			
 		for (const FAbilityMapping& Entry : Abilities)
 		{
 			if (Entry.AbilityClass.IsNull())
@@ -79,11 +81,15 @@ void UGameFeatureAction_AddAbilities::HandleActorExtension(AActor* Owner, const 
 				AddActorAbilities(Owner, Entry);
 			}
 		}
+
+		// Free the pointer. We only need this enum when we're adding abilities
+		InputIDEnumeration_Ptr.Reset();
 	}
 }
 
 void UGameFeatureAction_AddAbilities::AddActorAbilities(AActor* TargetActor, const FAbilityMapping& Ability)
 {
+	// Only proceed if the target actor is valid and has authority
 	if (!IsValid(TargetActor) || TargetActor->GetLocalRole() != ROLE_Authority)
 	{
 		return;
@@ -91,36 +97,41 @@ void UGameFeatureAction_AddAbilities::AddActorAbilities(AActor* TargetActor, con
 
 	if (UAbilitySystemComponent* const AbilitySystemComponent = ModularFeaturesHelper::GetAbilitySystemComponentByActor(TargetActor))
 	{
+		// If InputID Enumeration using is disabled, assume -1 as value
+		const int32 InputID = ModularFeaturesHelper::GetInputIDByName(Ability.InputIDValueName, InputIDEnumeration_Ptr.Get());
+		
+		//Check if there's a existing ability data already loaded
 		FActiveAbilityData& NewAbilityData = ActiveExtensions.FindOrAdd(TargetActor);
 
-		const uint32 InputID = InputIDEnumerationClass.LoadSynchronous()->GetValueByName(Ability.InputIDValueName, EGetByNameFlags::CheckAuthoredName);
-
+		// Load the ability class and store into a const variable
 		const TSubclassOf<UGameplayAbility> AbilityToAdd = Ability.AbilityClass.LoadSynchronous();
-
+		
 		UE_LOG(LogGameplayFeaturesExtraActions, Display, TEXT("%s: Adding ability %s to Actor %s."), *FString(__func__), *AbilityToAdd->GetName(), *TargetActor->GetName());
+		
+		// Create the spec, used to give the ability to target's ability system component
+		FGameplayAbilitySpec NewAbilitySpec(AbilityToAdd, Ability.AbilityLevel, InputID, TargetActor);
 
-		const FGameplayAbilitySpec NewAbilitySpec(AbilityToAdd, Ability.AbilityLevel, InputID, TargetActor);
-
+		// Try to give the ability to the target and check if the spec handle is valid
 		if (const FGameplayAbilitySpecHandle NewSpecHandle = AbilitySystemComponent->GiveAbility(NewAbilitySpec);
 			NewSpecHandle.IsValid())
 		{
+			// Add the spec handle to the ability data
 			NewAbilityData.SpecHandle.Add(NewSpecHandle);
-
+						
+			// Only bind the input if the Input Action is valid. This is not mandatory due to passive abilities that don't need to be associated to inputs
 			if (!Ability.InputAction.IsNull())
 			{
-				if (const IAbilityInputBinding* const SetupInputInterface = ModularFeaturesHelper::GetAbilityInputBindingInterface(TargetActor, InputBindingOwner))
-				{
-					UInputAction* const AbilityInput = Ability.InputAction.LoadSynchronous();
-					IAbilityInputBinding::Execute_SetupAbilityInputBinding(SetupInputInterface->_getUObject(), AbilityInput, InputID);
+				// Get the target Ability Input Binding interface
+				const IAbilityInputBinding* const SetupInputInterface = ModularFeaturesHelper::GetAbilityInputBindingInterface(TargetActor, InputBindingOwnerOverride);
 
+				// If we can bind the input to the target interface, we must add the input reference to the ability data
+				if (UInputAction* const AbilityInput = Ability.InputAction.LoadSynchronous(); 
+					ModularFeaturesHelper::BindAbilityInputToInterfaceOwner(SetupInputInterface, AbilityInput, NewAbilitySpec))
+				{
 					NewAbilityData.InputReference.Add(AbilityInput);
 				}
-				else
-				{
-					UE_LOG(LogGameplayFeaturesExtraActions, Error, TEXT("%s: Failed to setup input binding for ability %s on Actor %s."), *FString(__func__), *AbilityToAdd->GetName(), *TargetActor->GetName());
-				}
 			}
-
+			
 			ActiveExtensions.Add(TargetActor, NewAbilityData);
 		}
 	}
@@ -132,53 +143,52 @@ void UGameFeatureAction_AddAbilities::AddActorAbilities(AActor* TargetActor, con
 
 void UGameFeatureAction_AddAbilities::RemoveActorAbilities(AActor* TargetActor)
 {
+	// Only proceed if the target actor is valid
 	if (!IsValid(TargetActor))
 	{
 		ActiveExtensions.Remove(TargetActor);
 		return;
 	}
 
+	// Only proceed if the target actor has authority
 	if (TargetActor->GetLocalRole() != ROLE_Authority)
 	{
 		return;
 	}
 
-	const FActiveAbilityData ActiveAbilities = ActiveExtensions.FindRef(TargetActor);
-
+	// Check if we can remove the abilities from this target actor by checking if it is inside the active extensions map
+	FActiveAbilityData ActiveAbilities = ActiveExtensions.FindRef(TargetActor);
 	if constexpr (&ActiveAbilities == nullptr)
 	{
 		UE_LOG(LogGameplayFeaturesExtraActions, Warning, TEXT("%s: No active abilities found for Actor %s."), *FString(__func__), *TargetActor->GetName());
+		ActiveExtensions.Remove(TargetActor);
+		return;
 	}
-	else
+	
+	if (UAbilitySystemComponent* const AbilitySystemComponent = ModularFeaturesHelper::GetAbilitySystemComponentByActor(TargetActor))
 	{
-		if (UAbilitySystemComponent* const AbilitySystemComponent = ModularFeaturesHelper::GetAbilitySystemComponentByActor(TargetActor))
+		UE_LOG(LogGameplayFeaturesExtraActions, Display, TEXT("%s: Removing associated abilities from Actor %s."), *FString(__func__), *TargetActor->GetName());
+
+		// Iterate the active abilities and remove all spec handle associated to this actor
+		for (const FGameplayAbilitySpecHandle& SpecHandle : ActiveAbilities.SpecHandle)
 		{
-			UE_LOG(LogGameplayFeaturesExtraActions, Display, TEXT("%s: Removing associated abilities from Actor %s."), *FString(__func__), *TargetActor->GetName());
-
-			for (const FGameplayAbilitySpecHandle& SpecHandle : ActiveAbilities.SpecHandle)
+			if (SpecHandle.IsValid())
 			{
-				if (SpecHandle.IsValid())
-				{
-					AbilitySystemComponent->SetRemoveAbilityOnEnd(SpecHandle);
-					AbilitySystemComponent->ClearAbility(SpecHandle);
-				}
-			}
-
-			if (const IAbilityInputBinding* const SetupInputInterface = ModularFeaturesHelper::GetAbilityInputBindingInterface(TargetActor, InputBindingOwner))
-			{
-				for (const UInputAction* const& InputRef : ActiveAbilities.InputReference)
-				{
-					if (IsValid(InputRef))
-					{
-						IAbilityInputBinding::Execute_RemoveAbilityInputBinding(SetupInputInterface->_getUObject(), InputRef);
-					}
-				}
+				// Set the ability to be removed on end and clear it
+				AbilitySystemComponent->SetRemoveAbilityOnEnd(SpecHandle);
+				AbilitySystemComponent->ClearAbility(SpecHandle);
 			}
 		}
-		else if (IsValid(GetWorld()) && IsValid(GetWorld()->GetGameInstance()))
+
+		// Get the interface owner and try to remove the input bindings
+		if (const IAbilityInputBinding* const SetupInputInterface = ModularFeaturesHelper::GetAbilityInputBindingInterface(TargetActor, InputBindingOwnerOverride))
 		{
-			UE_LOG(LogGameplayFeaturesExtraActions, Error, TEXT("%s: Failed to find AbilitySystemComponent on Actor %s."), *FString(__func__), *TargetActor->GetName());
+			ModularFeaturesHelper::RemoveAbilityInputInInterfaceOwner(SetupInputInterface->_getUObject(), ActiveAbilities.InputReference);
 		}
+	}
+	else if (IsValid(GetWorld()) && IsValid(GetWorld()->GetGameInstance()))
+	{
+		UE_LOG(LogGameplayFeaturesExtraActions, Error, TEXT("%s: Failed to find AbilitySystemComponent on Actor %s."), *FString(__func__), *TargetActor->GetName());
 	}
 
 	ActiveExtensions.Remove(TargetActor);

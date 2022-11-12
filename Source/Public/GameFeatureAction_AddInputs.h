@@ -7,10 +7,13 @@
 #include "CoreMinimal.h"
 #include "InputTriggers.h"
 #include "EnhancedInputComponent.h"
+#include "GameplayAbilitySpec.h"
 #include "GameFeatureAction_WorldActionBase.h"
 #include "GameFeatureAction_AddInputs.generated.h"
 
+class UGameplayAbility;
 class UInputMappingContext;
+class UEnhancedInputLocalPlayerSubsystem;
 struct FComponentRequestHandle;
 
 /**
@@ -31,6 +34,7 @@ struct FFunctionStackedData
 	TArray<ETriggerEvent> Triggers;
 };
 
+/* Settings for ability binding: Use InputID Value Name if Ability Binding Mode is InputID | Use AbilityTags if Ability Binding Mode is AbilityTags | Use AbilityClass if Ability Binding Mode is AbilityClass | Use bFindAbilitySpec and AbilityClass if Ability Binding Mode is AbilitySpec */
 USTRUCT(BlueprintType, Category = "MF Extra Actions | Modular Structs")
 struct FAbilityInputBindingData
 {
@@ -40,13 +44,21 @@ struct FAbilityInputBindingData
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	bool bSetupAbilityInput = false;
 
-	/* Enumeration class that will be used by the Ability System Component to manage abilities inputs */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", meta = (DisplayName = "InputID Enumeration Class"))
-	TSoftObjectPtr<UEnum> InputIDEnumerationClass;
+	/* Bind this input to an ability activation using an Input ID */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", meta = (DisplayName = "InputID Value Name", EditCondition = "bSetupAbilityInput"))
+	FName InputIDValueName = NAME_None;
 
-	/* Should this action setup call SetupAbilityInput/RemoveAbilityInputBinding using the IAbilityInputBinding interface? */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", meta = (DisplayName = "InputID Value Name"))
-	FName InputIDValueName;
+	/* Bind this input to an ability activation using Ability Tags container */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", meta = (DisplayName = "InputID Value Name", EditCondition = "bSetupAbilityInput"))
+	FGameplayTagContainer AbilityTags = FGameplayTagContainer::EmptyContainer;
+
+	/* Bind this input to an ability activation using the Ability Class */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", meta = (DisplayName = "InputID Value Name", EditCondition = "bSetupAbilityInput"))
+	TSoftClassPtr<UGameplayAbility> AbilityClass;
+
+	/* Bind this input to an ability activation using the an active ability spec - Must specify the Ability Class! */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", meta = (DisplayName = "InputID Value Name", EditCondition = "bSetupAbilityInput && AbilityClass != nullptr"))
+	bool bFindAbilitySpec = false;
 };
 
 USTRUCT(BlueprintType, Category = "MF Extra Actions | Modular Structs")
@@ -80,13 +92,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", meta = (AllowedClasses = "/Script/Engine.Pawn", OnlyPlaceable = "true"))
 	TSoftClassPtr<APawn> TargetPawnClass;
 
+	/* Determines whether the binding will be performed within the controller class or within the pawn */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
+	EInputBindingOwnerOverride InputBindingOwnerOverride = EInputBindingOwnerOverride::Default;
+
 	/* Tags required on the target to apply this action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	TArray<FName> RequireTags;
-
-	/* Determines whether the binding will be performed within the controller class or within the pawn */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
-	EControllerOwner InputBindingOwner = EControllerOwner::Controller;
 
 	/* Enhanced Input Mapping Context to be added */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
@@ -111,6 +123,11 @@ private:
 
 	void AddActorInputs(AActor* TargetActor);
 	void RemoveActorInputs(AActor* TargetActor);
+
+	void SetupActionBindings(AActor* TargetActor, UObject* FunctionOwner, UEnhancedInputComponent* InputComponent);
+
+	FGameplayAbilitySpec GetAbilitySpecInformationFromBindingData(AActor* TargetActor, const FAbilityInputBindingData& AbilityBindingData, UEnum* InputIDEnum = nullptr);
+	UEnhancedInputLocalPlayerSubsystem* GetEnhancedInputComponentFromPawn(APawn* TargetPawn);
 
 	struct FInputBindingData
 	{

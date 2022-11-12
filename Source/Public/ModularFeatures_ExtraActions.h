@@ -9,7 +9,6 @@
 /**
  *
  */
-
 class FModularFeatures_ExtraActionsModule : public IModuleInterface
 {
 public:

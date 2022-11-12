@@ -33,9 +33,9 @@ struct FAbilityMapping
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	int32 AbilityLevel = 1;
 
-	/* InputID Value Name associated by Enumeration Class */
+	/* If the plugin is using an enumeration class to setup abilities, we need to specify wich enum value this input binding will be associated by its display name - Can ignore if not using enums to manage ability inputs */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", meta = (DisplayName = "InputID Value Name"))
-	FName InputIDValueName;
+	FName InputIDValueName = NAME_None;
 };
 
 /**
@@ -51,17 +51,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", meta = (AllowedClasses = "/Script/Engine.Pawn", OnlyPlaceable = "true"))
 	TSoftClassPtr<APawn> TargetPawnClass;
 
+	/* Determines whether the binding will be performed within the controller class or within the pawn */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
+	EInputBindingOwnerOverride InputBindingOwnerOverride = EInputBindingOwnerOverride::Default;
+
 	/* Tags required on the target to apply this action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	TArray<FName> RequireTags;
-
-	/* Determines whether the binding will be performed within the controller class or within the pawn */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
-	EControllerOwner InputBindingOwner = EControllerOwner::Controller;
-
-	/* Enumeration class that will be used by the Ability System Component to manage abilities inputs */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", meta = (DisplayName = "InputID Enumeration Class"))
-	TSoftObjectPtr<UEnum> InputIDEnumerationClass;
 
 	/* Abilities to be added */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", meta = (DisplayName = "Ability Mapping", ShowOnlyInnerProperties))
@@ -75,15 +71,16 @@ protected:
 private:
 	void HandleActorExtension(AActor* Owner, FName EventName);
 	void ResetExtension();
-
+	
 	void AddActorAbilities(AActor* TargetActor, const FAbilityMapping& Ability);
 	void RemoveActorAbilities(AActor* TargetActor);
 
 	struct FActiveAbilityData
 	{
 		TArray<FGameplayAbilitySpecHandle> SpecHandle;
-		TArray<UInputAction*> InputReference;
+		TArray<TWeakObjectPtr<UInputAction>> InputReference;
 	};
 
 	TMap<TWeakObjectPtr<AActor>, FActiveAbilityData> ActiveExtensions;
+	TWeakObjectPtr<UEnum> InputIDEnumeration_Ptr;
 };
