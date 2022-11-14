@@ -2,7 +2,7 @@
 // Year: 2022
 // Repo: https://github.com/lucoiso/UEModularFeatures_ExtraActions
 
-#include "GameFeatureAction_WorldActionBase.h"
+#include "Actions/GameFeatureAction_WorldActionBase.h"
 
 void UGameFeatureAction_WorldActionBase::OnGameFeatureActivating(FGameFeatureActivatingContext& Context)
 {

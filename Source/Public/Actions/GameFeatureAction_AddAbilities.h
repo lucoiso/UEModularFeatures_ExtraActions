@@ -6,7 +6,7 @@
 
 #include "CoreMinimal.h"
 #include "GameplayAbilitySpec.h"
-#include "GameFeatureAction_WorldActionBase.h"
+#include "Actions/GameFeatureAction_WorldActionBase.h"
 #include "GameFeatureAction_AddAbilities.generated.h"
 
 class UGameplayAbility;

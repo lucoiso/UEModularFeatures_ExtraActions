@@ -5,7 +5,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFeatureAction_WorldActionBase.h"
+#include "Actions/GameFeatureAction_WorldActionBase.h"
 #include "GameFeatureAction_SpawnActors.generated.h"
 
 struct FComponentRequestHandle;

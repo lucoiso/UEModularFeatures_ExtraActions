@@ -41,7 +41,7 @@ private:
 	bool bEnableAbilityAutoBinding;
 
 public:
-	/* Determine the binding mode that will be used by this plugin - This choice affects which function from IAbilityInputBinding interface will be used to bind the abilities */
+	/* Determine the binding mode that will be used by this plugin - This choice affects which function from IMFEA_AbilityInputBinding interface will be used to bind the abilities */
 	UPROPERTY(GlobalConfig, EditAnywhere, Category = "Settings", Meta = (EditCondition = "!bEnableAbilityAutoBinding"))
 	EAbilityBindingMode AbilityBindingMode;
 

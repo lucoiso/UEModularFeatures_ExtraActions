@@ -8,7 +8,7 @@
 #include "InputTriggers.h"
 #include "EnhancedInputComponent.h"
 #include "GameplayAbilitySpec.h"
-#include "GameFeatureAction_WorldActionBase.h"
+#include "Actions/GameFeatureAction_WorldActionBase.h"
 #include "GameFeatureAction_AddInputs.generated.h"
 
 class UGameplayAbility;
@@ -40,7 +40,7 @@ struct FAbilityInputBindingData
 {
 	GENERATED_BODY()
 
-	/* Should this action setup call SetupAbilityInput/RemoveAbilityInputBinding using the IAbilityInputBinding interface? */
+	/* Should this action setup call SetupAbilityInput/RemoveAbilityInputBinding using the IMFEA_AbilityInputBinding interface? */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	bool bSetupAbilityInput = false;
 

@@ -7,7 +7,7 @@
 #include "CoreMinimal.h"
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemInterface.h"
-#include "AbilityInputBinding.h"
+#include "Interfaces/MFEA_AbilityInputBinding.h"
 #include "EnhancedInputComponent.h"
 #include "GameFramework/Controller.h"
 #include "LogModularFeatures_ExtraActions.h"
@@ -57,7 +57,7 @@ namespace ModularFeaturesHelper
 		return GetPluginSettings()->InputBindingOwner;
 	}
 
-	IAbilityInputBinding* GetAbilityInputBindingInterface(AActor* InActor, const EInputBindingOwnerOverride& InOwner)
+	IMFEA_AbilityInputBinding* GetAbilityInputBindingInterface(AActor* InActor, const EInputBindingOwnerOverride& InOwner)
 	{
 		if (!IsValid(InActor))
 		{
@@ -68,8 +68,8 @@ namespace ModularFeaturesHelper
 		{
 			switch (GetValidatedInputBindingOwner(InOwner))
 			{
-				case EInputBindingOwner::Pawn: return Cast<IAbilityInputBinding>(TargetPawn);
-				case EInputBindingOwner::Controller: return Cast<IAbilityInputBinding>(TargetPawn->GetController());
+				case EInputBindingOwner::Pawn: return Cast<IMFEA_AbilityInputBinding>(TargetPawn);
+				case EInputBindingOwner::Controller: return Cast<IMFEA_AbilityInputBinding>(TargetPawn->GetController());
 				default: return nullptr;
 			}
 		}
@@ -116,7 +116,7 @@ namespace ModularFeaturesHelper
 	}
 
 	// Will be removed in the future - but i don't want to break existing projects :)
-	const bool BindAbilityInputToInterfaceOwnerWithID(const IAbilityInputBinding* TargetInterfaceOwner, UInputAction* InputAction, const int32 InputID)
+	const bool BindAbilityInputToInterfaceOwnerWithID(const IMFEA_AbilityInputBinding* TargetInterfaceOwner, UInputAction* InputAction, const int32 InputID)
 	{
 		if (!TargetInterfaceOwner)
 		{
@@ -125,12 +125,10 @@ namespace ModularFeaturesHelper
 			return false;
 		}
 
-		IAbilityInputBinding::Execute_SetupAbilityInputBinding(TargetInterfaceOwner->_getUObject(), InputAction, InputID);
-
 		return true;
 	}
 	
-	const bool BindAbilityInputToInterfaceOwner(const IAbilityInputBinding* TargetInterfaceOwner, UInputAction* InputAction, const FGameplayAbilitySpec& AbilitySpec)
+	const bool BindAbilityInputToInterfaceOwner(const IMFEA_AbilityInputBinding* TargetInterfaceOwner, UInputAction* InputAction, const FGameplayAbilitySpec& AbilitySpec)
 	{
 		if (!BindAbilityInputToInterfaceOwnerWithID(TargetInterfaceOwner, InputAction, AbilitySpec.InputID))
 		{
@@ -140,19 +138,19 @@ namespace ModularFeaturesHelper
 		switch (GetPluginSettings()->AbilityBindingMode)
 		{
 			case (EAbilityBindingMode::InputID):
-				IAbilityInputBinding::Execute_SetupAbilityBindingByInput(TargetInterfaceOwner->_getUObject(), InputAction, AbilitySpec.InputID);
+				IMFEA_AbilityInputBinding::Execute_SetupAbilityBindingByInput(TargetInterfaceOwner->_getUObject(), InputAction, AbilitySpec.InputID);
 				break;
 
 			case (EAbilityBindingMode::AbilitySpec):
-				IAbilityInputBinding::Execute_SetupAbilityBindingBySpec(TargetInterfaceOwner->_getUObject(), InputAction, AbilitySpec);
+				IMFEA_AbilityInputBinding::Execute_SetupAbilityBindingBySpec(TargetInterfaceOwner->_getUObject(), InputAction, AbilitySpec);
 				break;
 
 			case (EAbilityBindingMode::AbilityTags):
-				IAbilityInputBinding::Execute_SetupAbilityBindingByTags(TargetInterfaceOwner->_getUObject(), InputAction, AbilitySpec.Ability->AbilityTags);
+				IMFEA_AbilityInputBinding::Execute_SetupAbilityBindingByTags(TargetInterfaceOwner->_getUObject(), InputAction, AbilitySpec.Ability->AbilityTags);
 				break;
 
 			case (EAbilityBindingMode::AbilityClass):
-				IAbilityInputBinding::Execute_SetupAbilityBindingByClass(TargetInterfaceOwner->_getUObject(), InputAction, TSubclassOf<UGameplayAbility>(AbilitySpec.Ability->GetClass()));
+				IMFEA_AbilityInputBinding::Execute_SetupAbilityBindingByClass(TargetInterfaceOwner->_getUObject(), InputAction, TSubclassOf<UGameplayAbility>(AbilitySpec.Ability->GetClass()));
 				break;
 
 			default:
@@ -174,7 +172,7 @@ namespace ModularFeaturesHelper
 		{
 			if (InputRef.IsValid())
 			{
-				IAbilityInputBinding::Execute_RemoveAbilityInputBinding(InterfaceOwner, InputRef.Get());
+				IMFEA_AbilityInputBinding::Execute_RemoveAbilityInputBinding(InterfaceOwner, InputRef.Get());
 			}
 
 			InputRef.Reset();

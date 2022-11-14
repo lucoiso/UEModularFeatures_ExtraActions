@@ -2,4 +2,4 @@
 // Year: 2022
 // Repo: https://github.com/lucoiso/UEModularFeatures_ExtraActions
 
-#include "AbilityInputBinding.h"
+#include "Interfaces/MFEA_AbilityInputBinding.h"
