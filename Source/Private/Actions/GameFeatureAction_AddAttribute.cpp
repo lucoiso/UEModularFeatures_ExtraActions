@@ -2,7 +2,7 @@
 // Year: 2022
 // Repo: https://github.com/lucoiso/UEModularFeatures_ExtraActions
 
-#include "GameFeatureAction_AddAttribute.h"
+#include "Actions/GameFeatureAction_AddAttribute.h"
 #include "Components/GameFrameworkComponentManager.h"
 #include "ModularFeatures_InternalFuncs.h"
 #include "Runtime/Launch/Resources/Version.h"

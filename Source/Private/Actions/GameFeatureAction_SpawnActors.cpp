@@ -2,7 +2,7 @@
 // Year: 2022
 // Repo: https://github.com/lucoiso/UEModularFeatures_ExtraActions
 
-#include "GameFeatureAction_SpawnActors.h"
+#include "Actions/GameFeatureAction_SpawnActors.h"
 #include "Components/GameFrameworkComponentManager.h"
 
 void UGameFeatureAction_SpawnActors::OnGameFeatureActivating(FGameFeatureActivatingContext& Context)

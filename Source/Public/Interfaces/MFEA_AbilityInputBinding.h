@@ -8,7 +8,7 @@
 #include "UObject/Interface.h"
 #include "GameplayAbilitySpec.h"
 #include "GameplayTagContainer.h"
-#include "AbilityInputBinding.generated.h"
+#include "MFEA_AbilityInputBinding.generated.h"
 
 /**
  *
@@ -16,21 +16,17 @@
 class UInputAction;
 
 /* Your pawn or controller need this inferface to accept ability input bindings */
-UINTERFACE(MinimalAPI, Blueprintable, Category = "MF Extra Actions | Modular Interfaces")
-class UAbilityInputBinding : public UInterface
+UINTERFACE(MinimalAPI, Blueprintable, Category = "MF Extra Actions | Interfaces", Meta = (DisplayName = "MF Extra Actions: Ability Input Binding"))
+class UMFEA_AbilityInputBinding : public UInterface
 {
 	GENERATED_BODY()
 };
 
 /* Your pawn or controller need this inferface to accept ability input bindings */
-class MODULARFEATURES_EXTRAACTIONS_API IAbilityInputBinding
+class MODULARFEATURES_EXTRAACTIONS_API IMFEA_AbilityInputBinding
 {
 	GENERATED_IINTERFACE_BODY()
 		
-	/* This function is needed for setup ability input binding inside your controller or pawn */
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "MF Extra Actions | Modular Interfaces", Meta = (Deprecated = "true", DeprecationMessage = "There are new functions to bind the input. Please check SetupAbilityBindingByInput, SetupAbilityBindingBySpec, SetupAbilityBindingByTags and SetupAbilityBindingByClass"))
-	void SetupAbilityInputBinding(UInputAction* Action, const int32 InputID);
-
 	/* Setup ability bind using input id - AbilityLocalInputPressed(InputID)*/
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "MF Extra Actions | Modular Interfaces")
 	void SetupAbilityBindingByInput(UInputAction* Action, const int32 InputID);

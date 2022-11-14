@@ -2,7 +2,7 @@
 // Year: 2022
 // Repo: https://github.com/lucoiso/UEModularFeatures_ExtraActions
 
-#include "GameFeatureAction_AddInputs.h"
+#include "Actions/GameFeatureAction_AddInputs.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputMappingContext.h"
 #include "Components/GameFrameworkComponentManager.h"
@@ -176,8 +176,8 @@ void UGameFeatureAction_AddInputs::RemoveActorInputs(AActor* TargetActor)
 					InputComponent->RemoveBinding(InputActionBinding);
 				}
 
-				// Verify and try to remove the ability bindings by calling the RemoveAbilityInputBinding from IAbilityInputBinding interface
-				if (const IAbilityInputBinding* const SetupInputInterface = ModularFeaturesHelper::GetAbilityInputBindingInterface(TargetActor, InputBindingOwnerOverride))
+				// Verify and try to remove the ability bindings by calling the RemoveAbilityInputBinding from IMFEA_AbilityInputBinding interface
+				if (const IMFEA_AbilityInputBinding* const SetupInputInterface = ModularFeaturesHelper::GetAbilityInputBindingInterface(TargetActor, InputBindingOwnerOverride))
 				{
 					ModularFeaturesHelper::RemoveAbilityInputInInterfaceOwner(SetupInputInterface->_getUObject(), AbilityActions);
 				}
@@ -197,7 +197,7 @@ void UGameFeatureAction_AddInputs::SetupActionBindings(AActor* TargetActor, UObj
 	FInputBindingData& NewInputData = ActiveExtensions.FindOrAdd(TargetActor);
 
 	// Get and store the interface owner before the for-loop
-	const IAbilityInputBinding* const SetupInputInterface = ModularFeaturesHelper::GetAbilityInputBindingInterface(TargetActor, InputBindingOwnerOverride);
+	const IMFEA_AbilityInputBinding* const SetupInputInterface = ModularFeaturesHelper::GetAbilityInputBindingInterface(TargetActor, InputBindingOwnerOverride);
 
 	// Load the enumeration and save it before the loop to avoid high disk consumption due to loading a soft reference a lot of times since there's only 1 enumeration
 	TWeakObjectPtr<UEnum> InputIDEnumeration_Ptr = ModularFeaturesHelper::LoadInputEnum();
@@ -233,7 +233,7 @@ void UGameFeatureAction_AddInputs::SetupActionBindings(AActor* TargetActor, UObj
 			continue;
 		}
 		
-		// Try to bind this input by calling the function SetupAbilityInputBinding from IAbilityInputBinding interface
+		// Try to bind this input by calling the function SetupAbilityInputBinding from IMFEA_AbilityInputBinding interface
 		if (FGameplayAbilitySpec NewAbilitySpec = GetAbilitySpecInformationFromBindingData(TargetActor, AbilityBindingData, InputIDEnumeration_Ptr.Get()); 
 			ModularFeaturesHelper::BindAbilityInputToInterfaceOwner(SetupInputInterface, InputAction, NewAbilitySpec))
 		{
