@@ -1,6 +1,6 @@
 {
 	"FileVersion": 3,
-	"Version": 1,
+	"Version": 2,
 	"VersionName": "1.2.1",
 	"FriendlyName": "Modular Features: Extra Actions",
 	"Description": "Integrates GAS and Enhanced Input to the existing Game Features and Modular plugins.",
