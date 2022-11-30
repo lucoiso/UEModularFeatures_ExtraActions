@@ -4,9 +4,9 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
-#include "GameplayTagContainer.h"
-#include "GameplayEffectTypes.h"
+#include <CoreMinimal.h>
+#include <GameplayTagContainer.h>
+#include <GameplayEffectTypes.h>
 #include "Actions/GameFeatureAction_WorldActionBase.h"
 #include "GameFeatureAction_AddEffects.generated.h"
 

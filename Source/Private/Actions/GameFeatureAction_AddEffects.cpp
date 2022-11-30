@@ -3,8 +3,8 @@
 // Repo: https://github.com/lucoiso/UEModularFeatures_ExtraActions
 
 #include "Actions/GameFeatureAction_AddEffects.h"
-#include "Components/GameFrameworkComponentManager.h"
 #include "ModularFeatures_InternalFuncs.h"
+#include <Components/GameFrameworkComponentManager.h>
 
 void UGameFeatureAction_AddEffects::OnGameFeatureActivating(FGameFeatureActivatingContext& Context)
 {

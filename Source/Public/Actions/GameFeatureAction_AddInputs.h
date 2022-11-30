@@ -4,10 +4,10 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
-#include "InputTriggers.h"
-#include "EnhancedInputComponent.h"
-#include "GameplayAbilitySpec.h"
+#include <CoreMinimal.h>
+#include <InputTriggers.h>
+#include <EnhancedInputComponent.h>
+#include <GameplayAbilitySpec.h>
 #include "Actions/GameFeatureAction_WorldActionBase.h"
 #include "GameFeatureAction_AddInputs.generated.h"
 

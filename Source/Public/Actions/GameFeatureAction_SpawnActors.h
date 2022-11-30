@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
+#include <CoreMinimal.h>
 #include "Actions/GameFeatureAction_WorldActionBase.h"
 #include "GameFeatureAction_SpawnActors.generated.h"
 

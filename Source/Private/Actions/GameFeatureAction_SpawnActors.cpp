@@ -3,7 +3,7 @@
 // Repo: https://github.com/lucoiso/UEModularFeatures_ExtraActions
 
 #include "Actions/GameFeatureAction_SpawnActors.h"
-#include "Components/GameFrameworkComponentManager.h"
+#include <Components/GameFrameworkComponentManager.h>
 
 void UGameFeatureAction_SpawnActors::OnGameFeatureActivating(FGameFeatureActivatingContext& Context)
 {

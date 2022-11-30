@@ -3,9 +3,9 @@
 // Repo: https://github.com/lucoiso/UEModularFeatures_ExtraActions
 
 #include "Actions/GameFeatureAction_AddAbilities.h"
-#include "Components/GameFrameworkComponentManager.h"
-#include "InputAction.h"
 #include "ModularFeatures_InternalFuncs.h"
+#include <Components/GameFrameworkComponentManager.h>
+#include <InputAction.h>
 
 void UGameFeatureAction_AddAbilities::OnGameFeatureActivating(FGameFeatureActivatingContext& Context)
 {

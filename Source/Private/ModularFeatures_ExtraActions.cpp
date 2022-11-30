@@ -3,7 +3,7 @@
 // Repo: https://github.com/lucoiso/UEModularFeatures_ExtraActions
 
 #include "ModularFeatures_ExtraActions.h"
-#include "Modules/ModuleManager.h"
+#include <Modules/ModuleManager.h>
 
 void FModularFeatures_ExtraActionsModule::StartupModule()
 {

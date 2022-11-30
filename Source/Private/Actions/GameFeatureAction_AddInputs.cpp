@@ -3,12 +3,12 @@
 // Repo: https://github.com/lucoiso/UEModularFeatures_ExtraActions
 
 #include "Actions/GameFeatureAction_AddInputs.h"
-#include "EnhancedInputSubsystems.h"
-#include "InputMappingContext.h"
-#include "Components/GameFrameworkComponentManager.h"
-#include "GameFramework/PlayerController.h"
-#include "Engine/LocalPlayer.h"
 #include "ModularFeatures_InternalFuncs.h"
+#include <EnhancedInputSubsystems.h>
+#include <InputMappingContext.h>
+#include <Components/GameFrameworkComponentManager.h>
+#include <GameFramework/PlayerController.h>
+#include <Engine/LocalPlayer.h>
 
 void UGameFeatureAction_AddInputs::OnGameFeatureActivating(FGameFeatureActivatingContext& Context)
 {
