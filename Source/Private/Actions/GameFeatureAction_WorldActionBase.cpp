@@ -8,16 +8,25 @@ void UGameFeatureAction_WorldActionBase::OnGameFeatureActivating(FGameFeatureAct
 {
 	Super::OnGameFeatureActivating(Context);
 
+	if (!ensureAlways(ActiveRequests.IsEmpty()))
+	{
+		ResetExtension();
+	}
+
+	const FGameFeatureStateChangeContext StateChangeContext(Context);
+
 	// When the game instance starts, will perform the modular feature activation behavior
-	GameInstanceStartHandle = FWorldDelegates::OnStartGameInstance.AddUObject(this, &UGameFeatureAction_WorldActionBase::HandleGameInstanceStart, FGameFeatureStateChangeContext(Context));
+	GameInstanceStartHandle = FWorldDelegates::OnStartGameInstance.AddUObject(this, &UGameFeatureAction_WorldActionBase::HandleGameInstanceStart, StateChangeContext);
 
 	// Useful to activate the feature even if the game instance has already started
 	for (const FWorldContext& WorldContext : GEngine->GetWorldContexts())
 	{
-		if (Context.ShouldApplyToWorldContext(WorldContext))
+		if (!Context.ShouldApplyToWorldContext(WorldContext))
 		{
-			AddToWorld(WorldContext);
+			continue;
 		}
+
+		AddToWorld(WorldContext);
 	}
 }
 
@@ -26,6 +35,11 @@ void UGameFeatureAction_WorldActionBase::OnGameFeatureDeactivating(FGameFeatureD
 	Super::OnGameFeatureDeactivating(Context);
 
 	FWorldDelegates::OnStartGameInstance.Remove(GameInstanceStartHandle);
+}
+
+void UGameFeatureAction_WorldActionBase::ResetExtension()
+{
+	ActiveRequests.Empty();
 }
 
 UGameFrameworkComponentManager* UGameFeatureAction_WorldActionBase::GetGameFrameworkComponentManager(const FWorldContext& WorldContext) const
@@ -40,8 +54,10 @@ UGameFrameworkComponentManager* UGameFeatureAction_WorldActionBase::GetGameFrame
 
 void UGameFeatureAction_WorldActionBase::HandleGameInstanceStart(UGameInstance* GameInstance, const FGameFeatureStateChangeContext ChangeContext)
 {
-	if (ChangeContext.ShouldApplyToWorldContext(*GameInstance->GetWorldContext()))
+	if (!ChangeContext.ShouldApplyToWorldContext(*GameInstance->GetWorldContext()))
 	{
-		AddToWorld(*GameInstance->GetWorldContext());
+		return;
 	}
+
+	AddToWorld(*GameInstance->GetWorldContext());
 }

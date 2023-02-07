@@ -9,7 +9,7 @@
 
 void UGameFeatureAction_AddAbilities::OnGameFeatureActivating(FGameFeatureActivatingContext& Context)
 {
-	if (!ensureAlways(ActiveExtensions.IsEmpty()) || !ensureAlways(ActiveRequests.IsEmpty()))
+	if (!ensureAlways(ActiveExtensions.IsEmpty()))
 	{
 		ResetExtension();
 	}
@@ -20,7 +20,6 @@ void UGameFeatureAction_AddAbilities::OnGameFeatureActivating(FGameFeatureActiva
 void UGameFeatureAction_AddAbilities::OnGameFeatureDeactivating(FGameFeatureDeactivatingContext& Context)
 {
 	Super::OnGameFeatureDeactivating(Context);
-
 	ResetExtension();
 }
 
@@ -32,16 +31,14 @@ void UGameFeatureAction_AddAbilities::ResetExtension()
 		RemoveActorAbilities(ExtensionIterator->Key.Get());
 	}
 
-	ActiveRequests.Empty();
+	Super::ResetExtension();
 }
 
 void UGameFeatureAction_AddAbilities::AddToWorld(const FWorldContext& WorldContext)
 {
-	if (UGameFrameworkComponentManager* const ComponentManager = GetGameFrameworkComponentManager(WorldContext);
-		IsValid(ComponentManager) && !TargetPawnClass.IsNull())
+	if (UGameFrameworkComponentManager* const ComponentManager = GetGameFrameworkComponentManager(WorldContext); IsValid(ComponentManager) && !TargetPawnClass.IsNull())
 	{
 		using FHandlerDelegate = UGameFrameworkComponentManager::FExtensionHandlerDelegate;
-
 		const FHandlerDelegate ExtensionHandlerDelegate = FHandlerDelegate::CreateUObject(this, &UGameFeatureAction_AddAbilities::HandleActorExtension);
 
 		ActiveRequests.Add(ComponentManager->AddExtensionHandler(TargetPawnClass, ExtensionHandlerDelegate));
@@ -112,8 +109,7 @@ void UGameFeatureAction_AddAbilities::AddActorAbilities(AActor* TargetActor, con
 		FGameplayAbilitySpec NewAbilitySpec(AbilityToAdd, Ability.AbilityLevel, InputID, TargetActor);
 
 		// Try to give the ability to the target and check if the spec handle is valid
-		if (const FGameplayAbilitySpecHandle NewSpecHandle = AbilitySystemComponent->GiveAbility(NewAbilitySpec);
-			NewSpecHandle.IsValid())
+		if (const FGameplayAbilitySpecHandle NewSpecHandle = AbilitySystemComponent->GiveAbility(NewAbilitySpec); NewSpecHandle.IsValid())
 		{
 			// Add the spec handle to the ability data
 			NewAbilityData.SpecHandle.Add(NewSpecHandle);
@@ -125,8 +121,7 @@ void UGameFeatureAction_AddAbilities::AddActorAbilities(AActor* TargetActor, con
 				const IMFEA_AbilityInputBinding* const SetupInputInterface = ModularFeaturesHelper::GetAbilityInputBindingInterface(TargetActor, InputBindingOwnerOverride);
 
 				// If we can bind the input to the target interface, we must add the input reference to the ability data
-				if (UInputAction* const AbilityInput = Ability.InputAction.LoadSynchronous(); 
-					ModularFeaturesHelper::BindAbilityInputToInterfaceOwner(SetupInputInterface, AbilityInput, NewAbilitySpec))
+				if (UInputAction* const AbilityInput = Ability.InputAction.LoadSynchronous(); ModularFeaturesHelper::BindAbilityInputToInterfaceOwner(SetupInputInterface, AbilityInput, NewAbilitySpec))
 				{
 					NewAbilityData.InputReference.Add(AbilityInput);
 				}
@@ -157,11 +152,12 @@ void UGameFeatureAction_AddAbilities::RemoveActorAbilities(AActor* TargetActor)
 	}
 
 	// Check if we can remove the abilities from this target actor by checking if it is inside the active extensions map
-	FActiveAbilityData ActiveAbilities = ActiveExtensions.FindRef(TargetActor);
-	if constexpr (&ActiveAbilities == nullptr)
+	FActiveAbilityData* const ActiveAbilities = ActiveExtensions.Find(TargetActor);
+	if (!ActiveAbilities)
 	{
 		UE_LOG(LogGameplayFeaturesExtraActions, Warning, TEXT("%s: No active abilities found for Actor %s."), *FString(__func__), *TargetActor->GetName());
 		ActiveExtensions.Remove(TargetActor);
+		
 		return;
 	}
 	
@@ -170,7 +166,7 @@ void UGameFeatureAction_AddAbilities::RemoveActorAbilities(AActor* TargetActor)
 		UE_LOG(LogGameplayFeaturesExtraActions, Display, TEXT("%s: Removing associated abilities from Actor %s."), *FString(__func__), *TargetActor->GetName());
 
 		// Iterate the active abilities and remove all spec handle associated to this actor
-		for (const FGameplayAbilitySpecHandle& SpecHandle : ActiveAbilities.SpecHandle)
+		for (const FGameplayAbilitySpecHandle& SpecHandle : ActiveAbilities->SpecHandle)
 		{
 			if (SpecHandle.IsValid())
 			{
@@ -183,7 +179,7 @@ void UGameFeatureAction_AddAbilities::RemoveActorAbilities(AActor* TargetActor)
 		// Get the interface owner and try to remove the input bindings
 		if (const IMFEA_AbilityInputBinding* const SetupInputInterface = ModularFeaturesHelper::GetAbilityInputBindingInterface(TargetActor, InputBindingOwnerOverride))
 		{
-			ModularFeaturesHelper::RemoveAbilityInputInInterfaceOwner(SetupInputInterface->_getUObject(), ActiveAbilities.InputReference);
+			ModularFeaturesHelper::RemoveAbilityInputInInterfaceOwner(SetupInputInterface->_getUObject(), ActiveAbilities->InputReference);
 		}
 	}
 	else if (IsValid(GetWorld()) && IsValid(GetWorld()->GetGameInstance()))

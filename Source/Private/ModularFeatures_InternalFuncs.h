@@ -49,9 +49,9 @@ namespace ModularFeaturesHelper
 	{
 		switch (InOwner)
 		{
-		case EInputBindingOwnerOverride::Pawn: return EInputBindingOwner::Pawn;
-		case EInputBindingOwnerOverride::Controller: return EInputBindingOwner::Controller;
-		default: break;
+			case EInputBindingOwnerOverride::Pawn: return EInputBindingOwner::Pawn;
+			case EInputBindingOwnerOverride::Controller: return EInputBindingOwner::Controller;
+			default: break;
 		}
 
 		return GetPluginSettings()->InputBindingOwner;

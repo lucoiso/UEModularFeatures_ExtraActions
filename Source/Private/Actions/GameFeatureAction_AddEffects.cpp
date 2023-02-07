@@ -8,7 +8,7 @@
 
 void UGameFeatureAction_AddEffects::OnGameFeatureActivating(FGameFeatureActivatingContext& Context)
 {
-	if (!ensureAlways(ActiveExtensions.IsEmpty()) || !ensureAlways(ActiveRequests.IsEmpty()))
+	if (!ensureAlways(ActiveExtensions.IsEmpty()))
 	{
 		ResetExtension();
 	}
@@ -19,7 +19,6 @@ void UGameFeatureAction_AddEffects::OnGameFeatureActivating(FGameFeatureActivati
 void UGameFeatureAction_AddEffects::OnGameFeatureDeactivating(FGameFeatureDeactivatingContext& Context)
 {
 	Super::OnGameFeatureDeactivating(Context);
-
 	ResetExtension();
 }
 
@@ -31,16 +30,14 @@ void UGameFeatureAction_AddEffects::ResetExtension()
 		RemoveEffects(ExtensionIterator->Key.Get());
 	}
 
-	ActiveRequests.Empty();
+	Super::ResetExtension();
 }
 
 void UGameFeatureAction_AddEffects::AddToWorld(const FWorldContext& WorldContext)
 {
-	if (UGameFrameworkComponentManager* const ComponentManager = GetGameFrameworkComponentManager(WorldContext);
-		IsValid(ComponentManager) && !TargetPawnClass.IsNull())
+	if (UGameFrameworkComponentManager* const ComponentManager = GetGameFrameworkComponentManager(WorldContext); IsValid(ComponentManager) && !TargetPawnClass.IsNull())
 	{
 		using FHandlerDelegate = UGameFrameworkComponentManager::FExtensionHandlerDelegate;
-
 		const FHandlerDelegate ExtensionHandlerDelegate = FHandlerDelegate::CreateUObject(this, &UGameFeatureAction_AddEffects::HandleActorExtension);
 
 		ActiveRequests.Add(ComponentManager->AddExtensionHandler(TargetPawnClass, ExtensionHandlerDelegate));
@@ -136,8 +133,7 @@ void UGameFeatureAction_AddEffects::RemoveEffects(AActor* TargetActor)
 	}
 
 	// Get the active effects and check if it's empty
-	if (TArray<FActiveGameplayEffectHandle> ActiveEffects = ActiveExtensions.FindRef(TargetActor);
-		!ActiveEffects.IsEmpty())
+	if (TArray<FActiveGameplayEffectHandle> ActiveEffects = ActiveExtensions.FindRef(TargetActor); !ActiveEffects.IsEmpty())
 	{
 		// Get the target ability system component
 		if (UAbilitySystemComponent* const AbilitySystemComponent = ModularFeaturesHelper::GetAbilitySystemComponentByActor(TargetActor))
@@ -147,10 +143,12 @@ void UGameFeatureAction_AddEffects::RemoveEffects(AActor* TargetActor)
 			// Iterate through the active effects and remove the specified effect by its effect handle if its valid
 			for (const FActiveGameplayEffectHandle& EffectHandle : ActiveEffects)
 			{
-				if (EffectHandle.IsValid())
+				if (!EffectHandle.IsValid())
 				{
-					AbilitySystemComponent->RemoveActiveGameplayEffect(EffectHandle);
+					continue;
 				}
+
+				AbilitySystemComponent->RemoveActiveGameplayEffect(EffectHandle);
 			}
 		}
 		else if (IsValid(GetWorld()) && IsValid(GetWorld()->GetGameInstance()))
