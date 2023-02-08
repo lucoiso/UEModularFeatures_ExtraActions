@@ -7,6 +7,10 @@
 #include <Components/GameFrameworkComponentManager.h>
 #include <Runtime/Launch/Resources/Version.h>
 
+#ifdef UE_INLINE_GENERATED_CPP_BY_NAME
+#include UE_INLINE_GENERATED_CPP_BY_NAME(GameFeatureAction_AddAttribute)
+#endif
+
 void UGameFeatureAction_AddAttribute::OnGameFeatureActivating(FGameFeatureActivatingContext& Context)
 {
 	if (!ensureAlways(ActiveExtensions.IsEmpty()))

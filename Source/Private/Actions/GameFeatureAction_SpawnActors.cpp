@@ -6,6 +6,10 @@
 #include "LogModularFeatures_ExtraActions.h"
 #include <Components/GameFrameworkComponentManager.h>
 
+#ifdef UE_INLINE_GENERATED_CPP_BY_NAME
+#include UE_INLINE_GENERATED_CPP_BY_NAME(GameFeatureAction_SpawnActors)
+#endif
+
 void UGameFeatureAction_SpawnActors::OnGameFeatureActivating(FGameFeatureActivatingContext& Context)
 {
 	if (!ensureAlways(SpawnedActors.IsEmpty()))

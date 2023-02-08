@@ -25,7 +25,7 @@ class UMFEA_AbilityInputBinding : public UInterface
 /* Your pawn or controller need this inferface to accept ability input bindings */
 class MODULARFEATURES_EXTRAACTIONS_API IMFEA_AbilityInputBinding
 {
-	GENERATED_IINTERFACE_BODY()
+	GENERATED_BODY()
 		
 	/* Setup ability bind using input id - AbilityLocalInputPressed(InputID)*/
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "MF Extra Actions | Modular Interfaces")

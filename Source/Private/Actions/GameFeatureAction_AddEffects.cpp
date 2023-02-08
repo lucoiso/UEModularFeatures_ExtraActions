@@ -6,6 +6,10 @@
 #include "ModularFeatures_InternalFuncs.h"
 #include <Components/GameFrameworkComponentManager.h>
 
+#ifdef UE_INLINE_GENERATED_CPP_BY_NAME
+#include UE_INLINE_GENERATED_CPP_BY_NAME(GameFeatureAction_AddEffects)
+#endif
+
 void UGameFeatureAction_AddEffects::OnGameFeatureActivating(FGameFeatureActivatingContext& Context)
 {
 	if (!ensureAlways(ActiveExtensions.IsEmpty()))
