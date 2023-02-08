@@ -26,7 +26,8 @@ class UMFEA_AbilityInputBinding : public UInterface
 class MODULARFEATURES_EXTRAACTIONS_API IMFEA_AbilityInputBinding
 {
 	GENERATED_BODY()
-		
+
+public:
 	/* Setup ability bind using input id - AbilityLocalInputPressed(InputID)*/
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "MF Extra Actions | Modular Interfaces")
 	void SetupAbilityBindingByInput(UInputAction* Action, const int32 InputID);
