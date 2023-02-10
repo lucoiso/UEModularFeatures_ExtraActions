@@ -34,6 +34,7 @@ class MODULARFEATURES_EXTRAACTIONS_API UMFEA_Settings : public UDeveloperSetting
 	
 public:
 	explicit UMFEA_Settings(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
+	static const UMFEA_Settings* Get();
 
 private:
 	/* Work in Progress: If true, will auto bind the ability input directly using the given Input Action. Will be added in a next update. */

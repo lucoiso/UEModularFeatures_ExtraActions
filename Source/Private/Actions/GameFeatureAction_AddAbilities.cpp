@@ -96,7 +96,7 @@ void UGameFeatureAction_AddAbilities::AddActorAbilities(AActor* TargetActor, con
 		return;
 	}
 
-	if (UAbilitySystemComponent* const AbilitySystemComponent = ModularFeaturesHelper::GetAbilitySystemComponentByActor(TargetActor))
+	if (UAbilitySystemComponent* const AbilitySystemComponent = ModularFeaturesHelper::GetAbilitySystemComponentInActor(TargetActor))
 	{
 		// If InputID Enumeration using is disabled, assume -1 as value
 		const int32 InputID = ModularFeaturesHelper::GetInputIDByName(Ability.InputIDValueName, InputIDEnumeration_Ptr.Get());
@@ -165,7 +165,7 @@ void UGameFeatureAction_AddAbilities::RemoveActorAbilities(AActor* TargetActor)
 		return;
 	}
 	
-	if (UAbilitySystemComponent* const AbilitySystemComponent = ModularFeaturesHelper::GetAbilitySystemComponentByActor(TargetActor))
+	if (UAbilitySystemComponent* const AbilitySystemComponent = ModularFeaturesHelper::GetAbilitySystemComponentInActor(TargetActor))
 	{
 		UE_LOG(LogGameplayFeaturesExtraActions, Display, TEXT("%s: Removing associated abilities from Actor %s."), *FString(__func__), *TargetActor->GetName());
 

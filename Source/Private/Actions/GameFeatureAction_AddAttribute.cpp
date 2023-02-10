@@ -86,7 +86,7 @@ void UGameFeatureAction_AddAttribute::AddAttribute(AActor* TargetActor)
 	}
 
 	// Get the ability system component of the target actor
-	if (UAbilitySystemComponent* const AbilitySystemComponent = ModularFeaturesHelper::GetAbilitySystemComponentByActor(TargetActor))
+	if (UAbilitySystemComponent* const AbilitySystemComponent = ModularFeaturesHelper::GetAbilitySystemComponentInActor(TargetActor))
 	{
 		// Load and store the AttributeSet Class into a const variable
 		if (const TSubclassOf<UAttributeSet> SetType = Attribute.LoadSynchronous())
@@ -137,7 +137,7 @@ void UGameFeatureAction_AddAttribute::RemoveAttribute(AActor* TargetActor)
 	}
 
 	// Get the ability system component of the target actor
-	if (UAbilitySystemComponent* const AbilitySystemComponent = ModularFeaturesHelper::GetAbilitySystemComponentByActor(TargetActor))
+	if (UAbilitySystemComponent* const AbilitySystemComponent = ModularFeaturesHelper::GetAbilitySystemComponentInActor(TargetActor))
 	{
 		// Get the added Attribute Set to the target actor by searching inside the Active Extensions, remove it from the Ability System Component and force a replication
 #if ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION == 0

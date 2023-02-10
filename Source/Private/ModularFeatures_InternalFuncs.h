@@ -6,7 +6,7 @@
 
 #include <CoreMinimal.h>
 #include <AbilitySystemComponent.h>
-#include <AbilitySystemInterface.h>
+#include <AbilitySystemGlobals.h>
 #include <EnhancedInputComponent.h>
 #include <GameFramework/Controller.h>
 #include "Interfaces/MFEA_AbilityInputBinding.h"
@@ -39,10 +39,9 @@ namespace ModularFeaturesHelper
 		return true;
 	}
 
-	UAbilitySystemComponent* GetAbilitySystemComponentByActor(AActor* InActor)
+	UAbilitySystemComponent* GetAbilitySystemComponentInActor(AActor* InActor)
 	{
-		const IAbilitySystemInterface* const InterfaceOwner = Cast<IAbilitySystemInterface>(InActor);
-		return InterfaceOwner != nullptr ? InterfaceOwner->GetAbilitySystemComponent() : InActor->FindComponentByClass<UAbilitySystemComponent>();
+		return UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(InActor);
 	}
 
 	EInputBindingOwner GetValidatedInputBindingOwner(const EInputBindingOwnerOverride& InOwner)

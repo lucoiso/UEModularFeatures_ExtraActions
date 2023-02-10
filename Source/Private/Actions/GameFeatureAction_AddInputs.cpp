@@ -282,7 +282,7 @@ FGameplayAbilitySpec UGameFeatureAction_AddInputs::GetAbilitySpecInformationFrom
 	// If the user wants to find a active ability spec, we'll try to get the ability system component of the target actor and get the spec using the specified ability class
 	if (AbilityBindingData.bFindAbilitySpec)
 	{
-		if (UAbilitySystemComponent* const AbilitySystemComponent = ModularFeaturesHelper::GetAbilitySystemComponentByActor(TargetActor))
+		if (UAbilitySystemComponent* const AbilitySystemComponent = ModularFeaturesHelper::GetAbilitySystemComponentInActor(TargetActor))
 		{
 			// We're not using the InputID to search for existing spec because more than 1 abilities can have the same Input Id
 			AbilitySystemComponent->FindAbilitySpecFromClass(TSubclassOf<UGameplayAbility>(AbilityBindingData.AbilityClass.LoadSynchronous()));

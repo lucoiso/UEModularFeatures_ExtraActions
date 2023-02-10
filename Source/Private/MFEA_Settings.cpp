@@ -14,3 +14,9 @@ UMFEA_Settings::UMFEA_Settings(const FObjectInitializer& ObjectInitializer) : Su
 {
 	CategoryName = TEXT("Plugins");
 }
+
+const UMFEA_Settings* UMFEA_Settings::Get()
+{
+	static const UMFEA_Settings* const Instance = GetDefault<UMFEA_Settings>();
+	return Instance;
+}

@@ -88,7 +88,7 @@ void UGameFeatureAction_AddEffects::AddEffects(AActor* TargetActor, const FEffec
 	}
 
 	// Get the ability system component of the target actor
-	if (UAbilitySystemComponent* const AbilitySystemComponent = ModularFeaturesHelper::GetAbilitySystemComponentByActor(TargetActor))
+	if (UAbilitySystemComponent* const AbilitySystemComponent = ModularFeaturesHelper::GetAbilitySystemComponentInActor(TargetActor))
 	{
 		// Check if there's already added spec data applied to the target actor
 		TArray<FActiveGameplayEffectHandle>& SpecData = ActiveExtensions.FindOrAdd(TargetActor);
@@ -140,7 +140,7 @@ void UGameFeatureAction_AddEffects::RemoveEffects(AActor* TargetActor)
 	if (TArray<FActiveGameplayEffectHandle> ActiveEffects = ActiveExtensions.FindRef(TargetActor); !ActiveEffects.IsEmpty())
 	{
 		// Get the target ability system component
-		if (UAbilitySystemComponent* const AbilitySystemComponent = ModularFeaturesHelper::GetAbilitySystemComponentByActor(TargetActor))
+		if (UAbilitySystemComponent* const AbilitySystemComponent = ModularFeaturesHelper::GetAbilitySystemComponentInActor(TargetActor))
 		{
 			UE_LOG(LogGameplayFeaturesExtraActions, Display, TEXT("%s: Removing effects from Actor %s."), *FString(__func__), *TargetActor->GetName());
 
