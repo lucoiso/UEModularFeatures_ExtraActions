@@ -51,7 +51,7 @@ void UGameFeatureAction_AddAttribute::AddToWorld(const FWorldContext& WorldConte
 
 void UGameFeatureAction_AddAttribute::HandleActorExtension(AActor* Owner, const FName EventName)
 {
-	UE_LOG(LogGameplayFeaturesExtraActions, Display, TEXT("Event %s sent by Actor %s for attribute management."), *EventName.ToString(), *Owner->GetName());
+	UE_LOG(LogGameplayFeaturesExtraActions_Internal, Display, TEXT("Event %s sent by Actor %s for attribute management."), *EventName.ToString(), *Owner->GetName());
 
 	if (EventName == UGameFrameworkComponentManager::NAME_ExtensionRemoved || EventName == UGameFrameworkComponentManager::NAME_ReceiverRemoved)
 	{
@@ -68,7 +68,7 @@ void UGameFeatureAction_AddAttribute::HandleActorExtension(AActor* Owner, const 
 
 		if (Attribute.IsNull())
 		{
-			UE_LOG(LogGameplayFeaturesExtraActions, Error, TEXT("%s: Attribute is null."), *FString(__func__));
+			UE_LOG(LogGameplayFeaturesExtraActions_Internal, Error, TEXT("%s: Attribute is null."), *FString(__func__));
 		}
 		else
 		{
@@ -112,12 +112,12 @@ void UGameFeatureAction_AddAttribute::AddAttribute(AActor* TargetActor)
 		}
 		else
 		{
-			UE_LOG(LogGameplayFeaturesExtraActions, Error, TEXT("%s: Attribute is invalid."), *FString(__func__));
+			UE_LOG(LogGameplayFeaturesExtraActions_Internal, Error, TEXT("%s: Attribute is invalid."), *FString(__func__));
 		}
 	}
 	else
 	{
-		UE_LOG(LogGameplayFeaturesExtraActions, Error, TEXT("%s: Failed to find AbilitySystemComponent on Actor %s."), *FString(__func__), *TargetActor->GetName());
+		UE_LOG(LogGameplayFeaturesExtraActions_Internal, Error, TEXT("%s: Failed to find AbilitySystemComponent on Actor %s."), *FString(__func__), *TargetActor->GetName());
 	}
 }
 
@@ -159,7 +159,7 @@ void UGameFeatureAction_AddAttribute::RemoveAttribute(AActor* TargetActor)
 	// We don't need to warn the user if there's no valid world or game instance, since this is a common case when the game is shutting down
 	else if (IsValid(GetWorld()) && IsValid(GetWorld()->GetGameInstance()))
 	{
-		UE_LOG(LogGameplayFeaturesExtraActions, Error, TEXT("%s: Failed to find AbilitySystemComponent on Actor %s."), *FString(__func__), *TargetActor->GetName());
+		UE_LOG(LogGameplayFeaturesExtraActions_Internal, Error, TEXT("%s: Failed to find AbilitySystemComponent on Actor %s."), *FString(__func__), *TargetActor->GetName());
 	}
 
 	ActiveExtensions.Remove(TargetActor);

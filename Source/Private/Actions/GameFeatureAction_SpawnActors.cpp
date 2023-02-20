@@ -71,7 +71,7 @@ void UGameFeatureAction_SpawnActors::SpawnActors(UWorld* WorldReference)
 		// Check if the soft reference is null
 		if (ActorClass.IsNull())
 		{
-			UE_LOG(LogGameplayFeaturesExtraActions, Error, TEXT("%s: Actor class is null."), *FString(__func__));
+			UE_LOG(LogGameplayFeaturesExtraActions_Internal, Error, TEXT("%s: Actor class is null."), *FString(__func__));
 			continue;
 		}
 
@@ -95,6 +95,7 @@ void UGameFeatureAction_SpawnActors::DestroyActors()
 			continue;
 		}
 
+		UE_LOG(LogGameplayFeaturesExtraActions, Display, TEXT("%s: Destroying actor %s"), *FString(__func__), *ActorPtr->GetName());
 		ActorPtr->Destroy();
 	}
 

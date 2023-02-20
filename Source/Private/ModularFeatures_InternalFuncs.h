@@ -107,7 +107,7 @@ namespace ModularFeaturesHelper
 	{
 		if (GetPluginSettings()->InputIDEnumeration.IsNull())
 		{
-			UE_LOG(LogGameplayFeaturesExtraActions, Error, TEXT("%s: bUseInputEnumeration is set to true but Enumeration class is null!"), *FString(__func__));
+			UE_LOG(LogGameplayFeaturesExtraActions_Internal, Error, TEXT("%s: bUseInputEnumeration is set to true but Enumeration class is null!"), *FString(__func__));
 			return nullptr;
 		}
 
@@ -119,7 +119,7 @@ namespace ModularFeaturesHelper
 	{
 		if (!TargetInterfaceOwner)
 		{
-			UE_LOG(LogGameplayFeaturesExtraActions, Error, TEXT("%s: Failed to setup input binding on Actor %s due to a invalid interface owner."), *FString(__func__), *TargetInterfaceOwner->_getUObject()->GetName());
+			UE_LOG(LogGameplayFeaturesExtraActions_Internal, Error, TEXT("%s: Failed to setup input binding on Actor %s due to a invalid interface owner."), *FString(__func__), *TargetInterfaceOwner->_getUObject()->GetName());
 
 			return false;
 		}
@@ -163,7 +163,7 @@ namespace ModularFeaturesHelper
 	{
 		if (!IsValid(InterfaceOwner))
 		{
-			UE_LOG(LogGameplayFeaturesExtraActions, Error, TEXT("%s: Failed to remove input binding due to invalid interface owner."), *FString(__func__));			
+			UE_LOG(LogGameplayFeaturesExtraActions_Internal, Error, TEXT("%s: Failed to remove input binding due to invalid interface owner."), *FString(__func__));			
 			return;
 		}
 

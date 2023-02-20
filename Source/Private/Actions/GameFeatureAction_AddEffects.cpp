@@ -50,7 +50,7 @@ void UGameFeatureAction_AddEffects::AddToWorld(const FWorldContext& WorldContext
 
 void UGameFeatureAction_AddEffects::HandleActorExtension(AActor* Owner, const FName EventName)
 {
-	UE_LOG(LogGameplayFeaturesExtraActions, Display, TEXT("Event %s sent by Actor %s for effects management."), *EventName.ToString(), *Owner->GetName());
+	UE_LOG(LogGameplayFeaturesExtraActions_Internal, Display, TEXT("Event %s sent by Actor %s for effects management."), *EventName.ToString(), *Owner->GetName());
 
 	if (EventName == UGameFrameworkComponentManager::NAME_ExtensionRemoved || EventName == UGameFrameworkComponentManager::NAME_ReceiverRemoved)
 	{
@@ -69,7 +69,7 @@ void UGameFeatureAction_AddEffects::HandleActorExtension(AActor* Owner, const FN
 		{
 			if (Entry.EffectClass.IsNull())
 			{
-				UE_LOG(LogGameplayFeaturesExtraActions, Error, TEXT("%s: Effect class is null."), *FString(__func__));
+				UE_LOG(LogGameplayFeaturesExtraActions_Internal, Error, TEXT("%s: Effect class is null."), *FString(__func__));
 			}
 			else
 			{
@@ -117,7 +117,7 @@ void UGameFeatureAction_AddEffects::AddEffects(AActor* TargetActor, const FEffec
 	}
 	else
 	{
-		UE_LOG(LogGameplayFeaturesExtraActions, Error, TEXT("%s: Failed to find AbilitySystemComponent on Actor %s."), *FString(__func__), *TargetActor->GetName());
+		UE_LOG(LogGameplayFeaturesExtraActions_Internal, Error, TEXT("%s: Failed to find AbilitySystemComponent on Actor %s."), *FString(__func__), *TargetActor->GetName());
 	}
 }
 
@@ -157,7 +157,7 @@ void UGameFeatureAction_AddEffects::RemoveEffects(AActor* TargetActor)
 		}
 		else if (IsValid(GetWorld()) && IsValid(GetWorld()->GetGameInstance()))
 		{
-			UE_LOG(LogGameplayFeaturesExtraActions, Error, TEXT("%s: Failed to find AbilitySystemComponent on Actor %s."), *FString(__func__), *TargetActor->GetName());
+			UE_LOG(LogGameplayFeaturesExtraActions_Internal, Error, TEXT("%s: Failed to find AbilitySystemComponent on Actor %s."), *FString(__func__), *TargetActor->GetName());
 		}
 	}
 
