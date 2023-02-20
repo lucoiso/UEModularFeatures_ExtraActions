@@ -54,8 +54,6 @@ void UGameFeatureAction_AddInputs::AddToWorld(const FWorldContext& WorldContext)
 
 void UGameFeatureAction_AddInputs::HandleActorExtension(AActor* Owner, const FName EventName)
 {
-	UE_LOG(LogGameplayFeaturesExtraActions_Internal, Display, TEXT("Event %s sent by Actor %s for inputs management."), *EventName.ToString(), *Owner->GetName());
-
 	if (EventName == UGameFrameworkComponentManager::NAME_ExtensionRemoved || EventName == UGameFrameworkComponentManager::NAME_ReceiverRemoved)
 	{
 		RemoveActorInputs(Owner);
@@ -104,7 +102,7 @@ void UGameFeatureAction_AddInputs::AddActorInputs(AActor* TargetActor)
 		// Load the Input Mapping context and store it into a variable
 		UInputMappingContext* const InputMapping = InputMappingContext.LoadSynchronous();
 
-		UE_LOG(LogGameplayFeaturesExtraActions, Display, TEXT("%s: Adding Enhanced Input Mapping %s to Actor %s."), *FString(__func__), *InputMapping->GetName(), *TargetActor->GetName());
+		UE_LOG(LogGameplayFeaturesExtraActions_Internal, Display, TEXT("%s: Adding Enhanced Input Mapping %s to Actor %s."), *FString(__func__), *InputMapping->GetName(), *TargetActor->GetName());
 
 		// Add the loaded mapping context into the enhanced input subsystem
 		Subsystem->AddMappingContext(InputMapping, MappingPriority);
@@ -161,7 +159,7 @@ void UGameFeatureAction_AddInputs::RemoveActorInputs(AActor* TargetActor)
 		// Try to get the enhanced input subsystem from the pawn
 		if (UEnhancedInputLocalPlayerSubsystem* const Subsystem = GetEnhancedInputComponentFromPawn(TargetPawn))
 		{
-			UE_LOG(LogGameplayFeaturesExtraActions, Display, TEXT("%s: Removing Enhanced Input Mapping %s from Actor %s."), *FString(__func__), *ActiveInputData->Mapping->GetName(), *TargetActor->GetName());
+			UE_LOG(LogGameplayFeaturesExtraActions_Internal, Display, TEXT("%s: Removing Enhanced Input Mapping %s from Actor %s."), *FString(__func__), *ActiveInputData->Mapping->GetName(), *TargetActor->GetName());
 
 			// Try to get the enhanced input component of the target pawn
 			if (const TWeakObjectPtr<UEnhancedInputComponent> InputComponent = ModularFeaturesHelper::GetEnhancedInputComponentInPawn(TargetPawn); !InputComponent.IsValid())

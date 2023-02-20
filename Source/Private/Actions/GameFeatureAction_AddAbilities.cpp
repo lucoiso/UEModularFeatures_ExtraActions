@@ -51,8 +51,6 @@ void UGameFeatureAction_AddAbilities::AddToWorld(const FWorldContext& WorldConte
 
 void UGameFeatureAction_AddAbilities::HandleActorExtension(AActor* Owner, const FName EventName)
 {
-	UE_LOG(LogGameplayFeaturesExtraActions_Internal, Display, TEXT("Event %s sent by Actor %s for ability management."), *EventName.ToString(), *Owner->GetName());
-
 	if (EventName == UGameFrameworkComponentManager::NAME_ExtensionRemoved || EventName == UGameFrameworkComponentManager::NAME_ReceiverRemoved)
 	{
 		RemoveActorAbilities(Owner);
@@ -107,7 +105,7 @@ void UGameFeatureAction_AddAbilities::AddActorAbilities(AActor* TargetActor, con
 		// Load the ability class and store into a const variable
 		const TSubclassOf<UGameplayAbility> AbilityToAdd = Ability.AbilityClass.LoadSynchronous();
 		
-		UE_LOG(LogGameplayFeaturesExtraActions, Display, TEXT("%s: Adding ability %s to Actor %s."), *FString(__func__), *AbilityToAdd->GetName(), *TargetActor->GetName());
+		UE_LOG(LogGameplayFeaturesExtraActions_Internal, Display, TEXT("%s: Adding ability %s to Actor %s."), *FString(__func__), *AbilityToAdd->GetName(), *TargetActor->GetName());
 		
 		// Create the spec, used to give the ability to target's ability system component
 		FGameplayAbilitySpec NewAbilitySpec(AbilityToAdd, Ability.AbilityLevel, InputID, TargetActor);
@@ -167,7 +165,7 @@ void UGameFeatureAction_AddAbilities::RemoveActorAbilities(AActor* TargetActor)
 	
 	if (UAbilitySystemComponent* const AbilitySystemComponent = ModularFeaturesHelper::GetAbilitySystemComponentInActor(TargetActor))
 	{
-		UE_LOG(LogGameplayFeaturesExtraActions, Display, TEXT("%s: Removing associated abilities from Actor %s."), *FString(__func__), *TargetActor->GetName());
+		UE_LOG(LogGameplayFeaturesExtraActions_Internal, Display, TEXT("%s: Removing associated abilities from Actor %s."), *FString(__func__), *TargetActor->GetName());
 
 		// Iterate the active abilities and remove all spec handle associated to this actor
 		for (const FGameplayAbilitySpecHandle& SpecHandle : ActiveAbilities->SpecHandle)

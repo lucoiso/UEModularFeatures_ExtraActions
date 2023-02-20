@@ -78,7 +78,7 @@ void UGameFeatureAction_SpawnActors::SpawnActors(UWorld* WorldReference)
 		// Load the actor class and store it into a variable
 		TSubclassOf<AActor> ClassToSpawn = ActorClass.LoadSynchronous();
 
-		UE_LOG(LogGameplayFeaturesExtraActions, Display, TEXT("%s: Spawning actor %s on world %s"), *FString(__func__), *ClassToSpawn->GetName(), *WorldReference->GetName());
+		UE_LOG(LogGameplayFeaturesExtraActions_Internal, Display, TEXT("%s: Spawning actor %s on world %s"), *FString(__func__), *ClassToSpawn->GetName(), *WorldReference->GetName());
 
 		// Spawn the actor and add it to the spawned array
 		SpawnedActors.Add(WorldReference->SpawnActor<AActor>(ClassToSpawn, SpawnTransform));
@@ -95,7 +95,7 @@ void UGameFeatureAction_SpawnActors::DestroyActors()
 			continue;
 		}
 
-		UE_LOG(LogGameplayFeaturesExtraActions, Display, TEXT("%s: Destroying actor %s"), *FString(__func__), *ActorPtr->GetName());
+		UE_LOG(LogGameplayFeaturesExtraActions_Internal, Display, TEXT("%s: Destroying actor %s"), *FString(__func__), *ActorPtr->GetName());
 		ActorPtr->Destroy();
 	}
 
