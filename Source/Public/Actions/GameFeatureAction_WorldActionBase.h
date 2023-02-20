@@ -41,6 +41,8 @@ protected:
 
 	UGameFrameworkComponentManager* GetGameFrameworkComponentManager(const FWorldContext& WorldContext) const;
 	TArray<FComponentRequestHandlePtr> ActiveRequests;
+
+	virtual void ResetExtension();
 	
 private:
 	void HandleGameInstanceStart(UGameInstance* GameInstance, FGameFeatureStateChangeContext ChangeContext);

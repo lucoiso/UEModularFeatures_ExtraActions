@@ -7,9 +7,13 @@
 #include <Components/GameFrameworkComponentManager.h>
 #include <Runtime/Launch/Resources/Version.h>
 
+#ifdef UE_INLINE_GENERATED_CPP_BY_NAME
+#include UE_INLINE_GENERATED_CPP_BY_NAME(GameFeatureAction_AddAttribute)
+#endif
+
 void UGameFeatureAction_AddAttribute::OnGameFeatureActivating(FGameFeatureActivatingContext& Context)
 {
-	if (!ensureAlways(ActiveExtensions.IsEmpty()) || !ensureAlways(ActiveRequests.IsEmpty()))
+	if (!ensureAlways(ActiveExtensions.IsEmpty()))
 	{
 		ResetExtension();
 	}
@@ -20,7 +24,6 @@ void UGameFeatureAction_AddAttribute::OnGameFeatureActivating(FGameFeatureActiva
 void UGameFeatureAction_AddAttribute::OnGameFeatureDeactivating(FGameFeatureDeactivatingContext& Context)
 {
 	Super::OnGameFeatureDeactivating(Context);
-
 	ResetExtension();
 }
 
@@ -32,16 +35,14 @@ void UGameFeatureAction_AddAttribute::ResetExtension()
 		RemoveAttribute(ExtensionIterator->Key.Get());
 	}
 
-	ActiveRequests.Empty();
+	Super::ResetExtension();
 }
 
 void UGameFeatureAction_AddAttribute::AddToWorld(const FWorldContext& WorldContext)
 {
-	if (UGameFrameworkComponentManager* const ComponentManager = GetGameFrameworkComponentManager(WorldContext);
-		IsValid(ComponentManager) && !TargetPawnClass.IsNull())
+	if (UGameFrameworkComponentManager* const ComponentManager = GetGameFrameworkComponentManager(WorldContext); IsValid(ComponentManager) && !TargetPawnClass.IsNull())
 	{
 		using FHandlerDelegate = UGameFrameworkComponentManager::FExtensionHandlerDelegate;
-
 		const FHandlerDelegate ExtensionHandlerDelegate = FHandlerDelegate::CreateUObject(this, &UGameFeatureAction_AddAttribute::HandleActorExtension);
 
 		ActiveRequests.Add(ComponentManager->AddExtensionHandler(TargetPawnClass, ExtensionHandlerDelegate));
@@ -50,8 +51,6 @@ void UGameFeatureAction_AddAttribute::AddToWorld(const FWorldContext& WorldConte
 
 void UGameFeatureAction_AddAttribute::HandleActorExtension(AActor* Owner, const FName EventName)
 {
-	UE_LOG(LogGameplayFeaturesExtraActions, Display, TEXT("Event %s sent by Actor %s for attribute management."), *EventName.ToString(), *Owner->GetName());
-
 	if (EventName == UGameFrameworkComponentManager::NAME_ExtensionRemoved || EventName == UGameFrameworkComponentManager::NAME_ReceiverRemoved)
 	{
 		RemoveAttribute(Owner);
@@ -67,7 +66,7 @@ void UGameFeatureAction_AddAttribute::HandleActorExtension(AActor* Owner, const 
 
 		if (Attribute.IsNull())
 		{
-			UE_LOG(LogGameplayFeaturesExtraActions, Error, TEXT("%s: Attribute is null."), *FString(__func__));
+			UE_LOG(LogGameplayFeaturesExtraActions_Internal, Error, TEXT("%s: Attribute is null."), *FString(__func__));
 		}
 		else
 		{
@@ -85,7 +84,7 @@ void UGameFeatureAction_AddAttribute::AddAttribute(AActor* TargetActor)
 	}
 
 	// Get the ability system component of the target actor
-	if (UAbilitySystemComponent* const AbilitySystemComponent = ModularFeaturesHelper::GetAbilitySystemComponentByActor(TargetActor))
+	if (UAbilitySystemComponent* const AbilitySystemComponent = ModularFeaturesHelper::GetAbilitySystemComponentInActor(TargetActor))
 	{
 		// Load and store the AttributeSet Class into a const variable
 		if (const TSubclassOf<UAttributeSet> SetType = Attribute.LoadSynchronous())
@@ -105,18 +104,18 @@ void UGameFeatureAction_AddAttribute::AddAttribute(AActor* TargetActor)
 			// Force the ability system component to replicate the attribute addition
 			AbilitySystemComponent->ForceReplication();
 
-			UE_LOG(LogGameplayFeaturesExtraActions, Display, TEXT("%s: Attribute %s added to Actor %s."), *FString(__func__), *SetType->GetName(), *TargetActor->GetName());
+			UE_LOG(LogGameplayFeaturesExtraActions_Internal, Display, TEXT("%s: Attribute %s added to Actor %s."), *FString(__func__), *SetType->GetName(), *TargetActor->GetName());
 
 			ActiveExtensions.Add(TargetActor, NewSet);
 		}
 		else
 		{
-			UE_LOG(LogGameplayFeaturesExtraActions, Error, TEXT("%s: Attribute is invalid."), *FString(__func__));
+			UE_LOG(LogGameplayFeaturesExtraActions_Internal, Error, TEXT("%s: Attribute is invalid."), *FString(__func__));
 		}
 	}
 	else
 	{
-		UE_LOG(LogGameplayFeaturesExtraActions, Error, TEXT("%s: Failed to find AbilitySystemComponent on Actor %s."), *FString(__func__), *TargetActor->GetName());
+		UE_LOG(LogGameplayFeaturesExtraActions_Internal, Error, TEXT("%s: Failed to find AbilitySystemComponent on Actor %s."), *FString(__func__), *TargetActor->GetName());
 	}
 }
 
@@ -136,22 +135,21 @@ void UGameFeatureAction_AddAttribute::RemoveAttribute(AActor* TargetActor)
 	}
 
 	// Get the ability system component of the target actor
-	if (UAbilitySystemComponent* const AbilitySystemComponent = ModularFeaturesHelper::GetAbilitySystemComponentByActor(TargetActor))
+	if (UAbilitySystemComponent* const AbilitySystemComponent = ModularFeaturesHelper::GetAbilitySystemComponentInActor(TargetActor))
 	{
 		// Get the added Attribute Set to the target actor by searching inside the Active Extensions, remove it from the Ability System Component and force a replication
-#if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >= 1
-		if (UAttributeSet* const AttributeToRemove = ActiveExtensions.FindRef(TargetActor).Get())
+#if ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION == 0
+		if (UAttributeSet* const AttributeToRemove = ActiveExtensions.FindRef(TargetActor).Get(); AbilitySystemComponent->GetSpawnedAttributes_Mutable().Remove(AttributeToRemove) != 0)
 		{
-			UE_LOG(LogGameplayFeaturesExtraActions, Display, TEXT("%s: Removing attribute %s from Actor %s."), *FString(__func__), *AttributeToRemove->GetName(), *TargetActor->GetName());
-
-			AbilitySystemComponent->RemoveSpawnedAttribute(AttributeToRemove);
+			UE_LOG(LogGameplayFeaturesExtraActions_Internal, Display, TEXT("%s: Attribute %s removed from Actor %s."), *FString(__func__), *AttributeToRemove->GetName(), *TargetActor->GetName());
 			AbilitySystemComponent->ForceReplication();
 		}
-#elif ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION == 0
-		if (UAttributeSet* const AttributeToRemove = ActiveExtensions.FindRef(TargetActor).Get();
-			AbilitySystemComponent->GetSpawnedAttributes_Mutable().Remove(AttributeToRemove) != 0)
+#else
+		if (UAttributeSet* const AttributeToRemove = ActiveExtensions.FindRef(TargetActor).Get())
 		{
-			UE_LOG(LogGameplayFeaturesExtraActions, Display, TEXT("%s: Attribute %s removed from Actor %s."), *FString(__func__), *AttributeToRemove->GetName(), *TargetActor->GetName());
+			UE_LOG(LogGameplayFeaturesExtraActions_Internal, Display, TEXT("%s: Removing attribute %s from Actor %s."), *FString(__func__), *AttributeToRemove->GetName(), *TargetActor->GetName());
+
+			AbilitySystemComponent->RemoveSpawnedAttribute(AttributeToRemove);
 			AbilitySystemComponent->ForceReplication();
 		}
 #endif
@@ -159,7 +157,7 @@ void UGameFeatureAction_AddAttribute::RemoveAttribute(AActor* TargetActor)
 	// We don't need to warn the user if there's no valid world or game instance, since this is a common case when the game is shutting down
 	else if (IsValid(GetWorld()) && IsValid(GetWorld()->GetGameInstance()))
 	{
-		UE_LOG(LogGameplayFeaturesExtraActions, Error, TEXT("%s: Failed to find AbilitySystemComponent on Actor %s."), *FString(__func__), *TargetActor->GetName());
+		UE_LOG(LogGameplayFeaturesExtraActions_Internal, Error, TEXT("%s: Failed to find AbilitySystemComponent on Actor %s."), *FString(__func__), *TargetActor->GetName());
 	}
 
 	ActiveExtensions.Remove(TargetActor);

@@ -10,9 +10,13 @@
 #include <GameFramework/PlayerController.h>
 #include <Engine/LocalPlayer.h>
 
+#ifdef UE_INLINE_GENERATED_CPP_BY_NAME
+#include UE_INLINE_GENERATED_CPP_BY_NAME(GameFeatureAction_AddInputs)
+#endif
+
 void UGameFeatureAction_AddInputs::OnGameFeatureActivating(FGameFeatureActivatingContext& Context)
 {
-	if (!ensureAlways(ActiveExtensions.IsEmpty()) || !ensureAlways(ActiveRequests.IsEmpty()))
+	if (!ensureAlways(ActiveExtensions.IsEmpty()))
 	{
 		ResetExtension();
 	}
@@ -23,7 +27,6 @@ void UGameFeatureAction_AddInputs::OnGameFeatureActivating(FGameFeatureActivatin
 void UGameFeatureAction_AddInputs::OnGameFeatureDeactivating(FGameFeatureDeactivatingContext& Context)
 {
 	Super::OnGameFeatureDeactivating(Context);
-
 	ResetExtension();
 }
 
@@ -35,16 +38,14 @@ void UGameFeatureAction_AddInputs::ResetExtension()
 		RemoveActorInputs(ExtensionIterator->Key.Get());
 	}
 
-	ActiveRequests.Empty();
+	Super::ResetExtension();
 }
 
 void UGameFeatureAction_AddInputs::AddToWorld(const FWorldContext& WorldContext)
 {
-	if (UGameFrameworkComponentManager* const ComponentManager = GetGameFrameworkComponentManager(WorldContext);
-		IsValid(ComponentManager) && !TargetPawnClass.IsNull())
+	if (UGameFrameworkComponentManager* const ComponentManager = GetGameFrameworkComponentManager(WorldContext); IsValid(ComponentManager) && !TargetPawnClass.IsNull())
 	{
 		using FHandlerDelegate = UGameFrameworkComponentManager::FExtensionHandlerDelegate;
-
 		const FHandlerDelegate ExtensionHandlerDelegate = FHandlerDelegate::CreateUObject(this, &UGameFeatureAction_AddInputs::HandleActorExtension);
 
 		ActiveRequests.Add(ComponentManager->AddExtensionHandler(TargetPawnClass, ExtensionHandlerDelegate));
@@ -53,8 +54,6 @@ void UGameFeatureAction_AddInputs::AddToWorld(const FWorldContext& WorldContext)
 
 void UGameFeatureAction_AddInputs::HandleActorExtension(AActor* Owner, const FName EventName)
 {
-	UE_LOG(LogGameplayFeaturesExtraActions, Display, TEXT("Event %s sent by Actor %s for inputs management."), *EventName.ToString(), *Owner->GetName());
-
 	if (EventName == UGameFrameworkComponentManager::NAME_ExtensionRemoved || EventName == UGameFrameworkComponentManager::NAME_ReceiverRemoved)
 	{
 		RemoveActorInputs(Owner);
@@ -70,7 +69,7 @@ void UGameFeatureAction_AddInputs::HandleActorExtension(AActor* Owner, const FNa
 
 		if (InputMappingContext.IsNull())
 		{
-			UE_LOG(LogGameplayFeaturesExtraActions, Error, TEXT("%s: Input Mapping Context is null."), *FString(__func__));
+			UE_LOG(LogGameplayFeaturesExtraActions_Internal, Error, TEXT("%s: Input Mapping Context is null."), *FString(__func__));
 		}
 		else
 		{
@@ -103,7 +102,7 @@ void UGameFeatureAction_AddInputs::AddActorInputs(AActor* TargetActor)
 		// Load the Input Mapping context and store it into a variable
 		UInputMappingContext* const InputMapping = InputMappingContext.LoadSynchronous();
 
-		UE_LOG(LogGameplayFeaturesExtraActions, Display, TEXT("%s: Adding Enhanced Input Mapping %s to Actor %s."), *FString(__func__), *InputMapping->GetName(), *TargetActor->GetName());
+		UE_LOG(LogGameplayFeaturesExtraActions_Internal, Display, TEXT("%s: Adding Enhanced Input Mapping %s to Actor %s."), *FString(__func__), *InputMapping->GetName(), *TargetActor->GetName());
 
 		// Add the loaded mapping context into the enhanced input subsystem
 		Subsystem->AddMappingContext(InputMapping, MappingPriority);
@@ -115,7 +114,7 @@ void UGameFeatureAction_AddInputs::AddActorInputs(AActor* TargetActor)
 		const TWeakObjectPtr<UObject> FunctionOwner = ModularFeaturesHelper::GetPawnInputOwner(TargetPawn, InputBindingOwnerOverride);
 		if (!FunctionOwner.IsValid())
 		{
-			UE_LOG(LogGameplayFeaturesExtraActions, Error, TEXT("%s: Failed to get the function owner using the Actor %s."), *FString(__func__), *TargetActor->GetName());
+			UE_LOG(LogGameplayFeaturesExtraActions_Internal, Error, TEXT("%s: Failed to get the function owner using the Actor %s."), *FString(__func__), *TargetActor->GetName());
 			return;
 		}
 
@@ -123,7 +122,7 @@ void UGameFeatureAction_AddInputs::AddActorInputs(AActor* TargetActor)
 		const TWeakObjectPtr<UEnhancedInputComponent> InputComponent = ModularFeaturesHelper::GetEnhancedInputComponentInPawn(TargetPawn);
 		if (!InputComponent.IsValid())
 		{
-			UE_LOG(LogGameplayFeaturesExtraActions, Error, TEXT("%s: Failed to find InputComponent on Actor %s."), *FString(__func__), *TargetActor->GetName());
+			UE_LOG(LogGameplayFeaturesExtraActions_Internal, Error, TEXT("%s: Failed to find InputComponent on Actor %s."), *FString(__func__), *TargetActor->GetName());
 			return;
 		}
 
@@ -133,7 +132,7 @@ void UGameFeatureAction_AddInputs::AddActorInputs(AActor* TargetActor)
 	}
 	else if (TargetPawn->IsPawnControlled())
 	{
-		UE_LOG(LogGameplayFeaturesExtraActions, Error, TEXT("%s: Failed to find PlayerController on Actor %s."), *FString(__func__), *TargetActor->GetName());
+		UE_LOG(LogGameplayFeaturesExtraActions_Internal, Error, TEXT("%s: Failed to find PlayerController on Actor %s."), *FString(__func__), *TargetActor->GetName());
 	}
 }
 
@@ -160,13 +159,12 @@ void UGameFeatureAction_AddInputs::RemoveActorInputs(AActor* TargetActor)
 		// Try to get the enhanced input subsystem from the pawn
 		if (UEnhancedInputLocalPlayerSubsystem* const Subsystem = GetEnhancedInputComponentFromPawn(TargetPawn))
 		{
-			UE_LOG(LogGameplayFeaturesExtraActions, Display, TEXT("%s: Removing Enhanced Input Mapping %s from Actor %s."), *FString(__func__), *ActiveInputData->Mapping->GetName(), *TargetActor->GetName());
+			UE_LOG(LogGameplayFeaturesExtraActions_Internal, Display, TEXT("%s: Removing Enhanced Input Mapping %s from Actor %s."), *FString(__func__), *ActiveInputData->Mapping->GetName(), *TargetActor->GetName());
 
 			// Try to get the enhanced input component of the target pawn
-			if (const TWeakObjectPtr<UEnhancedInputComponent> InputComponent = ModularFeaturesHelper::GetEnhancedInputComponentInPawn(TargetPawn);
-				!InputComponent.IsValid())
+			if (const TWeakObjectPtr<UEnhancedInputComponent> InputComponent = ModularFeaturesHelper::GetEnhancedInputComponentInPawn(TargetPawn); !InputComponent.IsValid())
 			{
-				UE_LOG(LogGameplayFeaturesExtraActions, Error, TEXT("%s: Failed to find InputComponent on Actor %s."), *FString(__func__), *TargetActor->GetName());
+				UE_LOG(LogGameplayFeaturesExtraActions_Internal, Error, TEXT("%s: Failed to find InputComponent on Actor %s."), *FString(__func__), *TargetActor->GetName());
 			}
 			else
 			{
@@ -208,14 +206,14 @@ void UGameFeatureAction_AddInputs::SetupActionBindings(AActor* TargetActor, UObj
 		// Check if the action input is valid
 		if (ActionInput.IsNull())
 		{
-			UE_LOG(LogGameplayFeaturesExtraActions, Error, TEXT("%s: Action Input is null."), *FString(__func__));
+			UE_LOG(LogGameplayFeaturesExtraActions_Internal, Error, TEXT("%s: Action Input is null."), *FString(__func__));
 			continue;
 		}
 
 		// Load and store the Action Input into a variable
 		UInputAction* const InputAction = ActionInput.LoadSynchronous();
 
-		UE_LOG(LogGameplayFeaturesExtraActions, Display, TEXT("%s: Binding Action Input %s to Actor %s."), *FString(__func__), *InputAction->GetName(), *TargetActor->GetName());
+		UE_LOG(LogGameplayFeaturesExtraActions_Internal, Display, TEXT("%s: Binding Action Input %s to Actor %s."), *FString(__func__), *InputAction->GetName(), *TargetActor->GetName());
 
 		// Iterate through all function binding data to bind the UFunctions to it's corresponding input
 		for (const auto& [FunctionName, Triggers] : FunctionBindingData)
@@ -260,7 +258,7 @@ UEnhancedInputLocalPlayerSubsystem* UGameFeatureAction_AddInputs::GetEnhancedInp
 			UEnhancedInputLocalPlayerSubsystem* const Subsystem = LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
 			if (!IsValid(Subsystem))
 			{
-				UE_LOG(LogGameplayFeaturesExtraActions, Error, TEXT("%s: LocalPlayer %s has no EnhancedInputLocalPlayerSubsystem."), *FString(__func__), *LocalPlayer->GetName());
+				UE_LOG(LogGameplayFeaturesExtraActions_Internal, Error, TEXT("%s: LocalPlayer %s has no EnhancedInputLocalPlayerSubsystem."), *FString(__func__), *LocalPlayer->GetName());
 				return nullptr;
 			}
 
@@ -282,14 +280,14 @@ FGameplayAbilitySpec UGameFeatureAction_AddInputs::GetAbilitySpecInformationFrom
 	// If the user wants to find a active ability spec, we'll try to get the ability system component of the target actor and get the spec using the specified ability class
 	if (AbilityBindingData.bFindAbilitySpec)
 	{
-		if (UAbilitySystemComponent* const AbilitySystemComponent = ModularFeaturesHelper::GetAbilitySystemComponentByActor(TargetActor))
+		if (UAbilitySystemComponent* const AbilitySystemComponent = ModularFeaturesHelper::GetAbilitySystemComponentInActor(TargetActor))
 		{
 			// We're not using the InputID to search for existing spec because more than 1 abilities can have the same Input Id
 			AbilitySystemComponent->FindAbilitySpecFromClass(TSubclassOf<UGameplayAbility>(AbilityBindingData.AbilityClass.LoadSynchronous()));
 		}
 		else
 		{
-			UE_LOG(LogGameplayFeaturesExtraActions, Error, TEXT("%s: Failed to find AbilitySystemComponent on Actor %s."), *FString(__func__), *TargetActor->GetName());
+			UE_LOG(LogGameplayFeaturesExtraActions_Internal, Error, TEXT("%s: Failed to find AbilitySystemComponent on Actor %s."), *FString(__func__), *TargetActor->GetName());
 		}
 	}
 	// If we are not using an existing spec, we'll create a basic spec just to pass some parameters to the ability binding

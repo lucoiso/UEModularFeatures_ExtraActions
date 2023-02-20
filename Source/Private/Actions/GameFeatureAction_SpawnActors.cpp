@@ -3,7 +3,12 @@
 // Repo: https://github.com/lucoiso/UEModularFeatures_ExtraActions
 
 #include "Actions/GameFeatureAction_SpawnActors.h"
+#include "LogModularFeatures_ExtraActions.h"
 #include <Components/GameFrameworkComponentManager.h>
+
+#ifdef UE_INLINE_GENERATED_CPP_BY_NAME
+#include UE_INLINE_GENERATED_CPP_BY_NAME(GameFeatureAction_SpawnActors)
+#endif
 
 void UGameFeatureAction_SpawnActors::OnGameFeatureActivating(FGameFeatureActivatingContext& Context)
 {
@@ -66,18 +71,17 @@ void UGameFeatureAction_SpawnActors::SpawnActors(UWorld* WorldReference)
 		// Check if the soft reference is null
 		if (ActorClass.IsNull())
 		{
-			UE_LOG(LogGameplayFeaturesExtraActions, Error, TEXT("%s: Actor class is null."), *FString(__func__));
+			UE_LOG(LogGameplayFeaturesExtraActions_Internal, Error, TEXT("%s: Actor class is null."), *FString(__func__));
 			continue;
 		}
 
 		// Load the actor class and store it into a variable
 		TSubclassOf<AActor> ClassToSpawn = ActorClass.LoadSynchronous();
 
-		UE_LOG(LogGameplayFeaturesExtraActions, Display, TEXT("%s: Spawning actor %s on world %s"), *FString(__func__), *ClassToSpawn->GetName(), *WorldReference->GetName());
+		UE_LOG(LogGameplayFeaturesExtraActions_Internal, Display, TEXT("%s: Spawning actor %s on world %s"), *FString(__func__), *ClassToSpawn->GetName(), *WorldReference->GetName());
 
 		// Spawn the actor and add it to the spawned array
-		AActor* const SpawnedActor = WorldReference->SpawnActor<AActor>(ClassToSpawn, SpawnTransform);
-		SpawnedActors.Add(SpawnedActor);
+		SpawnedActors.Add(WorldReference->SpawnActor<AActor>(ClassToSpawn, SpawnTransform));
 	}
 }
 
@@ -86,10 +90,13 @@ void UGameFeatureAction_SpawnActors::DestroyActors()
 	// Iterate through all spawned actors and destroy all valid actors
 	for (const TWeakObjectPtr<AActor>& ActorPtr : SpawnedActors)
 	{
-		if (ActorPtr.IsValid())
+		if (!ActorPtr.IsValid())
 		{
-			ActorPtr->Destroy();
+			continue;
 		}
+
+		UE_LOG(LogGameplayFeaturesExtraActions_Internal, Display, TEXT("%s: Destroying actor %s"), *FString(__func__), *ActorPtr->GetName());
+		ActorPtr->Destroy();
 	}
 
 	SpawnedActors.Empty();

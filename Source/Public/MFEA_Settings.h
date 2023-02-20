@@ -34,6 +34,7 @@ class MODULARFEATURES_EXTRAACTIONS_API UMFEA_Settings : public UDeveloperSetting
 	
 public:
 	explicit UMFEA_Settings(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
+	static const UMFEA_Settings* Get();
 
 private:
 	/* Work in Progress: If true, will auto bind the ability input directly using the given Input Action. Will be added in a next update. */
@@ -41,6 +42,10 @@ private:
 	bool bEnableAbilityAutoBinding;
 
 public:
+	/* Will print extra internal informations in log */
+	UPROPERTY(GlobalConfig, EditAnywhere, Category = "Settings", Meta = (DisplayName = "Enable Internal Logs"))
+	bool bEnableInternalLogs;
+
 	/* Determine the binding mode that will be used by this plugin - This choice affects which function from IMFEA_AbilityInputBinding interface will be used to bind the abilities */
 	UPROPERTY(GlobalConfig, EditAnywhere, Category = "Settings", Meta = (EditCondition = "!bEnableAbilityAutoBinding"))
 	EAbilityBindingMode AbilityBindingMode;
@@ -52,4 +57,14 @@ public:
 	/* Determine if the ability binding will be performed to the pawn or its controller - Must be the owner of the binding interface. Can be overrided by actions. */
 	UPROPERTY(GlobalConfig, EditAnywhere, Category = "Settings", Meta = (DisplayName = "Default Input Binding Owner"))
 	EInputBindingOwner InputBindingOwner;
+
+protected:
+#if WITH_EDITOR
+	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+#endif
+
+	virtual void PostInitProperties() override;
+
+private:
+	void ToggleInternalLogs();
 };

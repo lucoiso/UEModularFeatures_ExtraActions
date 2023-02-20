@@ -6,7 +6,7 @@
 
 #include <CoreMinimal.h>
 #include <AbilitySystemComponent.h>
-#include <AbilitySystemInterface.h>
+#include <AbilitySystemGlobals.h>
 #include <EnhancedInputComponent.h>
 #include <GameFramework/Controller.h>
 #include "Interfaces/MFEA_AbilityInputBinding.h"
@@ -39,19 +39,18 @@ namespace ModularFeaturesHelper
 		return true;
 	}
 
-	UAbilitySystemComponent* GetAbilitySystemComponentByActor(AActor* InActor)
+	UAbilitySystemComponent* GetAbilitySystemComponentInActor(AActor* InActor)
 	{
-		const IAbilitySystemInterface* const InterfaceOwner = Cast<IAbilitySystemInterface>(InActor);
-		return InterfaceOwner != nullptr ? InterfaceOwner->GetAbilitySystemComponent() : InActor->FindComponentByClass<UAbilitySystemComponent>();
+		return UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(InActor);
 	}
 
 	EInputBindingOwner GetValidatedInputBindingOwner(const EInputBindingOwnerOverride& InOwner)
 	{
 		switch (InOwner)
 		{
-		case EInputBindingOwnerOverride::Pawn: return EInputBindingOwner::Pawn;
-		case EInputBindingOwnerOverride::Controller: return EInputBindingOwner::Controller;
-		default: break;
+			case EInputBindingOwnerOverride::Pawn: return EInputBindingOwner::Pawn;
+			case EInputBindingOwnerOverride::Controller: return EInputBindingOwner::Controller;
+			default: break;
 		}
 
 		return GetPluginSettings()->InputBindingOwner;
@@ -108,7 +107,7 @@ namespace ModularFeaturesHelper
 	{
 		if (GetPluginSettings()->InputIDEnumeration.IsNull())
 		{
-			UE_LOG(LogGameplayFeaturesExtraActions, Error, TEXT("%s: bUseInputEnumeration is set to true but Enumeration class is null!"), *FString(__func__));
+			UE_LOG(LogGameplayFeaturesExtraActions_Internal, Error, TEXT("%s: bUseInputEnumeration is set to true but Enumeration class is null!"), *FString(__func__));
 			return nullptr;
 		}
 
@@ -120,7 +119,7 @@ namespace ModularFeaturesHelper
 	{
 		if (!TargetInterfaceOwner)
 		{
-			UE_LOG(LogGameplayFeaturesExtraActions, Error, TEXT("%s: Failed to setup input binding on Actor %s due to a invalid interface owner."), *FString(__func__), *TargetInterfaceOwner->_getUObject()->GetName());
+			UE_LOG(LogGameplayFeaturesExtraActions_Internal, Error, TEXT("%s: Failed to setup input binding on Actor %s due to a invalid interface owner."), *FString(__func__), *TargetInterfaceOwner->_getUObject()->GetName());
 
 			return false;
 		}
@@ -164,7 +163,7 @@ namespace ModularFeaturesHelper
 	{
 		if (!IsValid(InterfaceOwner))
 		{
-			UE_LOG(LogGameplayFeaturesExtraActions, Error, TEXT("%s: Failed to remove input binding due to invalid interface owner."), *FString(__func__));			
+			UE_LOG(LogGameplayFeaturesExtraActions_Internal, Error, TEXT("%s: Failed to remove input binding due to invalid interface owner."), *FString(__func__));			
 			return;
 		}
 
