@@ -51,8 +51,6 @@ void UGameFeatureAction_AddAttribute::AddToWorld(const FWorldContext& WorldConte
 
 void UGameFeatureAction_AddAttribute::HandleActorExtension(AActor* Owner, const FName EventName)
 {
-	UE_LOG(LogGameplayFeaturesExtraActions, Display, TEXT("Event %s sent by Actor %s for attribute management."), *EventName.ToString(), *Owner->GetName());
-
 	if (EventName == UGameFrameworkComponentManager::NAME_ExtensionRemoved || EventName == UGameFrameworkComponentManager::NAME_ReceiverRemoved)
 	{
 		RemoveAttribute(Owner);
@@ -68,7 +66,7 @@ void UGameFeatureAction_AddAttribute::HandleActorExtension(AActor* Owner, const 
 
 		if (Attribute.IsNull())
 		{
-			UE_LOG(LogGameplayFeaturesExtraActions, Error, TEXT("%s: Attribute is null."), *FString(__func__));
+			UE_LOG(LogGameplayFeaturesExtraActions_Internal, Error, TEXT("%s: Attribute is null."), *FString(__func__));
 		}
 		else
 		{
@@ -106,18 +104,18 @@ void UGameFeatureAction_AddAttribute::AddAttribute(AActor* TargetActor)
 			// Force the ability system component to replicate the attribute addition
 			AbilitySystemComponent->ForceReplication();
 
-			UE_LOG(LogGameplayFeaturesExtraActions, Display, TEXT("%s: Attribute %s added to Actor %s."), *FString(__func__), *SetType->GetName(), *TargetActor->GetName());
+			UE_LOG(LogGameplayFeaturesExtraActions_Internal, Display, TEXT("%s: Attribute %s added to Actor %s."), *FString(__func__), *SetType->GetName(), *TargetActor->GetName());
 
 			ActiveExtensions.Add(TargetActor, NewSet);
 		}
 		else
 		{
-			UE_LOG(LogGameplayFeaturesExtraActions, Error, TEXT("%s: Attribute is invalid."), *FString(__func__));
+			UE_LOG(LogGameplayFeaturesExtraActions_Internal, Error, TEXT("%s: Attribute is invalid."), *FString(__func__));
 		}
 	}
 	else
 	{
-		UE_LOG(LogGameplayFeaturesExtraActions, Error, TEXT("%s: Failed to find AbilitySystemComponent on Actor %s."), *FString(__func__), *TargetActor->GetName());
+		UE_LOG(LogGameplayFeaturesExtraActions_Internal, Error, TEXT("%s: Failed to find AbilitySystemComponent on Actor %s."), *FString(__func__), *TargetActor->GetName());
 	}
 }
 
@@ -143,13 +141,13 @@ void UGameFeatureAction_AddAttribute::RemoveAttribute(AActor* TargetActor)
 #if ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION == 0
 		if (UAttributeSet* const AttributeToRemove = ActiveExtensions.FindRef(TargetActor).Get(); AbilitySystemComponent->GetSpawnedAttributes_Mutable().Remove(AttributeToRemove) != 0)
 		{
-			UE_LOG(LogGameplayFeaturesExtraActions, Display, TEXT("%s: Attribute %s removed from Actor %s."), *FString(__func__), *AttributeToRemove->GetName(), *TargetActor->GetName());
+			UE_LOG(LogGameplayFeaturesExtraActions_Internal, Display, TEXT("%s: Attribute %s removed from Actor %s."), *FString(__func__), *AttributeToRemove->GetName(), *TargetActor->GetName());
 			AbilitySystemComponent->ForceReplication();
 		}
 #else
 		if (UAttributeSet* const AttributeToRemove = ActiveExtensions.FindRef(TargetActor).Get())
 		{
-			UE_LOG(LogGameplayFeaturesExtraActions, Display, TEXT("%s: Removing attribute %s from Actor %s."), *FString(__func__), *AttributeToRemove->GetName(), *TargetActor->GetName());
+			UE_LOG(LogGameplayFeaturesExtraActions_Internal, Display, TEXT("%s: Removing attribute %s from Actor %s."), *FString(__func__), *AttributeToRemove->GetName(), *TargetActor->GetName());
 
 			AbilitySystemComponent->RemoveSpawnedAttribute(AttributeToRemove);
 			AbilitySystemComponent->ForceReplication();
@@ -159,7 +157,7 @@ void UGameFeatureAction_AddAttribute::RemoveAttribute(AActor* TargetActor)
 	// We don't need to warn the user if there's no valid world or game instance, since this is a common case when the game is shutting down
 	else if (IsValid(GetWorld()) && IsValid(GetWorld()->GetGameInstance()))
 	{
-		UE_LOG(LogGameplayFeaturesExtraActions, Error, TEXT("%s: Failed to find AbilitySystemComponent on Actor %s."), *FString(__func__), *TargetActor->GetName());
+		UE_LOG(LogGameplayFeaturesExtraActions_Internal, Error, TEXT("%s: Failed to find AbilitySystemComponent on Actor %s."), *FString(__func__), *TargetActor->GetName());
 	}
 
 	ActiveExtensions.Remove(TargetActor);

@@ -5,3 +5,4 @@
 #include "LogModularFeatures_ExtraActions.h"
 
 DEFINE_LOG_CATEGORY(LogGameplayFeaturesExtraActions);
+DEFINE_LOG_CATEGORY(LogGameplayFeaturesExtraActions_Internal);
