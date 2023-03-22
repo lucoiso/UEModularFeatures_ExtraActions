@@ -19,12 +19,14 @@
 			"Name": "ModularFeatures_ExtraActions",
 			"Type": "Runtime",
 			"LoadingPhase": "Default",
-			"PlatformAllowList": [
+			"WhitelistPlatforms": [
 				"Win64",
+				"Win32",
 				"Mac",
 				"Linux",
 				"IOS",
-				"Android"
+				"Android",
+				"HoloLens"
 			]
 		}
 	],
