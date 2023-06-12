@@ -3,6 +3,7 @@
 // Repo: https://github.com/lucoiso/UEModularFeatures_ExtraActions
 
 #include "Actions/GameFeatureAction_WorldActionBase.h"
+#include <Engine/GameInstance.h>
 
 #ifdef UE_INLINE_GENERATED_CPP_BY_NAME
 #include UE_INLINE_GENERATED_CPP_BY_NAME(GameFeatureAction_WorldActionBase)

@@ -9,6 +9,7 @@
 #include <AbilitySystemGlobals.h>
 #include <EnhancedInputComponent.h>
 #include <GameFramework/Controller.h>
+#include <GameFramework/Pawn.h>
 #include "Interfaces/MFEA_AbilityInputBinding.h"
 #include "LogModularFeatures_ExtraActions.h"
 #include "MFEA_Settings.h"
