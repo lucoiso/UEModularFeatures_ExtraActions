@@ -13,36 +13,36 @@
 
 UMFEA_Settings::UMFEA_Settings(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer), bEnableAbilityAutoBinding(false), bEnableInternalLogs(false), AbilityBindingMode(EAbilityBindingMode::InputID), InputBindingOwner(EInputBindingOwner::Controller)
 {
-	CategoryName = TEXT("Plugins");
+    CategoryName = TEXT("Plugins");
 }
 
 const UMFEA_Settings* UMFEA_Settings::Get()
 {
-	static const UMFEA_Settings* const Instance = GetDefault<UMFEA_Settings>();
-	return Instance;
+    static const UMFEA_Settings* const Instance = GetDefault<UMFEA_Settings>();
+    return Instance;
 }
 
 #if WITH_EDITOR
 void UMFEA_Settings::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
-	Super::PostEditChangeProperty(PropertyChangedEvent);
+    Super::PostEditChangeProperty(PropertyChangedEvent);
 
-	if (PropertyChangedEvent.Property->GetFName() == GET_MEMBER_NAME_CHECKED(UMFEA_Settings, bEnableInternalLogs))
-	{
-		ToggleInternalLogs();
-	}
+    if (PropertyChangedEvent.Property->GetFName() == GET_MEMBER_NAME_CHECKED(UMFEA_Settings, bEnableInternalLogs))
+    {
+        ToggleInternalLogs();
+    }
 }
 #endif
 
 void UMFEA_Settings::PostInitProperties()
 {
-	Super::PostInitProperties();
-	ToggleInternalLogs();
+    Super::PostInitProperties();
+    ToggleInternalLogs();
 }
 
 void UMFEA_Settings::ToggleInternalLogs()
 {
 #if !UE_BUILD_SHIPPING
-	LogGameplayFeaturesExtraActions_Internal.SetVerbosity(bEnableInternalLogs ? ELogVerbosity::Display : ELogVerbosity::NoLogging);
+    LogGameplayFeaturesExtraActions_Internal.SetVerbosity(bEnableInternalLogs ? ELogVerbosity::Display : ELogVerbosity::NoLogging);
 #endif
 }

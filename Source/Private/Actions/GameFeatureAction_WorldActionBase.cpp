@@ -11,58 +11,58 @@
 
 void UGameFeatureAction_WorldActionBase::OnGameFeatureActivating(FGameFeatureActivatingContext& Context)
 {
-	Super::OnGameFeatureActivating(Context);
+    Super::OnGameFeatureActivating(Context);
 
-	if (!ensureAlways(ActiveRequests.IsEmpty()))
-	{
-		ResetExtension();
-	}
+    if (!ensureAlways(ActiveRequests.IsEmpty()))
+    {
+        ResetExtension();
+    }
 
-	const FGameFeatureStateChangeContext StateChangeContext(Context);
+    const FGameFeatureStateChangeContext StateChangeContext(Context);
 
-	// When the game instance starts, will perform the modular feature activation behavior
-	GameInstanceStartHandle = FWorldDelegates::OnStartGameInstance.AddUObject(this, &UGameFeatureAction_WorldActionBase::HandleGameInstanceStart, StateChangeContext);
+    // When the game instance starts, will perform the modular feature activation behavior
+    GameInstanceStartHandle = FWorldDelegates::OnStartGameInstance.AddUObject(this, &UGameFeatureAction_WorldActionBase::HandleGameInstanceStart, StateChangeContext);
 
-	// Useful to activate the feature even if the game instance has already started
-	for (const FWorldContext& WorldContext : GEngine->GetWorldContexts())
-	{
-		if (!Context.ShouldApplyToWorldContext(WorldContext))
-		{
-			continue;
-		}
+    // Useful to activate the feature even if the game instance has already started
+    for (const FWorldContext& WorldContext : GEngine->GetWorldContexts())
+    {
+        if (!Context.ShouldApplyToWorldContext(WorldContext))
+        {
+            continue;
+        }
 
-		AddToWorld(WorldContext);
-	}
+        AddToWorld(WorldContext);
+    }
 }
 
 void UGameFeatureAction_WorldActionBase::OnGameFeatureDeactivating(FGameFeatureDeactivatingContext& Context)
 {
-	Super::OnGameFeatureDeactivating(Context);
+    Super::OnGameFeatureDeactivating(Context);
 
-	FWorldDelegates::OnStartGameInstance.Remove(GameInstanceStartHandle);
+    FWorldDelegates::OnStartGameInstance.Remove(GameInstanceStartHandle);
 }
 
 void UGameFeatureAction_WorldActionBase::ResetExtension()
 {
-	ActiveRequests.Empty();
+    ActiveRequests.Empty();
 }
 
 UGameFrameworkComponentManager* UGameFeatureAction_WorldActionBase::GetGameFrameworkComponentManager(const FWorldContext& WorldContext) const
 {
-	if (!IsValid(WorldContext.World()) || !WorldContext.World()->IsGameWorld())
-	{
-		return nullptr;
-	}
+    if (!IsValid(WorldContext.World()) || !WorldContext.World()->IsGameWorld())
+    {
+        return nullptr;
+    }
 
-	return UGameInstance::GetSubsystem<UGameFrameworkComponentManager>(WorldContext.OwningGameInstance);
+    return UGameInstance::GetSubsystem<UGameFrameworkComponentManager>(WorldContext.OwningGameInstance);
 }
 
 void UGameFeatureAction_WorldActionBase::HandleGameInstanceStart(UGameInstance* GameInstance, const FGameFeatureStateChangeContext ChangeContext)
 {
-	if (!ChangeContext.ShouldApplyToWorldContext(*GameInstance->GetWorldContext()))
-	{
-		return;
-	}
+    if (!ChangeContext.ShouldApplyToWorldContext(*GameInstance->GetWorldContext()))
+    {
+        return;
+    }
 
-	AddToWorld(*GameInstance->GetWorldContext());
+    AddToWorld(*GameInstance->GetWorldContext());
 }
