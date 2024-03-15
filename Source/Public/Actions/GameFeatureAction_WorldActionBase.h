@@ -18,9 +18,9 @@ using FComponentRequestHandlePtr = TSharedPtr<FComponentRequestHandle>;
 UENUM(BlueprintType, Category = "MF Extra Actions | Enums")
 enum class EInputBindingOwnerOverride : uint8
 {
-    Default,
-    Pawn,
-    Controller
+	Default,
+	Pawn,
+	Controller
 };
 
 /**
@@ -29,22 +29,22 @@ enum class EInputBindingOwnerOverride : uint8
 UCLASS(MinimalAPI, Abstract)
 class UGameFeatureAction_WorldActionBase : public UGameFeatureAction
 {
-    GENERATED_BODY()
+	GENERATED_BODY()
 
 protected:
-    virtual void OnGameFeatureActivating(FGameFeatureActivatingContext& Context) override;
-    virtual void OnGameFeatureDeactivating(FGameFeatureDeactivatingContext& Context) override;
+	virtual void OnGameFeatureActivating(FGameFeatureActivatingContext& Context) override;
+	virtual void OnGameFeatureDeactivating(FGameFeatureDeactivatingContext& Context) override;
 
-    virtual void AddToWorld(const FWorldContext& WorldContext)
-    {
-    }
+	virtual void AddToWorld(const FWorldContext& WorldContext)
+	{
+	}
 
-    UGameFrameworkComponentManager* GetGameFrameworkComponentManager(const FWorldContext& WorldContext) const;
-    TArray<FComponentRequestHandlePtr> ActiveRequests;
+	UGameFrameworkComponentManager* GetGameFrameworkComponentManager(const FWorldContext& WorldContext) const;
+	TArray<FComponentRequestHandlePtr> ActiveRequests;
 
-    virtual void ResetExtension();
+	virtual void ResetExtension();
 
 private:
-    void HandleGameInstanceStart(UGameInstance* GameInstance, FGameFeatureStateChangeContext ChangeContext);
-    FDelegateHandle GameInstanceStartHandle;
+	void HandleGameInstanceStart(UGameInstance* GameInstance, FGameFeatureStateChangeContext ChangeContext);
+	FDelegateHandle GameInstanceStartHandle;
 };

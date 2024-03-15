@@ -6,27 +6,27 @@ using UnrealBuildTool;
 
 public class ModularFeatures_ExtraActions : ModuleRules
 {
-    public ModularFeatures_ExtraActions(ReadOnlyTargetRules Target) : base(Target)
-    {
-        PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
-        CppStandard = CppStandardVersion.Cpp17;
+	public ModularFeatures_ExtraActions(ReadOnlyTargetRules Target) : base(Target)
+	{
+		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
+		CppStandard = CppStandardVersion.Cpp17;
 
-        PublicDependencyModuleNames.AddRange(new[]
-        {
-            "Core"
-        });
+		PublicDependencyModuleNames.AddRange(new[]
+		{
+			"Core"
+		});
 
-        PrivateDependencyModuleNames.AddRange(new[]
-        {
-            "Engine",
-            "CoreUObject",
-            "InputCore",
-            "EnhancedInput",
-            "GameplayAbilities",
-            "GameplayTags",
-            "GameFeatures",
-            "ModularGameplay",
-            "DeveloperSettings"
-        });
-    }
+		PrivateDependencyModuleNames.AddRange(new[]
+		{
+			"Engine",
+			"CoreUObject",
+			"InputCore",
+			"EnhancedInput",
+			"GameplayAbilities",
+			"GameplayTags",
+			"GameFeatures",
+			"ModularGameplay",
+			"DeveloperSettings"
+		});
+	}
 }

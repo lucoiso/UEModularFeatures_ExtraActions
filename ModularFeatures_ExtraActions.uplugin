@@ -1,49 +1,49 @@
 {
-	"FileVersion": 3,
-	"Version": 4,
-	"VersionName": "1.2.4",
-	"FriendlyName": "Modular Features: Extra Actions",
-	"Description": "Integrates GAS and Enhanced Input to the existing Game Features and Modular plugins.",
-	"Category": "Game Features",
-	"CreatedBy": "Lucas Vilas-Boas",
-	"CreatedByURL": "https://github.com/lucoiso",
-	"DocsURL": "https://github.com/lucoiso/UEModularFeatures_ExtraActions/wiki",
-	"MarketplaceURL": "com.epicgames.launcher://ue/marketplace/product/a718e1ae4fa741869b8f7aaea1434a8d",
-	"SupportURL": "https://github.com/lucoiso/UEModularFeatures_ExtraActions/issues",
-	"CanContainContent": false,
-	"IsBetaVersion": true,
-	"IsExperimentalVersion": false,
-	"Installed": false,
-	"Modules": [
-		{
-			"Name": "ModularFeatures_ExtraActions",
-			"Type": "Runtime",
-			"LoadingPhase": "Default",
-			"WhitelistPlatforms": [
-				"Win64",
-				"Mac",
-				"Linux",
-				"IOS",
-				"Android"
-			]
-		}
-	],
-	"Plugins": [
-		{
-			"Name": "GameFeatures",
-			"Enabled": true
-		},
-		{
-			"Name": "ModularGameplay",
-			"Enabled": true
-		},
-		{
-			"Name": "GameplayAbilities",
-			"Enabled": true
-		},
-		{
-			"Name": "EnhancedInput",
-			"Enabled": true
-		}
-	]
+  "FileVersion": 3,
+  "Version": 5,
+  "VersionName": "1.2.5",
+  "FriendlyName": "Modular Features: Extra Actions",
+  "Description": "Integrates GAS and Enhanced Input to the existing Game Features and Modular plugins.",
+  "Category": "Game Features",
+  "CreatedBy": "Lucas Vilas-Boas",
+  "CreatedByURL": "https://github.com/lucoiso",
+  "DocsURL": "https://github.com/lucoiso/UEModularFeatures_ExtraActions/wiki",
+  "MarketplaceURL": "com.epicgames.launcher://ue/marketplace/product/a718e1ae4fa741869b8f7aaea1434a8d",
+  "SupportURL": "https://github.com/lucoiso/UEModularFeatures_ExtraActions/issues",
+  "CanContainContent": false,
+  "IsBetaVersion": true,
+  "IsExperimentalVersion": false,
+  "Installed": false,
+  "Modules": [
+    {
+      "Name": "ModularFeatures_ExtraActions",
+      "Type": "Runtime",
+      "LoadingPhase": "Default",
+      "WhitelistPlatforms": [
+        "Win64",
+        "Mac",
+        "Linux",
+        "IOS",
+        "Android"
+      ]
+    }
+  ],
+  "Plugins": [
+    {
+      "Name": "GameFeatures",
+      "Enabled": true
+    },
+    {
+      "Name": "ModularGameplay",
+      "Enabled": true
+    },
+    {
+      "Name": "GameplayAbilities",
+      "Enabled": true
+    },
+    {
+      "Name": "EnhancedInput",
+      "Enabled": true
+    }
+  ]
 }
