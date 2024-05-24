@@ -16,13 +16,13 @@
 
 namespace ModularFeaturesHelper
 {
-	const UMFEA_Settings* GetPluginSettings()
+	static const UMFEA_Settings* GetPluginSettings()
 	{
 		static const UMFEA_Settings* Instance = GetDefault<UMFEA_Settings>();
 		return Instance;
 	}
 
-	bool ActorHasAllRequiredTags(const AActor* Actor, const TArray<FName>& RequiredTags)
+	static bool ActorHasAllRequiredTags(const AActor* Actor, const TArray<FName>& RequiredTags)
 	{
 		if (!IsValid(Actor))
 		{
@@ -40,12 +40,12 @@ namespace ModularFeaturesHelper
 		return true;
 	}
 
-	UAbilitySystemComponent* GetAbilitySystemComponentInActor(AActor* InActor)
+	static UAbilitySystemComponent* GetAbilitySystemComponentInActor(AActor* InActor)
 	{
 		return UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(InActor);
 	}
 
-	EInputBindingOwner GetValidatedInputBindingOwner(const EInputBindingOwnerOverride& InOwner)
+	static EInputBindingOwner GetValidatedInputBindingOwner(const EInputBindingOwnerOverride& InOwner)
 	{
 		switch (InOwner)
 		{
@@ -57,7 +57,7 @@ namespace ModularFeaturesHelper
 		return GetPluginSettings()->InputBindingOwner;
 	}
 
-	IMFEA_AbilityInputBinding* GetAbilityInputBindingInterface(AActor* InActor, const EInputBindingOwnerOverride& InOwner)
+	static IMFEA_AbilityInputBinding* GetAbilityInputBindingInterface(AActor* InActor, const EInputBindingOwnerOverride& InOwner)
 	{
 		if (!IsValid(InActor))
 		{
@@ -77,7 +77,7 @@ namespace ModularFeaturesHelper
 		return nullptr;
 	}
 
-	UEnhancedInputComponent* GetEnhancedInputComponentInPawn(APawn* InPawn)
+	static UEnhancedInputComponent* GetEnhancedInputComponentInPawn(APawn* InPawn)
 	{
 		if (!IsValid(InPawn))
 		{
@@ -87,7 +87,7 @@ namespace ModularFeaturesHelper
 		return Cast<UEnhancedInputComponent>(InPawn->GetController()->InputComponent.Get());
 	}
 
-	AActor* GetPawnInputOwner(APawn* InPawn, const EInputBindingOwnerOverride& InOwner)
+	static AActor* GetPawnInputOwner(APawn* InPawn, const EInputBindingOwnerOverride& InOwner)
 	{
 		if (!IsValid(InPawn))
 		{
@@ -104,12 +104,12 @@ namespace ModularFeaturesHelper
 		return nullptr;
 	}
 
-	UEnum* LoadInputEnum()
+	static UEnum* LoadInputEnum()
 	{
 		if (GetPluginSettings()->InputIDEnumeration.IsNull())
 		{
 			UE_LOG(LogGameplayFeaturesExtraActions_Internal, Error, TEXT("%s: bUseInputEnumeration is set to true but Enumeration class is null!"),
-			       *FString(__func__));
+			       *FString(__FUNCTION__));
 			return nullptr;
 		}
 
@@ -117,13 +117,13 @@ namespace ModularFeaturesHelper
 	}
 
 	// Will be removed in the future - but i don't want to break existing projects :)
-	const bool BindAbilityInputToInterfaceOwnerWithID(const IMFEA_AbilityInputBinding* TargetInterfaceOwner, UInputAction* InputAction,
-	                                                  const int32 InputID)
+	static const bool BindAbilityInputToInterfaceOwnerWithID(const IMFEA_AbilityInputBinding* TargetInterfaceOwner, UInputAction* InputAction,
+	                                                         const int32 InputID)
 	{
 		if (!TargetInterfaceOwner)
 		{
 			UE_LOG(LogGameplayFeaturesExtraActions_Internal, Error,
-			       TEXT("%s: Failed to setup input binding on Actor %s due to a invalid interface owner."), *FString(__func__),
+			       TEXT("%s: Failed to setup input binding on Actor %s due to a invalid interface owner."), *FString(__FUNCTION__),
 			       *TargetInterfaceOwner->_getUObject()->GetName());
 
 			return false;
@@ -132,8 +132,8 @@ namespace ModularFeaturesHelper
 		return true;
 	}
 
-	const bool BindAbilityInputToInterfaceOwner(const IMFEA_AbilityInputBinding* TargetInterfaceOwner, UInputAction* InputAction,
-	                                            const FGameplayAbilitySpec& AbilitySpec)
+	static const bool BindAbilityInputToInterfaceOwner(const IMFEA_AbilityInputBinding* TargetInterfaceOwner, UInputAction* InputAction,
+	                                                   const FGameplayAbilitySpec& AbilitySpec)
 	{
 		if (!BindAbilityInputToInterfaceOwnerWithID(TargetInterfaceOwner, InputAction, AbilitySpec.InputID))
 		{
@@ -167,12 +167,12 @@ namespace ModularFeaturesHelper
 		return true;
 	}
 
-	void RemoveAbilityInputInInterfaceOwner(UObject* InterfaceOwner, TArray<TWeakObjectPtr<UInputAction>>& ActionArr)
+	static void RemoveAbilityInputInInterfaceOwner(UObject* InterfaceOwner, TArray<TWeakObjectPtr<UInputAction>>& ActionArr)
 	{
 		if (!IsValid(InterfaceOwner))
 		{
 			UE_LOG(LogGameplayFeaturesExtraActions_Internal, Error, TEXT("%s: Failed to remove input binding due to invalid interface owner."),
-			       *FString(__func__));
+			       *FString(__FUNCTION__));
 			return;
 		}
 
@@ -189,12 +189,12 @@ namespace ModularFeaturesHelper
 		ActionArr.Empty();
 	}
 
-	const bool IsUsingInputIDEnumeration()
+	static const bool IsUsingInputIDEnumeration()
 	{
 		return GetPluginSettings()->AbilityBindingMode == EAbilityBindingMode::InputID;
 	}
 
-	const int32 GetInputIDByName(const FName DisplayName, UEnum* Enumeration = nullptr)
+	static const int32 GetInputIDByName(const FName DisplayName, UEnum* Enumeration = nullptr)
 	{
 		if (!IsUsingInputIDEnumeration())
 		{

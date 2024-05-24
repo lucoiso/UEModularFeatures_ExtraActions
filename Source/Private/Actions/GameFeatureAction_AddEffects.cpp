@@ -69,7 +69,7 @@ void UGameFeatureAction_AddEffects::HandleActorExtension(AActor* Owner, const FN
 		{
 			if (Entry.EffectClass.IsNull())
 			{
-				UE_LOG(LogGameplayFeaturesExtraActions_Internal, Error, TEXT("%s: Effect class is null."), *FString(__func__));
+				UE_LOG(LogGameplayFeaturesExtraActions_Internal, Error, TEXT("%s: Effect class is null."), *FString(__FUNCTION__));
 			}
 			else
 			{
@@ -97,7 +97,7 @@ void UGameFeatureAction_AddEffects::AddEffects(AActor* TargetActor, const FEffec
 		const TSubclassOf<UGameplayEffect> EffectClass = Effect.EffectClass.LoadSynchronous();
 
 		UE_LOG(LogGameplayFeaturesExtraActions_Internal, Display, TEXT("%s: Adding effect %s level %u to Actor %s with %u SetByCaller params."),
-		       *FString(__func__), *EffectClass->GetName(), Effect.EffectLevel, *TargetActor->GetName(), Effect.SetByCallerParams.Num());
+		       *FString(__FUNCTION__), *EffectClass->GetName(), Effect.EffectLevel, *TargetActor->GetName(), Effect.SetByCallerParams.Num());
 
 		// Create the outgoing spec handle to define the SetByCaller settings and apply the data to the target Ability System Component
 		const FGameplayEffectSpecHandle SpecHandle = AbilitySystemComponent->MakeOutgoingSpec(
@@ -119,7 +119,7 @@ void UGameFeatureAction_AddEffects::AddEffects(AActor* TargetActor, const FEffec
 	}
 	else
 	{
-		UE_LOG(LogGameplayFeaturesExtraActions_Internal, Error, TEXT("%s: Failed to find AbilitySystemComponent on Actor %s."), *FString(__func__),
+		UE_LOG(LogGameplayFeaturesExtraActions_Internal, Error, TEXT("%s: Failed to find AbilitySystemComponent on Actor %s."), *FString(__FUNCTION__),
 		       *TargetActor->GetName());
 	}
 }
@@ -145,7 +145,7 @@ void UGameFeatureAction_AddEffects::RemoveEffects(AActor* TargetActor)
 		// Get the target ability system component
 		if (UAbilitySystemComponent* const AbilitySystemComponent = ModularFeaturesHelper::GetAbilitySystemComponentInActor(TargetActor))
 		{
-			UE_LOG(LogGameplayFeaturesExtraActions_Internal, Display, TEXT("%s: Removing effects from Actor %s."), *FString(__func__),
+			UE_LOG(LogGameplayFeaturesExtraActions_Internal, Display, TEXT("%s: Removing effects from Actor %s."), *FString(__FUNCTION__),
 			       *TargetActor->GetName());
 
 			// Iterate through the active effects and remove the specified effect by its effect handle if its valid
@@ -162,7 +162,7 @@ void UGameFeatureAction_AddEffects::RemoveEffects(AActor* TargetActor)
 		else if (IsValid(GetWorld()) && IsValid(GetWorld()->GetGameInstance()))
 		{
 			UE_LOG(LogGameplayFeaturesExtraActions_Internal, Error, TEXT("%s: Failed to find AbilitySystemComponent on Actor %s."),
-			       *FString(__func__), *TargetActor->GetName());
+			       *FString(__FUNCTION__), *TargetActor->GetName());
 		}
 	}
 

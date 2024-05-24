@@ -70,7 +70,7 @@ void UGameFeatureAction_AddInputs::HandleActorExtension(AActor* Owner, const FNa
 
 		if (InputMappingContext.IsNull())
 		{
-			UE_LOG(LogGameplayFeaturesExtraActions_Internal, Error, TEXT("%s: Input Mapping Context is null."), *FString(__func__));
+			UE_LOG(LogGameplayFeaturesExtraActions_Internal, Error, TEXT("%s: Input Mapping Context is null."), *FString(__FUNCTION__));
 		}
 		else
 		{
@@ -103,7 +103,7 @@ void UGameFeatureAction_AddInputs::AddActorInputs(AActor* TargetActor)
 		// Load the Input Mapping context and store it into a variable
 		UInputMappingContext* const InputMapping = InputMappingContext.LoadSynchronous();
 
-		UE_LOG(LogGameplayFeaturesExtraActions_Internal, Display, TEXT("%s: Adding Enhanced Input Mapping %s to Actor %s."), *FString(__func__),
+		UE_LOG(LogGameplayFeaturesExtraActions_Internal, Display, TEXT("%s: Adding Enhanced Input Mapping %s to Actor %s."), *FString(__FUNCTION__),
 		       *InputMapping->GetName(), *TargetActor->GetName());
 
 		// Add the loaded mapping context into the enhanced input subsystem
@@ -117,7 +117,7 @@ void UGameFeatureAction_AddInputs::AddActorInputs(AActor* TargetActor)
 		if (!FunctionOwner.IsValid())
 		{
 			UE_LOG(LogGameplayFeaturesExtraActions_Internal, Error, TEXT("%s: Failed to get the function owner using the Actor %s."),
-			       *FString(__func__), *TargetActor->GetName());
+			       *FString(__FUNCTION__), *TargetActor->GetName());
 			return;
 		}
 
@@ -125,7 +125,7 @@ void UGameFeatureAction_AddInputs::AddActorInputs(AActor* TargetActor)
 		const TWeakObjectPtr<UEnhancedInputComponent> InputComponent = ModularFeaturesHelper::GetEnhancedInputComponentInPawn(TargetPawn);
 		if (!InputComponent.IsValid())
 		{
-			UE_LOG(LogGameplayFeaturesExtraActions_Internal, Error, TEXT("%s: Failed to find InputComponent on Actor %s."), *FString(__func__),
+			UE_LOG(LogGameplayFeaturesExtraActions_Internal, Error, TEXT("%s: Failed to find InputComponent on Actor %s."), *FString(__FUNCTION__),
 			       *TargetActor->GetName());
 			return;
 		}
@@ -136,7 +136,7 @@ void UGameFeatureAction_AddInputs::AddActorInputs(AActor* TargetActor)
 	}
 	else if (TargetPawn->IsPawnControlled())
 	{
-		UE_LOG(LogGameplayFeaturesExtraActions_Internal, Error, TEXT("%s: Failed to find PlayerController on Actor %s."), *FString(__func__),
+		UE_LOG(LogGameplayFeaturesExtraActions_Internal, Error, TEXT("%s: Failed to find PlayerController on Actor %s."), *FString(__FUNCTION__),
 		       *TargetActor->GetName());
 	}
 }
@@ -165,13 +165,13 @@ void UGameFeatureAction_AddInputs::RemoveActorInputs(AActor* TargetActor)
 		if (UEnhancedInputLocalPlayerSubsystem* const Subsystem = GetEnhancedInputComponentFromPawn(TargetPawn))
 		{
 			UE_LOG(LogGameplayFeaturesExtraActions_Internal, Display, TEXT("%s: Removing Enhanced Input Mapping %s from Actor %s."),
-			       *FString(__func__), *ActiveInputData->Mapping->GetName(), *TargetActor->GetName());
+			       *FString(__FUNCTION__), *ActiveInputData->Mapping->GetName(), *TargetActor->GetName());
 
 			// Try to get the enhanced input component of the target pawn
 			if (const TWeakObjectPtr<UEnhancedInputComponent> InputComponent = ModularFeaturesHelper::GetEnhancedInputComponentInPawn(TargetPawn); !
 				InputComponent.IsValid())
 			{
-				UE_LOG(LogGameplayFeaturesExtraActions_Internal, Error, TEXT("%s: Failed to find InputComponent on Actor %s."), *FString(__func__),
+				UE_LOG(LogGameplayFeaturesExtraActions_Internal, Error, TEXT("%s: Failed to find InputComponent on Actor %s."), *FString(__FUNCTION__),
 				       *TargetActor->GetName());
 			}
 			else
@@ -216,14 +216,14 @@ void UGameFeatureAction_AddInputs::SetupActionBindings(AActor* TargetActor, UObj
 		// Check if the action input is valid
 		if (ActionInput.IsNull())
 		{
-			UE_LOG(LogGameplayFeaturesExtraActions_Internal, Error, TEXT("%s: Action Input is null."), *FString(__func__));
+			UE_LOG(LogGameplayFeaturesExtraActions_Internal, Error, TEXT("%s: Action Input is null."), *FString(__FUNCTION__));
 			continue;
 		}
 
 		// Load and store the Action Input into a variable
 		UInputAction* const InputAction = ActionInput.LoadSynchronous();
 
-		UE_LOG(LogGameplayFeaturesExtraActions_Internal, Display, TEXT("%s: Binding Action Input %s to Actor %s."), *FString(__func__),
+		UE_LOG(LogGameplayFeaturesExtraActions_Internal, Display, TEXT("%s: Binding Action Input %s to Actor %s."), *FString(__FUNCTION__),
 		       *InputAction->GetName(), *TargetActor->GetName());
 
 		// Iterate through all function binding data to bind the UFunctions to it's corresponding input
@@ -271,7 +271,7 @@ UEnhancedInputLocalPlayerSubsystem* UGameFeatureAction_AddInputs::GetEnhancedInp
 			if (!IsValid(Subsystem))
 			{
 				UE_LOG(LogGameplayFeaturesExtraActions_Internal, Error, TEXT("%s: LocalPlayer %s has no EnhancedInputLocalPlayerSubsystem."),
-				       *FString(__func__), *LocalPlayer->GetName());
+				       *FString(__FUNCTION__), *LocalPlayer->GetName());
 				return nullptr;
 			}
 
@@ -302,7 +302,7 @@ FGameplayAbilitySpec UGameFeatureAction_AddInputs::GetAbilitySpecInformationFrom
 		else
 		{
 			UE_LOG(LogGameplayFeaturesExtraActions_Internal, Error, TEXT("%s: Failed to find AbilitySystemComponent on Actor %s."),
-			       *FString(__func__), *TargetActor->GetName());
+			       *FString(__FUNCTION__), *TargetActor->GetName());
 		}
 	}
 	// If we are not using an existing spec, we'll create a basic spec just to pass some parameters to the ability binding

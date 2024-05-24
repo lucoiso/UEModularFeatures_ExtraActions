@@ -71,14 +71,14 @@ void UGameFeatureAction_SpawnActors::SpawnActors(UWorld* WorldReference)
 		// Check if the soft reference is null
 		if (ActorClass.IsNull())
 		{
-			UE_LOG(LogGameplayFeaturesExtraActions_Internal, Error, TEXT("%s: Actor class is null."), *FString(__func__));
+			UE_LOG(LogGameplayFeaturesExtraActions_Internal, Error, TEXT("%s: Actor class is null."), *FString(__FUNCTION__));
 			continue;
 		}
 
 		// Load the actor class and store it into a variable
 		TSubclassOf<AActor> ClassToSpawn = ActorClass.LoadSynchronous();
 
-		UE_LOG(LogGameplayFeaturesExtraActions_Internal, Display, TEXT("%s: Spawning actor %s on world %s"), *FString(__func__),
+		UE_LOG(LogGameplayFeaturesExtraActions_Internal, Display, TEXT("%s: Spawning actor %s on world %s"), *FString(__FUNCTION__),
 		       *ClassToSpawn->GetName(), *WorldReference->GetName());
 
 		// Spawn the actor and add it to the spawned array
@@ -96,7 +96,7 @@ void UGameFeatureAction_SpawnActors::DestroyActors()
 			continue;
 		}
 
-		UE_LOG(LogGameplayFeaturesExtraActions_Internal, Display, TEXT("%s: Destroying actor %s"), *FString(__func__), *ActorPtr->GetName());
+		UE_LOG(LogGameplayFeaturesExtraActions_Internal, Display, TEXT("%s: Destroying actor %s"), *FString(__FUNCTION__), *ActorPtr->GetName());
 		ActorPtr->Destroy();
 	}
 
